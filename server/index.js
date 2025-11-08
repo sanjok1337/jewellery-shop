@@ -1,0 +1,46 @@
+require('dotenv').config();
+const express = require('express');
+const cors = require('cors');
+const { connectDB } = require('./config/database');
+
+const authRoutes = require('./routes/auth');
+const productRoutes = require('./routes/products');
+
+const app = express();
+const PORT = process.env.PORT || 5000;
+
+// Middleware
+app.use(cors());
+app.use(express.json());
+
+// Routes
+app.use('/api/auth', authRoutes);
+app.use('/api/products', productRoutes);
+
+// Health check
+app.get('/api/health', (req, res) => {
+  res.json({ message: '✓ Сервер працює' });
+});
+
+// Error handling middleware
+app.use((err, req, res, next) => {
+  console.error('Помилка сервера:', err);
+  res.status(500).json({ message: 'Помилка сервера', error: err.message });
+});
+
+// Запуск сервера
+const startServer = async () => {
+  try {
+    await connectDB();
+    app.listen(PORT, () => {
+      console.log(`\n🚀 Сервер запущено на http://localhost:${PORT}`);
+      console.log(`📦 Middleware: CORS, JSON Parser`);
+      console.log(`🔐 API Routes: /api/auth, /api/products\n`);
+    });
+  } catch (error) {
+    console.error('Помилка запуску сервера:', error);
+    process.exit(1);
+  }
+};
+
+startServer();
