@@ -149,4 +149,119 @@ const logout = (req, res) => {
   res.json({ message: 'Вихід успішний' });
 };
 
-module.exports = { register, login, getCurrentUser, logout };
+const changePassword = async (req, res) => {
+  const { oldPassword, newPassword } = req.body;
+  const userId = req.user.id;
+
+  try {
+    // Перевіряємо чи всі поля заповнені
+    if (!oldPassword || !newPassword) {
+      return res.status(400).json({ 
+        error: 'Старий та новий пароль є обов\'язковими' 
+      });
+    }
+
+    // Перевіряємо довжину нового пароля
+    if (newPassword.length < 6) {
+      return res.status(400).json({ 
+        error: 'Новий пароль повинен містити мінімум 6 символів' 
+      });
+    }
+
+    // Отримуємо з'єднання з пулу
+    const connection = await pool.getConnection();
+
+    try {
+      // Отримуємо користувача з бази даних
+      const [users] = await connection.execute(
+        'SELECT * FROM users WHERE id = ?',
+        [userId]
+      );
+
+      if (users.length === 0) {
+        connection.release();
+        return res.status(404).json({ error: 'Користувача не знайдено' });
+      }
+
+      const user = users[0];
+
+      // Перевіряємо старий пароль
+      const isOldPasswordValid = await bcrypt.compare(oldPassword, user.password_hash);
+      if (!isOldPasswordValid) {
+        connection.release();
+        return res.status(400).json({ error: 'Неправильний старий пароль' });
+      }
+
+      // Хешуємо новий пароль
+      const hashedNewPassword = await bcrypt.hash(newPassword, 10);
+
+      // Оновлюємо пароль в базі даних
+      await connection.execute(
+        'UPDATE users SET password_hash = ? WHERE id = ?',
+        [hashedNewPassword, userId]
+      );
+
+      connection.release();
+
+      res.json({ message: 'Пароль успішно змінено' });
+    } catch (error) {
+      connection.release();
+      throw error;
+    }
+  } catch (error) {
+    console.error('Change password error:', error);
+    res.status(500).json({ error: 'Помилка сервера' });
+  }
+};
+
+const changeEmail = async (req, res) => {
+  const { newEmail } = req.body;
+  const userId = req.user.id;
+
+  try {
+    // Перевіряємо чи email заповнений
+    if (!newEmail) {
+      return res.status(400).json({ error: 'Email є обов\'язковим' });
+    }
+
+    // Перевіряємо формат email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(newEmail)) {
+      return res.status(400).json({ error: 'Неправильний формат email' });
+    }
+
+    // Отримуємо з'єднання з пулу
+    const connection = await pool.getConnection();
+
+    try {
+      // Перевіряємо чи email вже існує
+      const [existingUsers] = await connection.execute(
+        'SELECT id FROM users WHERE email = ? AND id != ?',
+        [newEmail, userId]
+      );
+
+      if (existingUsers.length > 0) {
+        connection.release();
+        return res.status(400).json({ error: 'Цей email вже використовується' });
+      }
+
+      // Оновлюємо email в базі даних
+      await connection.execute(
+        'UPDATE users SET email = ? WHERE id = ?',
+        [newEmail, userId]
+      );
+
+      connection.release();
+
+      res.json({ message: 'Email успішно змінено', newEmail });
+    } catch (error) {
+      connection.release();
+      throw error;
+    }
+  } catch (error) {
+    console.error('Change email error:', error);
+    res.status(500).json({ error: 'Помилка сервера' });
+  }
+};
+
+module.exports = { register, login, getCurrentUser, logout, changePassword, changeEmail };

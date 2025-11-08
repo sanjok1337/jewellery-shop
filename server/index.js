@@ -5,6 +5,8 @@ const { connectDB } = require('./config/database');
 
 const authRoutes = require('./routes/auth');
 const productRoutes = require('./routes/products');
+const addressRoutes = require('./routes/addresses');
+const orderRoutes = require('./routes/orders');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -21,6 +23,8 @@ app.use(express.urlencoded({ extended: true }));
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/products', productRoutes);
+app.use('/api/addresses', addressRoutes);
+app.use('/api/orders', orderRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {
@@ -40,7 +44,7 @@ const startServer = async () => {
     app.listen(PORT, () => {
       console.log(`\n🚀 Сервер запущено на http://localhost:${PORT}`);
       console.log(`📦 Middleware: CORS, JSON Parser`);
-      console.log(`🔐 API Routes: /api/auth, /api/products\n`);
+      console.log(`🔐 API Routes: /api/auth, /api/products, /api/addresses\n`);
     });
   } catch (error) {
     console.error('Помилка запуску сервера:', error);
