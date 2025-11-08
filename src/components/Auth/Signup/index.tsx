@@ -1,8 +1,84 @@
+"use client";
+
 import Breadcrumb from "@/components/Common/Breadcrumb";
 import Link from "next/link";
-import React from "react";
+import React, { useState } from "react";
+import toast from "react-hot-toast";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/app/context/AuthContext";
 
 const Signup = () => {
+  const router = useRouter();
+  const { login } = useAuth();
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+  });
+  const [loading, setLoading] = useState(false);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    // Валідація
+    if (!formData.name.trim() || !formData.email.trim() || !formData.password) {
+      toast.error("Всі поля обов'язкові");
+      return;
+    }
+
+    if (formData.password !== formData.confirmPassword) {
+      toast.error("Паролі не збігаються");
+      return;
+    }
+
+    if (formData.password.length < 6) {
+      toast.error("Пароль має бути мінімум 6 символів");
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const response = await fetch("http://localhost:5000/api/auth/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: formData.name,
+          email: formData.email,
+          password: formData.password,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Помилка реєстрації");
+      }
+
+      // Зберігаємо токен через AuthContext
+      login(data.token, data.user);
+      toast.success("Реєстрація успішна!");
+      
+      // Перенаправляємо на головну сторінку
+      router.push("/");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Помилка реєстрації");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <>
       <Breadcrumb title={"Signup"} pages={["Signup"]} />
@@ -87,7 +163,7 @@ const Signup = () => {
             </span>
 
             <div className="mt-5.5">
-              <form>
+              <form onSubmit={handleSubmit}>
                 <div className="mb-5">
                   <label htmlFor="name" className="block mb-2.5">
                     Full Name <span className="text-red">*</span>
@@ -98,6 +174,8 @@ const Signup = () => {
                     name="name"
                     id="name"
                     placeholder="Enter your full name"
+                    value={formData.name}
+                    onChange={handleChange}
                     className="rounded-lg border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-3 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
                   />
                 </div>
@@ -112,6 +190,8 @@ const Signup = () => {
                     name="email"
                     id="email"
                     placeholder="Enter your email address"
+                    value={formData.email}
+                    onChange={handleChange}
                     className="rounded-lg border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-3 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
                   />
                 </div>
@@ -126,21 +206,25 @@ const Signup = () => {
                     name="password"
                     id="password"
                     placeholder="Enter your password"
+                    value={formData.password}
+                    onChange={handleChange}
                     autoComplete="on"
                     className="rounded-lg border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-3 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
                   />
                 </div>
 
                 <div className="mb-5.5">
-                  <label htmlFor="re-type-password" className="block mb-2.5">
-                    Re-type Password <span className="text-red">*</span>
+                  <label htmlFor="confirmPassword" className="block mb-2.5">
+                    Confirm Password <span className="text-red">*</span>
                   </label>
 
                   <input
                     type="password"
-                    name="re-type-password"
-                    id="re-type-password"
+                    name="confirmPassword"
+                    id="confirmPassword"
                     placeholder="Re-type your password"
+                    value={formData.confirmPassword}
+                    onChange={handleChange}
                     autoComplete="on"
                     className="rounded-lg border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-3 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
                   />
@@ -148,9 +232,10 @@ const Signup = () => {
 
                 <button
                   type="submit"
-                  className="w-full flex justify-center font-medium text-white bg-dark py-3 px-6 rounded-lg ease-out duration-200 hover:bg-blue mt-7.5"
+                  disabled={loading}
+                  className="w-full flex justify-center font-medium text-white bg-dark py-3 px-6 rounded-lg ease-out duration-200 hover:bg-blue mt-7.5 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Create Account
+                  {loading ? "Creating Account..." : "Create Account"}
                 </button>
 
                 <p className="text-center mt-6">

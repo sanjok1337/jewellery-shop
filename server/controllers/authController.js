@@ -5,11 +5,16 @@ const { pool } = require('../config/database');
 // Реєстрація користувача
 const register = async (req, res) => {
   try {
-    const { email, password, firstName, lastName, phone } = req.body;
+    const { name, email, password } = req.body;
 
     // Валідація
-    if (!email || !password || !firstName || !lastName) {
-      return res.status(400).json({ message: 'Всі поля обов\'язкові' });
+    if (!email || !password || !name) {
+      return res.status(400).json({ message: 'Ім\'я, email та пароль обов\'язкові' });
+    }
+
+    // Валідація пароля (мінімум 6 символів)
+    if (password.length < 6) {
+      return res.status(400).json({ message: 'Пароль має бути мінімум 6 символів' });
     }
 
     const connection = await pool.getConnection();
@@ -22,18 +27,35 @@ const register = async (req, res) => {
       return res.status(409).json({ message: 'Користувач з такою email уже існує' });
     }
 
-    // Хешування пароля
+    // Хешування пароля (10 раундів солі)
     const hashedPassword = await bcrypt.hash(password, 10);
 
     // Додавання користувача в БД
-    await connection.query(
-      'INSERT INTO users (email, password, first_name, last_name, phone) VALUES (?, ?, ?, ?, ?)',
-      [email, hashedPassword, firstName, lastName, phone || null]
+    const [result] = await connection.query(
+      'INSERT INTO users (name, email, password_hash) VALUES (?, ?, ?)',
+      [name, email, hashedPassword]
     );
 
     connection.release();
 
-    res.status(201).json({ message: 'Користувач зареєстрований успішно' });
+    const userId = result.insertId;
+
+    // Генерація JWT токена
+    const token = jwt.sign(
+      { id: userId, email, name },
+      process.env.JWT_SECRET || 'your_jwt_secret_key_change_this_in_production',
+      { expiresIn: process.env.JWT_EXPIRE || '7d' }
+    );
+
+    res.status(201).json({ 
+      message: 'Користувач зареєстрований успішно',
+      token,
+      user: {
+        id: userId,
+        name,
+        email
+      }
+    });
   } catch (error) {
     console.error('Помилка реєстрації:', error);
     res.status(500).json({ message: 'Помилка сервера', error: error.message });
@@ -62,22 +84,22 @@ const login = async (req, res) => {
 
     const user = users[0];
 
-    // Перевірка пароля
-    const isPasswordValid = await bcrypt.compare(password, user.password);
+    // Перевірка пароля (розхеширування)
+    const isPasswordValid = await bcrypt.compare(password, user.password_hash);
 
     if (!isPasswordValid) {
       connection.release();
       return res.status(401).json({ message: 'Невірна email або пароль' });
     }
 
+    connection.release();
+
     // Генерація JWT токена
     const token = jwt.sign(
-      { id: user.id, email: user.email, firstName: user.first_name },
+      { id: user.id, email: user.email, name: user.name },
       process.env.JWT_SECRET || 'your_jwt_secret_key_change_this_in_production',
       { expiresIn: process.env.JWT_EXPIRE || '7d' }
     );
-
-    connection.release();
 
     res.json({
       message: 'Вхід успішний',
@@ -85,8 +107,8 @@ const login = async (req, res) => {
       user: {
         id: user.id,
         email: user.email,
-        firstName: user.first_name,
-        lastName: user.last_name
+        name: user.name,
+        avatar_url: user.avatar_url
       }
     });
   } catch (error) {
@@ -112,9 +134,9 @@ const getCurrentUser = async (req, res) => {
     res.json({
       id: user.id,
       email: user.email,
-      firstName: user.first_name,
-      lastName: user.last_name,
-      phone: user.phone
+      name: user.name,
+      avatar_url: user.avatar_url,
+      created_at: user.created_at
     });
   } catch (error) {
     console.error('Помилка отримання користувача:', error);
@@ -122,4 +144,9 @@ const getCurrentUser = async (req, res) => {
   }
 };
 
-module.exports = { register, login, getCurrentUser };
+// Logout (фронтенд видаляє токен з localStorage)
+const logout = (req, res) => {
+  res.json({ message: 'Вихід успішний' });
+};
+
+module.exports = { register, login, getCurrentUser, logout };

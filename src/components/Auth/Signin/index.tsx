@@ -1,8 +1,68 @@
+"use client";
+
 import Breadcrumb from "@/components/Common/Breadcrumb";
 import Link from "next/link";
-import React from "react";
+import React, { useState } from "react";
+import toast from "react-hot-toast";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/app/context/AuthContext";
 
 const Signin = () => {
+  const router = useRouter();
+  const { login } = useAuth();
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
+  });
+  const [loading, setLoading] = useState(false);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    // Валідація
+    if (!formData.email.trim() || !formData.password) {
+      toast.error("Email та пароль обов'язкові");
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const response = await fetch("http://localhost:5000/api/auth/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Помилка входу");
+      }
+
+      // Зберігаємо токен через AuthContext
+      login(data.token, data.user);
+      toast.success("Вхід успішний!");
+      
+      // Перенаправляємо на головну сторінку
+      router.push("/");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Помилка входу");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <>
       <Breadcrumb title={"Signin"} pages={["Signin"]} />
@@ -17,7 +77,7 @@ const Signin = () => {
             </div>
 
             <div>
-              <form>
+              <form onSubmit={handleSubmit}>
                 <div className="mb-5">
                   <label htmlFor="email" className="block mb-2.5">
                     Email
@@ -28,6 +88,8 @@ const Signin = () => {
                     name="email"
                     id="email"
                     placeholder="Enter your email"
+                    value={formData.email}
+                    onChange={handleChange}
                     className="rounded-lg border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-3 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
                   />
                 </div>
@@ -42,6 +104,8 @@ const Signin = () => {
                     name="password"
                     id="password"
                     placeholder="Enter your password"
+                    value={formData.password}
+                    onChange={handleChange}
                     autoComplete="on"
                     className="rounded-lg border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-3 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
                   />
@@ -49,9 +113,10 @@ const Signin = () => {
 
                 <button
                   type="submit"
-                  className="w-full flex justify-center font-medium text-white bg-dark py-3 px-6 rounded-lg ease-out duration-200 hover:bg-blue mt-7.5"
+                  disabled={loading}
+                  className="w-full flex justify-center font-medium text-white bg-dark py-3 px-6 rounded-lg ease-out duration-200 hover:bg-blue mt-7.5 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Sign in to account
+                  {loading ? "Signing in..." : "Sign in to account"}
                 </button>
 
                 <a
