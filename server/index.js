@@ -7,6 +7,8 @@ const authRoutes = require('./routes/auth');
 const productRoutes = require('./routes/products');
 const addressRoutes = require('./routes/addresses');
 const orderRoutes = require('./routes/orders');
+const cartRoutes = require('./routes/cart');
+const wishlistRoutes = require('./routes/wishlist');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -20,11 +22,18 @@ app.use(cors({
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// Test route
+app.get('/test', (req, res) => {
+  res.json({ message: 'Server is working!' });
+});
+
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/addresses', addressRoutes);
 app.use('/api/orders', orderRoutes);
+app.use('/api/cart', cartRoutes);
+app.use('/api/wishlist', wishlistRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {

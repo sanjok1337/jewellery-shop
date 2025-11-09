@@ -1,10 +1,49 @@
-import React from "react";
+"use client";
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import ProductItem from "@/components/Common/ProductItem";
-import shopData from "@/components/Shop/shopData";
+
+interface Product {
+  id: number;
+  name: string;
+  description?: string;
+  price: number;
+  category?: string;
+  image_url?: string;
+  images?: Array<{image_url: string; is_main: boolean}>;
+  stock?: number;
+}
 
 const NewArrival = () => {
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchProducts();
+  }, []);
+
+  const fetchProducts = async () => {
+    try {
+      console.log('🔄 Fetching products from API...');
+      const response = await fetch('http://localhost:5000/api/products?limit=4&sortBy=newest');
+      console.log('📡 Response status:', response.status, response.ok);
+      
+      if (response.ok) {
+        const data = await response.json();
+        console.log('📦 API Response:', data);
+        console.log('🏷️ Products array:', data.products);
+        console.log('📊 Products count:', data.products?.length || 0);
+        setProducts(data.products || []);
+      } else {
+        console.error('❌ API request failed:', response.status, response.statusText);
+      }
+    } catch (error) {
+      console.error('❌ Fetch products error:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
   return (
     <section className="overflow-hidden pt-15">
       <div className="max-w-[1170px] w-full mx-auto px-4 sm:px-8 xl:px-0">
@@ -48,9 +87,37 @@ const NewArrival = () => {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-7.5 gap-y-9">
           {/* <!-- New Arrivals item --> */}
-          {shopData.map((item, key) => (
-            <ProductItem item={item} key={key} />
-          ))}
+          {loading ? (
+            <div className="col-span-full text-center py-8">
+              <p>Завантаження товарів...</p>
+            </div>
+          ) : products.length > 0 ? (
+            products.map((product) => {
+              // Адаптуємо дані з API до формату, який очікує ProductItem
+              const adaptedProduct = {
+                id: product.id,
+                title: product.name,
+                price: product.price,
+                discountedPrice: product.price, // поки що без знижки
+                reviews: 0, // поки що 0 відгуків
+                imgs: {
+                  thumbnails: [
+                    product.image_url || '/images/products/product-1-sm-1.png'
+                  ],
+                  previews: [
+                    product.image_url || '/images/products/product-1-bg-1.png'
+                  ]
+                }
+              };
+              return (
+                <ProductItem item={adaptedProduct} key={product.id} />
+              );
+            })
+          ) : (
+            <div className="col-span-full text-center py-8">
+              <p>Товарів не знайдено</p>
+            </div>
+          )}
         </div>
       </div>
     </section>

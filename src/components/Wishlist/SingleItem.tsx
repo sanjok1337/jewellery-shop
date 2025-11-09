@@ -1,33 +1,63 @@
 import React from "react";
-import { AppDispatch } from "@/redux/store";
-import { useDispatch } from "react-redux";
-
-import { removeItemFromWishlist } from "@/redux/features/wishlist-slice";
-import { addItemToCart } from "@/redux/features/cart-slice";
-
 import Image from "next/image";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/app/context/AuthContext";
+import toast from "react-hot-toast";
 
-const SingleItem = ({ item }) => {
-  const dispatch = useDispatch<AppDispatch>();
+interface WishlistItem {
+  id: number;
+  product_id: number;
+  name: string;
+  price: number;
+  image_url?: string;
+  category?: string;
+}
 
-  const handleRemoveFromWishlist = () => {
-    dispatch(removeItemFromWishlist(item.id));
-  };
+interface SingleItemProps {
+  item: WishlistItem;
+  onRemove: () => void;
+}
 
-  const handleAddToCart = () => {
-    dispatch(
-      addItemToCart({
-        ...item,
-        quantity: 1,
-      })
-    );
+const SingleItem = ({ item, onRemove }: SingleItemProps) => {
+  const router = useRouter();
+  const { token } = useAuth();
+
+  const handleAddToCart = async () => {
+    if (!token) {
+      toast.error('Увійдіть в аккаунт для додавання в кошик');
+      router.push('/signin');
+      return;
+    }
+
+    try {
+      const response = await fetch('http://localhost:5000/api/cart/add', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          productId: item.product_id,
+          quantity: 1
+        })
+      });
+
+      if (response.ok) {
+        toast.success('Товар додано в кошик!');
+      } else {
+        toast.error('Помилка додавання в кошик');
+      }
+    } catch (error) {
+      console.error('Add to cart error:', error);
+      toast.error('Помилка додавання в кошик');
+    }
   };
 
   return (
     <div className="flex items-center border-t border-gray-3 py-5 px-10">
       <div className="min-w-[83px]">
         <button
-          onClick={() => handleRemoveFromWishlist()}
+          onClick={onRemove}
           aria-label="button for remove product from wishlist"
           className="flex items-center justify-center rounded-lg max-w-[38px] w-full h-9.5 bg-gray-2 border border-gray-3 ease-out duration-200 hover:bg-red-light-6 hover:border-red-light-4 hover:text-red"
         >
@@ -57,12 +87,22 @@ const SingleItem = ({ item }) => {
         <div className="flex items-center justify-between gap-5">
           <div className="w-full flex items-center gap-5.5">
             <div className="flex items-center justify-center rounded-[5px] bg-gray-2 max-w-[80px] w-full h-17.5">
-              <Image src={item.imgs?.thumbnails[0]} alt="product" width={200} height={200} />
+              <Image 
+                src={item.image_url || '/images/products/product-1-bg-1.png'} 
+                alt={item.name} 
+                width={200} 
+                height={200} 
+              />
             </div>
 
             <div>
               <h3 className="text-dark ease-out duration-200 hover:text-blue">
-                <a href="#"> {item.title} </a>
+                <button 
+                  onClick={() => router.push(`/products/${item.product_id}`)}
+                  className="hover:text-red transition-colors"
+                > 
+                  {item.name} 
+                </button>
               </h3>
             </div>
           </div>
@@ -70,7 +110,7 @@ const SingleItem = ({ item }) => {
       </div>
 
       <div className="min-w-[205px]">
-        <p className="text-dark">${item.discountedPrice}</p>
+        <p className="text-dark">{item.price} грн</p>
       </div>
 
       <div className="min-w-[265px]">
@@ -98,16 +138,16 @@ const SingleItem = ({ item }) => {
             />
           </svg>
 
-          <span className="text-red"> Out of Stock </span>
+          <span className="text-green">{item.category || 'В наявності'}</span>
         </div>
       </div>
 
       <div className="min-w-[150px] flex justify-end">
         <button
-          onClick={() => handleAddToCart()}
+          onClick={handleAddToCart}
           className="inline-flex text-dark hover:text-white bg-gray-1 border border-gray-3 py-2.5 px-6 rounded-md ease-out duration-200 hover:bg-blue hover:border-gray-3"
         >
-          Add to Cart
+          Додати в кошик
         </button>
       </div>
     </div>

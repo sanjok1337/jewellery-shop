@@ -1,21 +1,61 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Breadcrumb from "../Common/Breadcrumb";
 
 import SingleGridItem from "../Shop/SingleGridItem";
 import SingleListItem from "../Shop/SingleListItem";
 import CustomSelect from "../ShopWithSidebar/CustomSelect";
 
-import shopData from "../Shop/shopData";
+interface Product {
+  id: number;
+  name: string;
+  description?: string;
+  price: number;
+  category?: string;
+  image_url?: string;
+  images?: Array<{image_url: string; is_main: boolean}>;
+  stock?: number;
+}
 
 const ShopWithoutSidebar = () => {
   const [productStyle, setProductStyle] = useState("grid");
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [totalProducts, setTotalProducts] = useState(0);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [sortBy, setSortBy] = useState('newest');
+
+  useEffect(() => {
+    fetchProducts();
+  }, [currentPage, sortBy]);
+
+  const fetchProducts = async () => {
+    setLoading(true);
+    try {
+      const response = await fetch(`http://localhost:5000/api/products?page=${currentPage}&limit=12&sortBy=${sortBy}`);
+      if (response.ok) {
+        const data = await response.json();
+        setProducts(data.products || []);
+        setTotalProducts(data.pagination?.total || 0);
+      }
+    } catch (error) {
+      console.error('Fetch products error:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const options = [
-    { label: "Latest Products", value: "0" },
-    { label: "Best Selling", value: "1" },
-    { label: "Old Products", value: "2" },
+    { label: "Latest Products", value: "newest" },
+    { label: "Price: Low to High", value: "price_asc" },
+    { label: "Price: High to Low", value: "price_desc" },
+    { label: "Name A-Z", value: "name" },
   ];
+
+  const handleSortChange = (value: string) => {
+    setSortBy(value);
+    setCurrentPage(1); // Скидаємо на першу сторінку при зміні сортування
+  };
 
   return (
     <>
@@ -32,10 +72,10 @@ const ShopWithoutSidebar = () => {
                 <div className="flex items-center justify-between">
                   {/* <!-- top bar left --> */}
                   <div className="flex flex-wrap items-center gap-4">
-                    <CustomSelect options={options} />
+                    <CustomSelect options={options} onChange={handleSortChange} />
 
                     <p>
-                      Showing <span className="text-dark">9 of 50</span>{" "}
+                      Showing <span className="text-dark">{products.length} of {totalProducts}</span>{" "}
                       Products
                     </p>
                   </div>
@@ -129,12 +169,39 @@ const ShopWithoutSidebar = () => {
                     : "flex flex-col gap-7.5"
                 }`}
               >
-                {shopData.map((item, key) =>
-                  productStyle === "grid" ? (
-                    <SingleGridItem item={item} key={key} />
-                  ) : (
-                    <SingleListItem item={item} key={key} />
-                  )
+                {loading ? (
+                  <div className="col-span-full text-center py-8">
+                    <p>Завантаження товарів...</p>
+                  </div>
+                ) : products.length > 0 ? (
+                  products.map((product) => {
+                    // Адаптуємо дані з API до формату, який очікують компоненти
+                    const adaptedProduct = {
+                      id: product.id,
+                      title: product.name,
+                      price: product.price,
+                      discountedPrice: product.price,
+                      reviews: 0,
+                      imgs: {
+                        thumbnails: [
+                          product.image_url || '/images/products/product-1-sm-1.png'
+                        ],
+                        previews: [
+                          product.image_url || '/images/products/product-1-bg-1.png'
+                        ]
+                      }
+                    };
+                    
+                    return productStyle === "grid" ? (
+                      <SingleGridItem item={adaptedProduct} key={product.id} />
+                    ) : (
+                      <SingleListItem item={adaptedProduct} key={product.id} />
+                    );
+                  })
+                ) : (
+                  <div className="col-span-full text-center py-8">
+                    <p>Товарів не знайдено</p>
+                  </div>
                 )}
               </div>
               {/* <!-- Products Grid Tab Content End --> */}

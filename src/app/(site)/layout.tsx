@@ -8,9 +8,11 @@ import Footer from "../../components/Footer";
 import { ModalProvider } from "../context/QuickViewModalContext";
 import { CartModalProvider } from "../context/CartSidebarModalContext";
 import { AuthProvider } from "../context/AuthContext";
+import { WishlistProvider } from "../context/WishlistContext";
 import { ReduxProvider } from "@/redux/provider";
 import QuickViewModal from "@/components/Common/QuickViewModal";
 import CartSidebarModal from "@/components/Common/CartSidebarModal";
+import FixedWishlist from "@/components/Common/FixedWishlist";
 import { PreviewSliderProvider } from "../context/PreviewSliderContext";
 import PreviewSliderModal from "@/components/Common/PreviewSlider";
 
@@ -36,20 +38,23 @@ export default function RootLayout({
         ) : (
           <>
             <AuthProvider>
-              <ReduxProvider>
-                <CartModalProvider>
-                  <ModalProvider>
-                    <PreviewSliderProvider>
-                      <Header />
-                      {children}
+              <WishlistProvider>
+                <ReduxProvider>
+                  <CartModalProvider>
+                    <ModalProvider>
+                      <PreviewSliderProvider>
+                        <Header />
+                        {children}
 
-                      <QuickViewModal />
-                      <CartSidebarModal />
-                      <PreviewSliderModal />
-                    </PreviewSliderProvider>
-                  </ModalProvider>
-                </CartModalProvider>
-              </ReduxProvider>
+                        <QuickViewModal />
+                        <CartSidebarModal />
+                        <PreviewSliderModal />
+                        <FixedWishlist />
+                      </PreviewSliderProvider>
+                    </ModalProvider>
+                  </CartModalProvider>
+                </ReduxProvider>
+              </WishlistProvider>
             </AuthProvider>
             <ScrollToTop />
             <Footer />
