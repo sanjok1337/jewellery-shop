@@ -169,14 +169,22 @@ const getProduct = async (req, res) => {
 // Отримання категорій
 const getCategories = async (req, res) => {
   try {
+    console.log('📋 getCategories called');
     const connection = await pool.getConnection();
-    const [categories] = await connection.query('SELECT DISTINCT category FROM products ORDER BY category');
+    const [categories] = await connection.query(`
+      SELECT c.id, c.name, c.slug, COUNT(p.id) as product_count 
+      FROM categories c 
+      LEFT JOIN products p ON c.id = p.category_id 
+      GROUP BY c.id, c.name, c.slug 
+      ORDER BY c.name
+    `);
     
     connection.release();
+    console.log('✅ Categories found:', categories.length);
 
-    res.json(categories.map(c => c.category));
+    res.json(categories);
   } catch (error) {
-    console.error('Помилка отримання категорій:', error);
+    console.error('❌ Помилка отримання категорій:', error);
     res.status(500).json({ message: 'Помилка сервера', error: error.message });
   }
 };
@@ -184,16 +192,18 @@ const getCategories = async (req, res) => {
 // Отримання діапазону цін
 const getPriceRange = async (req, res) => {
   try {
+    console.log('💰 getPriceRange called');
     const connection = await pool.getConnection();
     const [result] = await connection.query(
       'SELECT MIN(price) as minPrice, MAX(price) as maxPrice FROM products'
     );
     
     connection.release();
+    console.log('✅ Price range:', result[0]);
 
     res.json(result[0]);
   } catch (error) {
-    console.error('Помилка отримання діапазону цін:', error);
+    console.error('❌ Помилка отримання діапазону цін:', error);
     res.status(500).json({ message: 'Помилка сервера', error: error.message });
   }
 };

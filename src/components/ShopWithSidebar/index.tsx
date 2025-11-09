@@ -1,11 +1,9 @@
 "use client";
 import React, { useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import Breadcrumb from "../Common/Breadcrumb";
 import CustomSelect from "./CustomSelect";
 import CategoryDropdown from "./CategoryDropdown";
-import GenderDropdown from "./GenderDropdown";
-import SizeDropdown from "./SizeDropdown";
-import ColorsDropdwon from "./ColorsDropdwon";
 import PriceDropdown from "./PriceDropdown";
 import SingleGridItem from "../Shop/SingleGridItem";
 import SingleListItem from "../Shop/SingleListItem";
@@ -22,6 +20,7 @@ interface Product {
 }
 
 const ShopWithSidebar = () => {
+  const searchParams = useSearchParams();
   const [productStyle, setProductStyle] = useState("grid");
   const [productSidebar, setProductSidebar] = useState(false);
   const [stickyMenu, setStickyMenu] = useState(false);
@@ -30,15 +29,95 @@ const ShopWithSidebar = () => {
   const [totalProducts, setTotalProducts] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
   const [sortBy, setSortBy] = useState('newest');
+  const [categories, setCategories] = useState([]);
+  const [selectedCategory, setSelectedCategory] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [priceRange, setPriceRange] = useState({ minPrice: 0, maxPrice: 1500 });
+  const [selectedPriceRange, setSelectedPriceRange] = useState({ min: 0, max: 1500 });
+
+  // Читаємо параметри з URL при монтуванні
+  useEffect(() => {
+    const category = searchParams.get('category');
+    const search = searchParams.get('search');
+    
+    if (category) {
+      setSelectedCategory(category);
+    }
+    if (search) {
+      setSearchQuery(search);
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     fetchProducts();
-  }, [currentPage, sortBy]);
+  }, [currentPage, sortBy, selectedCategory, searchQuery, selectedPriceRange]);
+
+  useEffect(() => {
+    fetchCategories();
+    fetchPriceRange();
+  }, []);
+
+  const fetchCategories = async () => {
+    try {
+      console.log('🔍 Fetching categories from API...');
+      const response = await fetch('http://localhost:5000/api/products/categories');
+      console.log('📡 Categories response:', response.status);
+      if (response.ok) {
+        const data = await response.json();
+        console.log('📋 Categories data:', data);
+        const formattedCategories = data.map(cat => ({
+          name: cat.name,
+          products: cat.product_count,
+          isRefined: false
+        }));
+        console.log('✅ Formatted categories:', formattedCategories);
+        setCategories(formattedCategories);
+      } else {
+        console.error('❌ Categories response not OK:', response.status);
+      }
+    } catch (error) {
+      console.error('❌ Fetch categories error:', error);
+    }
+  };
+
+  const fetchPriceRange = async () => {
+    try {
+      console.log('💰 Fetching price range from API...');
+      const response = await fetch('http://localhost:5000/api/products/price-range');
+      console.log('📡 Price range response:', response.status);
+      if (response.ok) {
+        const data = await response.json();
+        console.log('💵 Price range data:', data);
+        const range = { 
+          minPrice: Math.floor(data.minPrice || 0), 
+          maxPrice: Math.ceil(data.maxPrice || 1500) 
+        };
+        console.log('✅ Price range set:', range);
+        setPriceRange(range);
+        setSelectedPriceRange({ min: range.minPrice, max: range.maxPrice });
+      } else {
+        console.error('❌ Price range response not OK:', response.status);
+      }
+    } catch (error) {
+      console.error('❌ Fetch price range error:', error);
+    }
+  };
 
   const fetchProducts = async () => {
     setLoading(true);
     try {
-      const response = await fetch(`http://localhost:5000/api/products?page=${currentPage}&limit=12&sortBy=${sortBy}`);
+      let url = `http://localhost:5000/api/products?page=${currentPage}&limit=12&sortBy=${sortBy}`;
+      if (selectedCategory) {
+        url += `&category=${encodeURIComponent(selectedCategory)}`;
+      }
+      if (searchQuery) {
+        url += `&search=${encodeURIComponent(searchQuery)}`;
+      }
+      if (selectedPriceRange.min !== priceRange.minPrice || selectedPriceRange.max !== priceRange.maxPrice) {
+        url += `&minPrice=${selectedPriceRange.min}&maxPrice=${selectedPriceRange.max}`;
+      }
+      
+      const response = await fetch(url);
       if (response.ok) {
         const data = await response.json();
         setProducts(data.products || []);
@@ -71,53 +150,14 @@ const ShopWithSidebar = () => {
     setCurrentPage(1);
   };
 
-  const categories = [
-    {
-      name: "Desktop",
-      products: 10,
-      isRefined: true,
-    },
-    {
-      name: "Laptop",
-      products: 12,
-      isRefined: false,
-    },
-    {
-      name: "Monitor",
-      products: 30,
-      isRefined: false,
-    },
-    {
-      name: "UPS",
-      products: 23,
-      isRefined: false,
-    },
-    {
-      name: "Phone",
-      products: 10,
-      isRefined: false,
-    },
-    {
-      name: "Watch",
-      products: 13,
-      isRefined: false,
-    },
-  ];
+  const handlePriceChange = (minPrice: number, maxPrice: number) => {
+    setSelectedPriceRange({ min: minPrice, max: maxPrice });
+    setCurrentPage(1);
+  };
 
-  const genders = [
-    {
-      name: "Men",
-      products: 10,
-    },
-    {
-      name: "Women",
-      products: 23,
-    },
-    {
-      name: "Unisex",
-      products: 8,
-    },
-  ];
+
+
+
 
   useEffect(() => {
     window.addEventListener("scroll", handleStickyMenu);
@@ -193,21 +233,31 @@ const ShopWithSidebar = () => {
                   <div className="bg-white shadow-1 rounded-lg py-4 px-5">
                     <div className="flex items-center justify-between">
                       <p>Filters:</p>
-                      <button className="text-blue">Clean All</button>
+                      <button 
+                        className="text-blue"
+                        onClick={() => {
+                          setSelectedCategory('');
+                          setSelectedPriceRange({ min: priceRange.minPrice, max: priceRange.maxPrice });
+                          setCurrentPage(1);
+                        }}
+                      >
+                        Clean All
+                      </button>
                     </div>
                   </div>
 
                   {/* <!-- category box --> */}
-                  <CategoryDropdown categories={categories} />
+                  <CategoryDropdown 
+                    categories={categories} 
+                    onCategoryChange={setSelectedCategory}
+                    selectedCategory={selectedCategory}
+                  />
 
-                  {/* <!-- gender box --> */}
-                  <GenderDropdown genders={genders} />
-
-                  {/* // <!-- size box --> */}
-                  <SizeDropdown />
-
-                  {/* // <!-- color box --> */}
-                  <ColorsDropdwon />
+                  {/* <!-- price range box --> */}
+                  <PriceDropdown 
+                    onPriceChange={handlePriceChange}
+                    priceRange={priceRange}
+                  />
 
                   {/* // <!-- price range box --> */}
                   <PriceDropdown />

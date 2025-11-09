@@ -1,6 +1,6 @@
 "use client";
 import { Swiper, SwiperSlide } from "swiper/react";
-import { useCallback, useRef, useEffect } from "react";
+import { useCallback, useRef, useEffect, useState } from "react";
 import data from "./categoryData";
 import Image from "next/image";
 
@@ -11,6 +11,7 @@ import SingleItem from "./SingleItem";
 
 const Categories = () => {
   const sliderRef = useRef(null);
+  const [categories, setCategories] = useState(data);
 
   const handlePrev = useCallback(() => {
     if (!sliderRef.current) return;
@@ -20,6 +21,29 @@ const Categories = () => {
   const handleNext = useCallback(() => {
     if (!sliderRef.current) return;
     sliderRef.current.swiper.slideNext();
+  }, []);
+
+  const fetchCategories = async () => {
+    try {
+      const response = await fetch('http://localhost:5000/api/products/categories');
+      if (response.ok) {
+        const apiCategories = await response.json();
+        const formattedCategories = apiCategories.map((cat, index) => ({
+          title: cat.name,
+          id: cat.id,
+          img: `/images/categories/categories-0${(index % 7) + 1}.png`, // Використовуємо існуючі зображення циклічно
+        }));
+        setCategories(formattedCategories);
+      }
+    } catch (error) {
+      console.error('Error fetching categories:', error);
+      // Якщо помилка, використовуємо статичні дані
+      setCategories(data);
+    }
+  };
+
+  useEffect(() => {
+    fetchCategories();
   }, []);
 
   useEffect(() => {
@@ -134,7 +158,7 @@ const Categories = () => {
               },
             }}
           >
-            {data.map((item, key) => (
+            {categories.map((item, key) => (
               <SwiperSlide key={key}>
                 <SingleItem item={item} />
               </SwiperSlide>

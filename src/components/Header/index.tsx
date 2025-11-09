@@ -1,6 +1,7 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import CustomSelect from "./CustomSelect";
 import { menuData } from "./menuData";
 import Dropdown from "./Dropdown";
@@ -12,9 +13,12 @@ import { useAuth } from "@/app/context/AuthContext";
 import Image from "next/image";
 
 const Header = () => {
+  const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("0");
   const [navigationOpen, setNavigationOpen] = useState(false);
   const [stickyMenu, setStickyMenu] = useState(false);
+  const [categories, setCategories] = useState([]);
   const { openCartModal } = useCartModalContext();
   const { user, isAuthenticated, logout } = useAuth();
 
@@ -23,6 +27,34 @@ const Header = () => {
 
   const handleOpenCartModal = () => {
     openCartModal();
+  };
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    // Знаходимо назву категорії за value
+    const selectedCat = categories.find(cat => cat.value === selectedCategory);
+    const categoryName = selectedCat && selectedCat.value !== "0" ? selectedCat.label : "";
+    
+    // Будуємо URL з параметрами
+    const params = new URLSearchParams();
+    if (searchQuery) params.append('search', searchQuery);
+    if (categoryName) params.append('category', categoryName);
+    
+    // Переходимо на сторінку з товарами
+    router.push(`/shop-with-sidebar${params.toString() ? `?${params.toString()}` : ''}`);
+  };
+
+  const handleCategoryChange = (value: string) => {
+    setSelectedCategory(value);
+    
+    // Якщо є вибрана категорія (не "All Categories"), одразу шукаємо
+    if (value !== "0") {
+      const selectedCat = categories.find(cat => cat.value === value);
+      if (selectedCat) {
+        router.push(`/shop-with-sidebar?category=${encodeURIComponent(selectedCat.label)}`);
+      }
+    }
   };
 
   // Sticky menu
@@ -38,15 +70,49 @@ const Header = () => {
     window.addEventListener("scroll", handleStickyMenu);
   });
 
-  const options = [
+  useEffect(() => {
+    fetchCategories();
+  }, []);
+
+  const fetchCategories = async () => {
+    try {
+      const response = await fetch('http://localhost:5000/api/products/categories');
+      if (response.ok) {
+        const data = await response.json();
+        const formattedCategories = [
+          { label: "All Categories", value: "0" },
+          ...data.map(cat => ({
+            label: cat.name,
+            value: cat.id.toString()
+          }))
+        ];
+        setCategories(formattedCategories);
+      }
+    } catch (error) {
+      console.error('Error fetching categories in header:', error);
+      // Якщо помилка, використовуємо статичні дані
+      setCategories([
+        { label: "All Categories", value: "0" },
+        { label: "Rings", value: "1" },
+        { label: "Necklaces", value: "2" },
+        { label: "Bracelets", value: "3" },
+        { label: "Earrings", value: "4" },
+        { label: "Watches", value: "5" },
+        { label: "Brooches", value: "6" },
+        { label: "Pendants", value: "7" },
+      ]);
+    }
+  };
+
+  const options = categories.length > 0 ? categories : [
     { label: "All Categories", value: "0" },
-    { label: "Desktop", value: "1" },
-    { label: "Laptop", value: "2" },
-    { label: "Monitor", value: "3" },
-    { label: "Phone", value: "4" },
-    { label: "Watch", value: "5" },
-    { label: "Mouse", value: "6" },
-    { label: "Tablet", value: "7" },
+    { label: "Rings", value: "1" },
+    { label: "Necklaces", value: "2" },
+    { label: "Bracelets", value: "3" },
+    { label: "Earrings", value: "4" },
+    { label: "Watches", value: "5" },
+    { label: "Brooches", value: "6" },
+    { label: "Pendants", value: "7" },
   ];
 
   return (
@@ -74,9 +140,13 @@ const Header = () => {
             </Link>
 
             <div className="max-w-[475px] w-full">
-              <form>
+              <form onSubmit={handleSearch}>
                 <div className="flex items-center">
-                  <CustomSelect options={options} />
+                  <CustomSelect 
+                    options={options} 
+                    value={selectedCategory}
+                    onChange={handleCategoryChange}
+                  />
 
                   <div className="relative max-w-[333px] sm:min-w-[333px] w-full">
                     {/* <!-- divider --> */}

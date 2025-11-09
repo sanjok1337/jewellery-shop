@@ -1,14 +1,39 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import RangeSlider from 'react-range-slider-input';
 import 'react-range-slider-input/dist/style.css';
 
-const PriceDropdown = () => {
-  const [toggleDropdown, setToggleDropdown] = useState(true);
+interface PriceDropdownProps {
+  onPriceChange?: (minPrice: number, maxPrice: number) => void;
+  priceRange?: { minPrice: number; maxPrice: number };
+}
 
+const PriceDropdown = ({ onPriceChange, priceRange }: PriceDropdownProps) => {
+  const [toggleDropdown, setToggleDropdown] = useState(true);
   const [selectedPrice, setSelectedPrice] = useState({
-    from: 0,
-    to: 100,
+    from: priceRange?.minPrice || 0,
+    to: priceRange?.maxPrice || 1500,
   });
+
+  useEffect(() => {
+    if (priceRange) {
+      setSelectedPrice({
+        from: priceRange.minPrice,
+        to: priceRange.maxPrice,
+      });
+    }
+  }, [priceRange]);
+
+  const handlePriceChange = (values: number[]) => {
+    const newPrice = {
+      from: values[0],
+      to: values[1],
+    };
+    setSelectedPrice(newPrice);
+    
+    if (onPriceChange) {
+      onPriceChange(values[0], values[1]);
+    }
+  };
 
   return (
     <div className="bg-white shadow-1 rounded-lg">
@@ -50,13 +75,11 @@ const PriceDropdown = () => {
             <RangeSlider
               id="range-slider-gradient"
               className="margin-lg"
-              step={'any'}
-              onInput={(e) =>
-                setSelectedPrice({
-                  from: Math.floor(e[0]),
-                  to: Math.ceil(e[1]),
-                })
-              }
+              min={priceRange?.minPrice || 0}
+              max={priceRange?.maxPrice || 1500}
+              step={1}
+              value={[selectedPrice.from, selectedPrice.to]}
+              onInput={handlePriceChange}
             />
 
             <div className="price-amount flex items-center justify-between pt-4">
