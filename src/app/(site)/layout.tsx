@@ -13,7 +13,6 @@ import { CartProvider } from "../context/CartContext";
 import { ReduxProvider } from "@/redux/provider";
 import QuickViewModal from "@/components/Common/QuickViewModal";
 import CartSidebarModal from "@/components/Common/CartSidebarModal";
-import FixedWishlist from "@/components/Common/FixedWishlist";
 import { PreviewSliderProvider } from "../context/PreviewSliderContext";
 import PreviewSliderModal from "@/components/Common/PreviewSlider";
 
@@ -51,7 +50,6 @@ export default function RootLayout({
                         <QuickViewModal />
                         <CartSidebarModal />
                         <PreviewSliderModal />
-                        <FixedWishlist />
                       </PreviewSliderProvider>
                     </ModalProvider>
                   </CartModalProvider>

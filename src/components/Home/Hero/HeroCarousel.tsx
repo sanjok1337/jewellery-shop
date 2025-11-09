@@ -38,11 +38,11 @@ const HeroCarousal = () => {
             </div>
 
             <h1 className="font-semibold text-dark text-xl sm:text-3xl mb-3">
-              <a href="#">True Wireless Noise Cancelling Headphone</a>
+              <a href="#">Exquisite Diamond Jewelry</a>
             </h1>
 
             <p>
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi at ipsum at risus euismod lobortis in
+            Exclusive collection of precious jewelry crafted by master artisans specially for you
             </p>
 
             <a
@@ -79,12 +79,11 @@ const HeroCarousal = () => {
             </div>
 
             <h1 className="font-semibold text-dark text-xl sm:text-3xl mb-3">
-              <a href="#">True Wireless Noise Cancelling Headphone</a>
+              <a href="#">Exquisite Diamond Jewelry</a>
             </h1>
 
             <p>
-              Lorem ipsum dolor sit, consectetur elit nunc suscipit non ipsum
-              nec suscipit.
+              The finest collection of gold and silver jewelry for special moments in your life
             </p>
 
             <a
@@ -98,7 +97,7 @@ const HeroCarousal = () => {
           <div>
             <Image
               src="/images/hero/hero-01.png"
-              alt="headphone"
+              alt="jewellery"
               width={351}
               height={358}
             />

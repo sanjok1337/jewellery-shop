@@ -29,7 +29,7 @@ const Hero = () => {
                 <div className="flex items-center gap-14">
                   <div>
                     <h2 className="max-w-[153px] font-semibold text-dark text-xl mb-20">
-                      <a href="#"> iPhone 14 Plus & 14 Pro Max </a>
+                      <a href="#"> Gold Diamond Earrings </a>
                     </h2>
 
                     <div>
@@ -38,10 +38,10 @@ const Hero = () => {
                       </p>
                       <span className="flex items-center gap-3">
                         <span className="font-medium text-heading-5 text-red">
-                          $699
+                          $499
                         </span>
                         <span className="font-medium text-2xl text-dark-4 line-through">
-                          $999
+                          $799
                         </span>
                       </span>
                     </div>
@@ -61,7 +61,7 @@ const Hero = () => {
                 <div className="flex items-center gap-14">
                   <div>
                     <h2 className="max-w-[153px] font-semibold text-dark text-xl mb-20">
-                      <a href="#"> Wireless Headphone </a>
+                      <a href="#"> Silver Bracelet </a>
                     </h2>
 
                     <div>
@@ -70,10 +70,10 @@ const Hero = () => {
                       </p>
                       <span className="flex items-center gap-3">
                         <span className="font-medium text-heading-5 text-red">
-                          $699
+                          $199
                         </span>
                         <span className="font-medium text-2xl text-dark-4 line-through">
-                          $999
+                          $299
                         </span>
                       </span>
                     </div>

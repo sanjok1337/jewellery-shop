@@ -9,7 +9,7 @@ const PromoBanner = () => {
         <div className="relative z-1 overflow-hidden rounded-lg bg-[#F5F5F7] py-12.5 lg:py-17.5 xl:py-22.5 px-4 sm:px-7.5 lg:px-14 xl:px-19 mb-7.5">
           <div className="max-w-[550px] w-full">
             <span className="block font-medium text-xl text-dark mb-3">
-              Apple iPhone 14 Plus
+              "Luxury" Collection
             </span>
 
             <h2 className="font-bold text-xl lg:text-heading-4 xl:text-heading-3 text-dark mb-5">
@@ -17,8 +17,8 @@ const PromoBanner = () => {
             </h2>
 
             <p>
-              iPhone 14 has the same superspeedy chip that’s in iPhone 13 Pro,
-              A15 Bionic, with a 5‑core GPU, powers all the latest features.
+              Exclusive collection of gold jewelry with natural diamonds and precious gemstones. 
+              Create your unique look with our premium-class products.
             </p>
 
             <a

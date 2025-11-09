@@ -11,27 +11,27 @@ import shopData from "../Shop/shopData";
 const BlogGridWithSidebar = () => {
   const categories = [
     {
-      name: "Desktop",
+      name: "Rings",
       products: 10,
     },
     {
-      name: "Laptop",
+      name: "Earrings",
       products: 12,
     },
     {
-      name: "Monitor",
+      name: "Necklaces",
       products: 30,
     },
     {
-      name: "UPS",
+      name: "Bracelets",
       products: 23,
     },
     {
-      name: "Phone",
+      name: "Pendants",
       products: 10,
     },
     {
-      name: "Watch",
+      name: "Brooches",
       products: 13,
     },
   ];

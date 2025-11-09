@@ -10,35 +10,7 @@ const FixedWishlist = () => {
 
   return (
     <>
-      {/* Кнопка віш-ліста */}
-      <div className="fixed bottom-20 right-4 z-50">
-        <button
-          onClick={toggleWishlist}
-          className="relative bg-red text-white p-3 rounded-full shadow-lg hover:bg-red/90 transition-colors"
-          aria-label="Відкрити віш-ліст"
-        >
-          <svg
-            className="w-6 h-6"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
-            />
-          </svg>
-          {items.length > 0 && (
-            <span className="absolute -top-2 -right-2 bg-white text-red text-xs rounded-full h-5 w-5 flex items-center justify-center font-semibold">
-              {items.length}
-            </span>
-          )}
-        </button>
-      </div>
-
-      {/* Панель віш-ліста */}
+      {/* Wishlist Panel */}
       {isOpen && (
         <div className="fixed inset-0 z-50 overflow-hidden">
           {/* Overlay */}
@@ -50,9 +22,9 @@ const FixedWishlist = () => {
           {/* Панель */}
           <div className="fixed right-0 top-0 h-full w-full max-w-md bg-white shadow-xl">
             <div className="flex flex-col h-full">
-              {/* Заголовок */}
+              {/* Header */}
               <div className="flex items-center justify-between p-4 border-b">
-                <h3 className="text-lg font-semibold">Віш-ліст ({items.length})</h3>
+                <h3 className="text-lg font-semibold">Wishlist ({items.length})</h3>
                 <button
                   onClick={toggleWishlist}
                   className="p-2 hover:bg-gray-100 rounded-full"
@@ -63,7 +35,7 @@ const FixedWishlist = () => {
                 </button>
               </div>
 
-              {/* Контент */}
+              {/* Content */}
               <div className="flex-1 overflow-y-auto p-4">
                 {items.length === 0 ? (
                   <div className="text-center py-8">
@@ -72,7 +44,7 @@ const FixedWishlist = () => {
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                       </svg>
                     </div>
-                    <p className="text-gray-600 mb-4">Ваш віш-ліст порожній</p>
+                    <p className="text-gray-600 mb-4">Your wishlist is empty</p>
                     <button 
                       onClick={() => {
                         toggleWishlist();
@@ -80,7 +52,7 @@ const FixedWishlist = () => {
                       }}
                       className="bg-red text-white px-4 py-2 rounded hover:bg-red/90 transition-colors"
                     >
-                      Почати покупки
+                      Start Shopping
                     </button>
                   </div>
                 ) : (
@@ -107,7 +79,7 @@ const FixedWishlist = () => {
                           >
                             {item.name}
                           </h4>
-                          <p className="text-sm text-gray-600">{item.price} грн</p>
+                          <p className="text-sm text-gray-600">${item.price}</p>
                           {item.category && (
                             <p className="text-xs text-gray-500">{item.category}</p>
                           )}
@@ -127,7 +99,7 @@ const FixedWishlist = () => {
                 )}
               </div>
 
-              {/* Футер */}
+              {/* Footer */}
               {items.length > 0 && (
                 <div className="border-t p-4 space-y-2">
                   <button
@@ -137,7 +109,7 @@ const FixedWishlist = () => {
                     }}
                     className="w-full bg-red text-white py-2 px-4 rounded hover:bg-red/90 transition-colors"
                   >
-                    Переглянути весь віш-ліст
+                    View Full Wishlist
                   </button>
                 </div>
               )}
