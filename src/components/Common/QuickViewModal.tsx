@@ -102,13 +102,19 @@ const QuickViewModal = () => {
                         activePreview === key && "border-2 border-blue"
                       }`}
                     >
-                      <Image
-                        src={img || ""}
-                        alt="thumbnail"
-                        width={61}
-                        height={61}
-                        className="aspect-square"
-                      />
+                      {img ? (
+                        <Image
+                          src={img}
+                          alt="thumbnail"
+                          width={61}
+                          height={61}
+                          className="aspect-square"
+                        />
+                      ) : (
+                        <div className="w-[61px] h-[61px] bg-gray-200 flex items-center justify-center text-gray-500 text-xs">
+                          No Image
+                        </div>
+                      )}
                     </button>
                   ))}
                 </div>
@@ -137,12 +143,18 @@ const QuickViewModal = () => {
                       </svg>
                     </button>
 
-                    <Image
-                      src={product?.imgs?.previews?.[activePreview]}
-                      alt="products-details"
-                      width={400}
-                      height={400}
-                    />
+                    {product?.imgs?.previews?.[activePreview] ? (
+                      <Image
+                        src={product.imgs.previews[activePreview]}
+                        alt="products-details"
+                        width={400}
+                        height={400}
+                      />
+                    ) : (
+                      <div className="w-[400px] h-[400px] bg-gray-200 flex items-center justify-center text-gray-500">
+                        <span>No Image Available</span>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>

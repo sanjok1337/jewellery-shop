@@ -20,7 +20,11 @@ const getProducts = async (req, res) => {
       p.*,
       c.name as category_name,
       pi.image_url,
-      pi.is_main
+      pi.is_main,
+      CASE 
+        WHEN p.stock > 0 THEN 'В наявності'
+        ELSE 'Немає в наявності'
+      END as stock_status
     FROM products p
     LEFT JOIN categories c ON p.category_id = c.id
     LEFT JOIN product_images pi ON p.id = pi.product_id AND pi.is_main = 1
@@ -120,10 +124,12 @@ const getProducts = async (req, res) => {
 const getProduct = async (req, res) => {
   try {
     const { id } = req.params;
+    console.log('🔍 getProduct called for ID:', id);
 
     const connection = await pool.getConnection();
     
     // Отримуємо товар з категорією
+    console.log('📝 Executing product query for ID:', id);
     const [products] = await connection.query(`
       SELECT 
         p.*,
@@ -133,6 +139,7 @@ const getProduct = async (req, res) => {
       LEFT JOIN categories c ON p.category_id = c.id
       WHERE p.id = ?
     `, [id]);
+    console.log('📦 Product query result:', products.length);
     
     if (products.length === 0) {
       connection.release();
@@ -151,7 +158,8 @@ const getProduct = async (req, res) => {
     product.images = images;
     product.image_url = images.find(img => img.is_main)?.image_url || images[0]?.image_url;
 
-    res.json(product);
+    console.log('✅ Sending product:', product.name);
+    res.json({ product });
   } catch (error) {
     console.error('Помилка отримання товару:', error);
     res.status(500).json({ message: 'Помилка сервера', error: error.message });

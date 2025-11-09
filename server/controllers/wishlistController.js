@@ -1,4 +1,4 @@
-const pool = require('../config/database');
+const { pool } = require('../config/database');
 
 // Додати товар до віш-ліста
 const addToWishlist = async (req, res) => {
@@ -60,7 +60,8 @@ const getWishlist = async (req, res) => {
   try {
     const userId = req.user.id;
 
-    const [wishlistItems] = await pool.execute(`
+    const connection = await pool.getConnection();
+    const [wishlistItems] = await connection.query(`
       SELECT 
         w.id,
         p.id as product_id,
@@ -75,6 +76,7 @@ const getWishlist = async (req, res) => {
       WHERE w.user_id = ?
       ORDER BY w.created_at DESC
     `, [userId]);
+    connection.release();
 
     res.json({
       success: true,

@@ -80,6 +80,8 @@ const BestSeller = () => {
                 price: product.price,
                 discountedPrice: product.price,
                 reviews: 0,
+                stock: product.stock || 0,
+                stockStatus: product.stock > 0 ? 'В наявності' : 'Немає в наявності',
                 imgs: {
                   thumbnails: [
                     product.image_url || '/images/products/product-1-sm-1.png'
@@ -90,7 +92,14 @@ const BestSeller = () => {
                 }
               };
               return (
-                <SingleItem item={adaptedProduct} key={product.id} />
+                <div key={product.id} className="relative">
+                  <SingleItem item={adaptedProduct} />
+                  {product.stock === 0 && (
+                    <div className="absolute top-2 left-2 bg-red-500 text-white px-2 py-1 text-xs rounded-md">
+                      Немає в наявності
+                    </div>
+                  )}
+                </div>
               );
             })
           ) : (

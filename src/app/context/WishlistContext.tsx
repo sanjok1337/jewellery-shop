@@ -44,6 +44,8 @@ export const WishlistProvider = ({ children }: WishlistProviderProps) => {
   const refreshWishlist = async () => {
     if (!token) return;
 
+    console.log('🔄 Оновлюємо wishlist...');
+
     try {
       const response = await fetch('http://localhost:5000/api/wishlist', {
         headers: {
@@ -51,9 +53,13 @@ export const WishlistProvider = ({ children }: WishlistProviderProps) => {
         }
       });
 
+      console.log('📡 Wishlist response status:', response.status);
+
       if (response.ok) {
         const data = await response.json();
-        setItems(data.items);
+        console.log('📦 Wishlist data:', data);
+        setItems(data.items || []);
+        console.log('✅ Wishlist оновлено, кількість товарів:', data.items?.length || 0);
       }
     } catch (error) {
       console.error('Fetch wishlist error:', error);
@@ -70,6 +76,9 @@ export const WishlistProvider = ({ children }: WishlistProviderProps) => {
       return;
     }
 
+    console.log('🔄 Додаємо товар до wishlist:', productId);
+    console.log('🔑 Token:', token ? 'є' : 'немає');
+
     try {
       const response = await fetch('http://localhost:5000/api/wishlist/add', {
         method: 'POST',
@@ -80,11 +89,15 @@ export const WishlistProvider = ({ children }: WishlistProviderProps) => {
         body: JSON.stringify({ productId })
       });
 
+      console.log('📡 Response status:', response.status);
+
       if (response.ok) {
         toast.success('Товар додано в віш-ліст!');
         await refreshWishlist();
+        console.log('✅ Товар додано до wishlist');
       } else {
         const data = await response.json();
+        console.log('❌ Помилка:', data);
         toast.error(data.message || 'Помилка додавання в віш-ліст');
       }
     } catch (error) {
