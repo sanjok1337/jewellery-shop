@@ -5,13 +5,14 @@ import { useModalContext } from "@/app/context/QuickViewModalContext";
 import { useDispatch } from "react-redux";
 import { AppDispatch } from "@/redux/store";
 import { updateQuickView } from "@/redux/features/quickView-slice";
-import { addItemToCart } from "@/redux/features/cart-slice";
+import { useCart } from "@/app/context/CartContext";
 import Image from "next/image";
 import Link from "next/link";
 import WishlistButton from "@/components/Common/WishlistButton";
 
 const SingleItem = ({ item }: { item: Product }) => {
   const { openModal } = useModalContext();
+  const { addToCart } = useCart();
   const dispatch = useDispatch<AppDispatch>();
 
   // update the QuickView state
@@ -21,12 +22,7 @@ const SingleItem = ({ item }: { item: Product }) => {
 
   // add to cart
   const handleAddToCart = () => {
-    dispatch(
-      addItemToCart({
-        ...item,
-        quantity: 1,
-      })
-    );
+    addToCart(item.id, 1);
   };
 
 

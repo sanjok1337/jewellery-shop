@@ -9,6 +9,7 @@ import { ModalProvider } from "../context/QuickViewModalContext";
 import { CartModalProvider } from "../context/CartSidebarModalContext";
 import { AuthProvider } from "../context/AuthContext";
 import { WishlistProvider } from "../context/WishlistContext";
+import { CartProvider } from "../context/CartContext";
 import { ReduxProvider } from "@/redux/provider";
 import QuickViewModal from "@/components/Common/QuickViewModal";
 import CartSidebarModal from "@/components/Common/CartSidebarModal";
@@ -39,8 +40,9 @@ export default function RootLayout({
           <>
             <AuthProvider>
               <WishlistProvider>
-                <ReduxProvider>
-                  <CartModalProvider>
+                <CartProvider>
+                  <ReduxProvider>
+                    <CartModalProvider>
                     <ModalProvider>
                       <PreviewSliderProvider>
                         <Header />
@@ -54,6 +56,7 @@ export default function RootLayout({
                     </ModalProvider>
                   </CartModalProvider>
                 </ReduxProvider>
+              </CartProvider>
               </WishlistProvider>
             </AuthProvider>
             <ScrollToTop />

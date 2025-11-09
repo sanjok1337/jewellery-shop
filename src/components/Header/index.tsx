@@ -5,10 +5,8 @@ import { useRouter } from "next/navigation";
 import CustomSelect from "./CustomSelect";
 import { menuData } from "./menuData";
 import Dropdown from "./Dropdown";
-import { useAppSelector } from "@/redux/store";
-import { useSelector } from "react-redux";
-import { selectTotalPrice } from "@/redux/features/cart-slice";
 import { useCartModalContext } from "@/app/context/CartSidebarModalContext";
+import { useCart } from "@/app/context/CartContext";
 import { useAuth } from "@/app/context/AuthContext";
 import Image from "next/image";
 
@@ -20,10 +18,11 @@ const Header = () => {
   const [stickyMenu, setStickyMenu] = useState(false);
   const [categories, setCategories] = useState([]);
   const { openCartModal } = useCartModalContext();
+  const { cartItems } = useCart();
   const { user, isAuthenticated, logout } = useAuth();
 
-  const product = useAppSelector((state) => state.cartReducer.items);
-  const totalPrice = useSelector(selectTotalPrice);
+  const cartItemsCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
+  const totalPrice = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
 
   const handleOpenCartModal = () => {
     openCartModal();
@@ -366,7 +365,7 @@ const Header = () => {
                     </svg>
 
                     <span className="flex items-center justify-center font-medium text-2xs absolute -right-2 -top-2.5 bg-blue w-4.5 h-4.5 rounded-full text-white">
-                      {product.length}
+                      {cartItemsCount}
                     </span>
                   </span>
 
@@ -375,7 +374,7 @@ const Header = () => {
                       cart
                     </span>
                     <p className="font-medium text-custom-sm text-dark">
-                      ${totalPrice}
+                      ${totalPrice.toFixed(2)}
                     </p>
                   </div>
                 </button>

@@ -1,27 +1,40 @@
 import React from "react";
-import { useDispatch } from "react-redux";
-import { AppDispatch } from "@/redux/store";
 import Image from "next/image";
 
-const SingleItem = ({ item, removeItemFromCart }) => {
-  const dispatch = useDispatch<AppDispatch>();
+interface SingleItemProps {
+  item: {
+    id: number;
+    product_id: number;
+    name: string;
+    price: number;
+    quantity: number;
+    image_url?: string;
+  };
+  removeFromCart: (cartItemId: number) => Promise<void>;
+}
 
+const SingleItem = ({ item, removeFromCart }: SingleItemProps) => {
   const handleRemoveFromCart = () => {
-    dispatch(removeItemFromCart(item.id));
+    removeFromCart(item.id);
   };
 
   return (
     <div className="flex items-center justify-between gap-5">
       <div className="w-full flex items-center gap-6">
         <div className="flex items-center justify-center rounded-[10px] bg-gray-3 max-w-[90px] w-full h-22.5">
-          <Image src={item.imgs?.thumbnails[0]} alt="product" width={100} height={100} />
+          <Image 
+            src={item.image_url || '/images/products/product-1.png'} 
+            alt={item.name} 
+            width={100} 
+            height={100} 
+          />
         </div>
 
         <div>
           <h3 className="font-medium text-dark mb-1 ease-out duration-200 hover:text-blue">
-            <a href="#"> {item.title} </a>
+            <a href={`/products/${item.product_id}`}> {item.name} </a>
           </h3>
-          <p className="text-custom-sm">Price: ${item.discountedPrice}</p>
+          <p className="text-custom-sm">Price: ${item.price} x {item.quantity}</p>
         </div>
       </div>
 

@@ -1,4 +1,4 @@
-const pool = require('../config/database');
+const { pool } = require('../config/database');
 
 // Отримати всі замовлення користувача
 const getUserOrders = async (req, res) => {

@@ -1,4 +1,4 @@
-const pool = require('../config/database');
+const { pool } = require('../config/database');
 
 // Додати товар до кошика
 const addToCart = async (req, res) => {

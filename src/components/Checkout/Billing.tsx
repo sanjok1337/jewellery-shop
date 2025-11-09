@@ -1,13 +1,86 @@
 import React from "react";
 
-const Billing = () => {
+interface Address {
+  id: number;
+  full_name: string;
+  phone: string;
+  address_line1: string;
+  address_line2?: string;
+  city: string;
+  state: string;
+  postal_code: string;
+  country: string;
+  is_default: boolean;
+}
+
+interface BillingProps {
+  addresses?: Address[];
+  selectedAddress?: Address | null;
+  onSelectAddress?: (address: Address) => void;
+}
+
+const Billing = ({ addresses = [], selectedAddress, onSelectAddress }: BillingProps) => {
   return (
     <div className="mt-9">
       <h2 className="font-medium text-dark text-xl sm:text-2xl mb-5.5">
-        Billing details
+        Billing & Shipping Address
       </h2>
 
       <div className="bg-white shadow-1 rounded-[10px] p-4 sm:p-8.5">
+        {addresses.length === 0 ? (
+          <div className="text-center py-8">
+            <p className="text-dark-5 mb-4">У вас немає збережених адрес</p>
+            <a href="/my-account" className="text-blue hover:underline">
+              Додати адресу в особистому кабінеті
+            </a>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            <p className="text-dark font-medium mb-4">Оберіть адресу доставки:</p>
+            {addresses.map((address) => (
+              <div
+                key={address.id}
+                onClick={() => onSelectAddress?.(address)}
+                className={`border-2 rounded-lg p-4 cursor-pointer transition-all ${
+                  selectedAddress?.id === address.id
+                    ? 'border-blue bg-blue/5'
+                    : 'border-gray-3 hover:border-blue/50'
+                }`}
+              >
+                <div className="flex items-start gap-3">
+                  <input
+                    type="radio"
+                    name="address"
+                    checked={selectedAddress?.id === address.id}
+                    onChange={() => onSelectAddress?.(address)}
+                    className="mt-1"
+                  />
+                  <div className="flex-1">
+                    <p className="font-medium text-dark">{address.full_name}</p>
+                    <p className="text-dark-5 text-sm mt-1">{address.phone}</p>
+                    <p className="text-dark mt-2">
+                      {address.address_line1}
+                      {address.address_line2 && `, ${address.address_line2}`}
+                    </p>
+                    <p className="text-dark">
+                      {address.city}, {address.state} {address.postal_code}
+                    </p>
+                    <p className="text-dark">{address.country}</p>
+                    {address.is_default && (
+                      <span className="inline-block mt-2 px-2 py-1 bg-blue/10 text-blue text-xs rounded">
+                        За замовчуванням
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Old form fields hidden below */}
+      <div className="hidden bg-white shadow-1 rounded-[10px] p-4 sm:p-8.5">
         <div className="flex flex-col lg:flex-row gap-5 sm:gap-8 mb-5">
           <div className="w-full">
             <label htmlFor="firstName" className="block mb-2.5">
@@ -75,9 +148,9 @@ const Billing = () => {
               >
                 <path
                   d="M2.41469 5.03569L2.41467 5.03571L2.41749 5.03846L7.76749 10.2635L8.0015 10.492L8.23442 10.2623L13.5844 4.98735L13.5844 4.98735L13.5861 4.98569C13.6809 4.89086 13.8199 4.89087 13.9147 4.98569C14.0092 5.08024 14.0095 5.21864 13.9155 5.31345C13.9152 5.31373 13.915 5.31401 13.9147 5.31429L8.16676 10.9622L8.16676 10.9622L8.16469 10.9643C8.06838 11.0606 8.02352 11.0667 8.00039 11.0667C7.94147 11.0667 7.89042 11.0522 7.82064 10.9991L2.08526 5.36345C1.99127 5.26865 1.99154 5.13024 2.08609 5.03569C2.18092 4.94086 2.31986 4.94086 2.41469 5.03569Z"
-                  fill=""
-                  stroke=""
-                  stroke-width="0.666667"
+                  fill="currentColor"
+                  stroke="currentColor"
+                  strokeWidth="0.666667"
                 />
               </svg>
             </span>
