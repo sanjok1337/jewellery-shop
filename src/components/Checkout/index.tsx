@@ -8,6 +8,7 @@ import PaymentMethod from "./PaymentMethod";
 import Coupon from "./Coupon";
 import Billing from "./Billing";
 import { useAuth } from "@/app/context/AuthContext";
+import { useCart } from "@/app/context/CartContext";
 import toast from "react-hot-toast";
 
 interface CartItem {
@@ -35,13 +36,13 @@ interface Address {
 const Checkout = () => {
   const router = useRouter();
   const { token, isAuthenticated } = useAuth();
-  const [cartItems, setCartItems] = useState<CartItem[]>([]);
+  const { cartItems } = useCart();
   const [addresses, setAddresses] = useState<Address[]>([]);
   const [selectedAddress, setSelectedAddress] = useState<Address | null>(null);
   const [loading, setLoading] = useState(true);
   const [notes, setNotes] = useState('');
   const [shippingMethod, setShippingMethod] = useState('standard');
-  const [paymentMethod, setPaymentMethod] = useState('card');
+  const [paymentMethod, setPaymentMethod] = useState('bank');
 
   useEffect(() => {
     console.log('Checkout - isAuthenticated:', isAuthenticated);
@@ -53,37 +54,9 @@ const Checkout = () => {
       return;
     }
     
-    fetchCartItems();
     fetchAddresses();
+    setLoading(false);
   }, [isAuthenticated, token]);
-
-  const fetchCartItems = async () => {
-    try {
-      console.log('Fetching cart with token:', token);
-      const response = await fetch('http://localhost:5000/api/cart', {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-
-      console.log('Cart response status:', response.status);
-      
-      if (response.ok) {
-        const data = await response.json();
-        console.log('Cart data:', data);
-        setCartItems(data.items || []);
-      } else {
-        const error = await response.json();
-        console.error('Cart error response:', error);
-        toast.error('Помилка завантаження кошика');
-      }
-    } catch (error) {
-      console.error('Fetch cart error:', error);
-      toast.error('Помилка завантаження кошика');
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const fetchAddresses = async () => {
     try {
@@ -138,6 +111,13 @@ const Checkout = () => {
     }
 
     try {
+      console.log('Creating order with:', {
+        address_id: selectedAddress.id,
+        payment_method: paymentMethod,
+        shipping_method: shippingMethod,
+        items_count: cartItems.length
+      });
+
       const response = await fetch('http://localhost:5000/api/orders', {
         method: 'POST',
         headers: {
@@ -157,13 +137,42 @@ const Checkout = () => {
         })
       });
 
+      console.log('Order response status:', response.status);
+      console.log('Order response headers:', response.headers.get('content-type'));
+      const text = await response.text();
+      console.log('Order response full text:', text);
+
       if (response.ok) {
-        const data = await response.json();
-        toast.success('Замовлення успішно створено!');
-        router.push(`/orders/${data.order.id}`);
+        try {
+          const data = JSON.parse(text);
+          console.log('Order created successfully:', data);
+          toast.success('Замовлення успішно створено!');
+          
+          // Очищаємо кошик після успішного замовлення
+          await fetch('http://localhost:5000/api/cart', {
+            method: 'DELETE',
+            headers: {
+              'Authorization': `Bearer ${token}`
+            }
+          });
+          
+          router.push(`/my-account`);
+        } catch (parseError) {
+          console.error('Parse success response error:', parseError);
+          console.error('Response was:', text);
+          toast.error('Помилка обробки відповіді сервера');
+        }
       } else {
-        const error = await response.json();
-        toast.error(error.message || 'Помилка створення замовлення');
+        console.error('Order failed with status:', response.status);
+        console.error('Error response text:', text);
+        try {
+          const error = JSON.parse(text);
+          console.error('Parsed error:', error);
+          toast.error(error.message || error.error || 'Помилка створення замовлення');
+        } catch (parseError) {
+          console.error('Could not parse error response:', parseError);
+          toast.error('Помилка сервера: ' + text.substring(0, 100));
+        }
       }
     } catch (error) {
       console.error('Checkout error:', error);

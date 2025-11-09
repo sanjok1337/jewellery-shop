@@ -118,7 +118,95 @@ const getOrderDetails = async (req, res) => {
   }
 };
 
+// Створити нове замовлення
+const createOrder = async (req, res) => {
+  const userId = req.user.id;
+  const { address_id, payment_method, shipping_method, notes, items } = req.body;
+
+  console.log('Creating order:', { userId, address_id, payment_method, shipping_method, items_count: items?.length });
+
+  if (!address_id || !items || items.length === 0) {
+    return res.status(400).json({ 
+      success: false,
+      message: 'Адреса та товари обов\'язкові' 
+    });
+  }
+
+  try {
+    const connection = await pool.getConnection();
+
+    try {
+      await connection.beginTransaction();
+
+      // Розраховуємо загальну суму
+      const subtotal = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+      const shippingCost = shipping_method === 'express' ? 25 : shipping_method === 'standard' ? 15 : 0;
+      const totalAmount = subtotal + shippingCost;
+
+      console.log('Order totals:', { subtotal, shippingCost, totalAmount });
+
+      // Створюємо замовлення
+      const [orderResult] = await connection.execute(`
+        INSERT INTO orders (
+          user_id, 
+          address_id, 
+          total_amount, 
+          status, 
+          payment_method,
+          shipping_method,
+          notes
+        ) VALUES (?, ?, ?, 'pending', ?, ?, ?)
+      `, [userId, address_id, totalAmount, payment_method, shipping_method, notes || null]);
+
+      const orderId = orderResult.insertId;
+      console.log('Order created with ID:', orderId);
+
+      // Додаємо товари замовлення
+      for (const item of items) {
+        await connection.execute(`
+          INSERT INTO order_items (
+            order_id,
+            product_id,
+            quantity,
+            price
+          ) VALUES (?, ?, ?, ?)
+        `, [orderId, item.product_id, item.quantity, item.price]);
+      }
+
+      // Очищаємо кошик користувача
+      await connection.execute('DELETE FROM cart_items WHERE user_id = ?', [userId]);
+
+      await connection.commit();
+      connection.release();
+
+      console.log('Order completed successfully');
+
+      res.status(201).json({
+        success: true,
+        message: 'Замовлення успішно створено',
+        order: {
+          id: orderId,
+          total_amount: totalAmount,
+          status: 'pending'
+        }
+      });
+    } catch (error) {
+      await connection.rollback();
+      connection.release();
+      throw error;
+    }
+  } catch (error) {
+    console.error('Create order error:', error);
+    res.status(500).json({ 
+      success: false,
+      message: 'Помилка створення замовлення',
+      error: error.message 
+    });
+  }
+};
+
 module.exports = {
   getUserOrders,
-  getOrderDetails
+  getOrderDetails,
+  createOrder
 };
