@@ -28,10 +28,19 @@ const Categories = () => {
       const response = await fetch('http://localhost:5000/api/products/categories');
       if (response.ok) {
         const apiCategories = await response.json();
+        const categoryImages = [
+          "/images/products/png-transparent-wedding-ring-carat-diamond-gold-jewelry-love-gemstone-ring-thumbnail.png",
+          "/images/products/pngtree-green-emerald-necklace-png-image_16563776.png",
+          "/images/products/braclet.svg",
+          "/images/products/gold-earrings-with-diamonds-isolated-transparent-background_191095-13254.avif",
+          "/images/products/png-clipart-watch-strap-metal-titan-company-platinum-watch-watch-accessory-fashion.png",
+          "/images/products/saphire ring.jpg",
+          "/images/products/pngtree-green-emerald-necklace-png-image_16563776.png",
+        ];
         const formattedCategories = apiCategories.map((cat, index) => ({
           title: cat.name,
           id: cat.id,
-          img: `/images/categories/categories-0${(index % 7) + 1}.png`, // Використовуємо існуючі зображення циклічно
+          img: categoryImages[index % categoryImages.length], // Використовуємо нові ювелірні зображення циклічно
         }));
         setCategories(formattedCategories);
       }

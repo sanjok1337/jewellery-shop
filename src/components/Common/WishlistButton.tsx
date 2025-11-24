@@ -9,17 +9,16 @@ interface WishlistButtonProps {
 }
 
 const WishlistButton = ({ productId, className = '', size = 'md' }: WishlistButtonProps) => {
-  const { addToWishlist, items } = useWishlist();
+  const { toggleWishlistItem, isInWishlist } = useWishlist();
 
-  const isInWishlist = items.some(item => item.product_id === productId);
+  const inWishlist = isInWishlist(productId);
 
   const handleClick = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     console.log('🖱️ Wishlist button clicked for product:', productId);
-    console.log('📋 Current wishlist items:', items);
-    console.log('❤️ Is in wishlist:', isInWishlist);
-    addToWishlist(productId);
+    console.log('❤️ Is in wishlist:', inWishlist);
+    toggleWishlistItem(productId);
   };
 
   // Розміри в залежності від size
@@ -41,16 +40,16 @@ const WishlistButton = ({ productId, className = '', size = 'md' }: WishlistButt
       className={`
         flex items-center justify-center ${sizeClasses[size]} 
         rounded-md shadow-sm transition-all duration-200
-        ${isInWishlist 
+        ${inWishlist 
           ? 'bg-red-50 border border-red-200 text-red-500 hover:bg-red-100' 
           : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50 hover:border-red-200 hover:text-red-500'
         }
         ${className}
       `}
-      title={isInWishlist ? "Вже в списку бажань" : "Додати в список бажань"}
+      title={inWishlist ? "Видалити зі списку бажань" : "Додати в список бажань"}
     >
       <svg
-        className={`${iconSizes[size]} transition-all duration-200 ${isInWishlist ? 'fill-red-500' : 'fill-none'}`}
+        className={`${iconSizes[size]} transition-all duration-200 ${inWishlist ? 'fill-red-500' : 'fill-none'}`}
         viewBox="0 0 24 24"
         stroke="currentColor"
         strokeWidth="2"

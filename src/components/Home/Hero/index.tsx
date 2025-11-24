@@ -49,8 +49,8 @@ const Hero = () => {
 
                   <div>
                     <Image
-                      src="/images/hero/hero-02.png"
-                      alt="mobile image"
+                      src="/images/products/gold-earrings-with-diamonds-isolated-transparent-background_191095-13254.avif"
+                      alt="gold earrings"
                       width={123}
                       height={161}
                     />
@@ -81,8 +81,8 @@ const Hero = () => {
 
                   <div>
                     <Image
-                      src="/images/hero/hero-01.png"
-                      alt="mobile image"
+                      src="/images/products/braclet.svg"
+                      alt="silver bracelet"
                       width={123}
                       height={161}
                     />

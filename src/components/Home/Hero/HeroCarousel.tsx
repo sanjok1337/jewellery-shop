@@ -55,8 +55,8 @@ const HeroCarousal = () => {
 
           <div>
             <Image
-              src="/images/hero/hero-01.png"
-              alt="headphone"
+              src="/images/products/gold-earrings-with-diamonds-isolated-transparent-background_191095-13254.avif"
+              alt="gold diamond earrings"
               width={351}
               height={358}
             />
@@ -96,8 +96,8 @@ const HeroCarousal = () => {
 
           <div>
             <Image
-              src="/images/hero/hero-01.png"
-              alt="jewellery"
+              src="/images/products/pngtree-green-emerald-necklace-png-image_16563776.png"
+              alt="emerald necklace"
               width={351}
               height={358}
             />

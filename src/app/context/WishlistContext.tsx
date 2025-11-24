@@ -18,6 +18,8 @@ interface WishlistContextType {
   toggleWishlist: () => void;
   addToWishlist: (productId: number) => Promise<void>;
   removeFromWishlist: (itemId: number) => Promise<void>;
+  toggleWishlistItem: (productId: number) => Promise<void>;
+  isInWishlist: (productId: number) => boolean;
   clearWishlist: () => Promise<void>;
   refreshWishlist: () => Promise<void>;
 }
@@ -152,6 +154,27 @@ export const WishlistProvider = ({ children }: WishlistProviderProps) => {
     }
   };
 
+  const isInWishlist = (productId: number): boolean => {
+    return items.some(item => item.product_id === productId);
+  };
+
+  const toggleWishlistItem = async (productId: number) => {
+    if (!token) {
+      toast.error('Увійдіть в аккаунт для додавання в віш-ліст');
+      return;
+    }
+
+    const existingItem = items.find(item => item.product_id === productId);
+    
+    if (existingItem) {
+      // Видаляємо з wishlist
+      await removeFromWishlist(existingItem.id);
+    } else {
+      // Додаємо в wishlist
+      await addToWishlist(productId);
+    }
+  };
+
   return (
     <WishlistContext.Provider value={{
       items,
@@ -159,6 +182,8 @@ export const WishlistProvider = ({ children }: WishlistProviderProps) => {
       toggleWishlist,
       addToWishlist,
       removeFromWishlist,
+      toggleWishlistItem,
+      isInWishlist,
       clearWishlist,
       refreshWishlist
     }}>

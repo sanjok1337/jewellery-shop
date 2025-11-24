@@ -27,7 +27,7 @@ interface ProductDetailProps {
 const ProductDetail = ({ productId }: ProductDetailProps) => {
   const router = useRouter();
   const { user, token } = useAuth();
-  const { addToWishlist: addToWishlistContext } = useWishlist();
+  const { toggleWishlistItem, isInWishlist } = useWishlist();
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
   const [quantity, setQuantity] = useState(1);
@@ -90,7 +90,7 @@ const ProductDetail = ({ productId }: ProductDetailProps) => {
 
   const handleAddToWishlist = async () => {
     if (!product?.id) return;
-    await addToWishlistContext(product.id);
+    await toggleWishlistItem(product.id);
   };
 
   if (loading) {
@@ -243,11 +243,16 @@ const ProductDetail = ({ productId }: ProductDetailProps) => {
                 
                 <button
                   onClick={handleAddToWishlist}
-                  className="flex items-center justify-center border border-red py-3 px-6 text-red hover:bg-red hover:text-white transition-colors"
+                  className={`flex items-center justify-center border py-3 px-6 transition-colors ${
+                    product?.id && isInWishlist(product.id)
+                      ? 'border-red bg-red text-white hover:bg-red/90'
+                      : 'border-red text-red hover:bg-red hover:text-white'
+                  }`}
                 >
                   <svg
-                    className="mr-2 h-5 w-5"
-                    fill="none"
+                    className={`mr-2 h-5 w-5 ${
+                      product?.id && isInWishlist(product.id) ? 'fill-white' : 'fill-none'
+                    }`}
                     stroke="currentColor"
                     viewBox="0 0 24 24"
                   >
@@ -258,7 +263,7 @@ const ProductDetail = ({ productId }: ProductDetailProps) => {
                       d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
                     />
                   </svg>
-                  Додати в віш-ліст
+                  {product?.id && isInWishlist(product.id) ? 'Видалити з віш-ліста' : 'Додати в віш-ліст'}
                 </button>
               </div>
 
