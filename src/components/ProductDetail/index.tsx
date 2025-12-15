@@ -282,7 +282,7 @@ const ProductDetail = ({ productId }: ProductDetailProps) => {
       </section>
 
       {/* Секція відгуків */}
-      <section className="py-20 bg-gray-50">
+      <section className="pb-20">
         <div className="mx-auto max-w-[1170px] px-4 sm:px-8 xl:px-0">
           <Reviews productId={productId} />
         </div>

@@ -1,4 +1,4 @@
-const db = require('../config/database');
+const { pool } = require('../config/database');
 
 // Отримати всі відгуки для товару
 const getProductReviews = async (req, res) => {
@@ -22,15 +22,15 @@ const getProductReviews = async (req, res) => {
       ORDER BY r.created_at DESC
     `;
     
-    const [reviews] = await db.execute(query, [productId]);
+    const [reviews] = await pool.execute(query, [productId]);
     
     // Обчислити середній рейтинг
-    const [ratingResult] = await db.execute(
+    const [ratingResult] = await pool.execute(
       'SELECT AVG(rating) as avg_rating, COUNT(*) as total_reviews FROM reviews WHERE product_id = ? AND status = "visible" AND rating IS NOT NULL',
       [productId]
     );
     
-    const avgRating = ratingResult[0].avg_rating || 0;
+    const avgRating = ratingResult[0].avg_rating ? parseFloat(ratingResult[0].avg_rating) : 0;
     const totalReviews = ratingResult[0].total_reviews || 0;
     
     res.json({
@@ -60,7 +60,7 @@ const createReview = async (req, res) => {
     }
     
     // Перевірити, чи товар існує
-    const [productExists] = await db.execute(
+    const [productExists] = await pool.execute(
       'SELECT id FROM products WHERE id = ?',
       [productId]
     );
@@ -71,7 +71,7 @@ const createReview = async (req, res) => {
     
     // Якщо це коментар, перевірити чи батьківський відгук існує
     if (parentId) {
-      const [parentExists] = await db.execute(
+      const [parentExists] = await pool.execute(
         'SELECT id FROM reviews WHERE id = ? AND product_id = ?',
         [parentId, productId]
       );
@@ -86,7 +86,7 @@ const createReview = async (req, res) => {
       VALUES (?, ?, ?, ?, ?, 'visible')
     `;
     
-    const [result] = await db.execute(query, [
+    const [result] = await pool.execute(query, [
       productId,
       userId,
       parentId || null,
@@ -100,7 +100,7 @@ const createReview = async (req, res) => {
     }
     
     // Отримати створений відгук з інформацією про користувача
-    const [newReview] = await db.execute(
+    const [newReview] = await pool.execute(
       `SELECT 
         r.id, 
         r.product_id, 
@@ -130,14 +130,14 @@ const createReview = async (req, res) => {
 // Оновити середній рейтинг товару
 const updateProductRating = async (productId) => {
   try {
-    const [result] = await db.execute(
+    const [result] = await pool.execute(
       'SELECT AVG(rating) as avg_rating FROM reviews WHERE product_id = ? AND status = "visible" AND rating IS NOT NULL',
       [productId]
     );
     
-    const avgRating = result[0].avg_rating || 0;
+    const avgRating = result[0].avg_rating ? parseFloat(result[0].avg_rating) : 0;
     
-    await db.execute(
+    await pool.execute(
       'UPDATE products SET average_rating = ? WHERE id = ?',
       [parseFloat(avgRating.toFixed(1)), productId]
     );
@@ -153,7 +153,7 @@ const deleteReview = async (req, res) => {
     const userId = req.user.id;
     
     // Перевірити, чи відгук належить користувачу
-    const [review] = await db.execute(
+    const [review] = await pool.execute(
       'SELECT id, product_id, parent_id FROM reviews WHERE id = ? AND user_id = ?',
       [reviewId, userId]
     );
@@ -165,7 +165,7 @@ const deleteReview = async (req, res) => {
     const productId = review[0].product_id;
     const isParent = review[0].parent_id === null;
     
-    await db.execute('DELETE FROM reviews WHERE id = ?', [reviewId]);
+    await pool.execute('DELETE FROM reviews WHERE id = ?', [reviewId]);
     
     // Оновити рейтинг, якщо це був відгук (не коментар)
     if (isParent) {
@@ -191,7 +191,7 @@ const updateReview = async (req, res) => {
     }
     
     // Перевірити, чи відгук належить користувачу
-    const [review] = await db.execute(
+    const [review] = await pool.execute(
       'SELECT id, product_id, parent_id FROM reviews WHERE id = ? AND user_id = ?',
       [reviewId, userId]
     );
@@ -208,20 +208,20 @@ const updateReview = async (req, res) => {
       if (rating < 1 || rating > 5) {
         return res.status(400).json({ message: 'Рейтинг повинен бути від 1 до 5' });
       }
-      await db.execute(
+      await pool.execute(
         'UPDATE reviews SET rating = ?, text = ? WHERE id = ?',
         [rating, text, reviewId]
       );
       await updateProductRating(productId);
     } else {
-      await db.execute(
+      await pool.execute(
         'UPDATE reviews SET text = ? WHERE id = ?',
         [text, reviewId]
       );
     }
     
     // Отримати оновлений відгук
-    const [updatedReview] = await db.execute(
+    const [updatedReview] = await pool.execute(
       `SELECT 
         r.id, 
         r.product_id, 
