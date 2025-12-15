@@ -1,11 +1,14 @@
-import { selectTotalPrice } from "@/redux/features/cart-slice";
-import { useAppSelector } from "@/redux/store";
-import React from "react";
-import { useSelector } from "react-redux";
+import React, { useMemo } from "react";
+import { useCart } from "@/app/context/CartContext";
+import { useRouter } from "next/navigation";
 
 const OrderSummary = () => {
-  const cartItems = useAppSelector((state) => state.cartReducer.items);
-  const totalPrice = useSelector(selectTotalPrice);
+  const { cartItems } = useCart();
+  const router = useRouter();
+  
+  const totalPrice = useMemo(() => {
+    return cartItems.reduce((total, item) => total + (item.price * item.quantity), 0);
+  }, [cartItems]);
 
   return (
     <div className="lg:max-w-[455px] w-full">
@@ -30,11 +33,11 @@ const OrderSummary = () => {
           {cartItems.map((item, key) => (
             <div key={key} className="flex items-center justify-between py-5 border-b border-gray-3">
               <div>
-                <p className="text-dark">{item.title}</p>
+                <p className="text-dark">{item.name} x {item.quantity}</p>
               </div>
               <div>
                 <p className="text-dark text-right">
-                  ${item.discountedPrice * item.quantity}
+                  {item.price * item.quantity} грн
                 </p>
               </div>
             </div>
@@ -47,14 +50,14 @@ const OrderSummary = () => {
             </div>
             <div>
               <p className="font-medium text-lg text-dark text-right">
-                ${totalPrice}
+                {totalPrice.toFixed(2)} грн
               </p>
             </div>
           </div>
 
           {/* <!-- checkout button --> */}
           <button
-            type="submit"
+            onClick={() => router.push('/checkout')}
             className="w-full flex justify-center font-medium text-white bg-blue py-3 px-6 rounded-md ease-out duration-200 hover:bg-blue-dark mt-7.5"
           >
             Process to Checkout

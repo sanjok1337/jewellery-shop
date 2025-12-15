@@ -75,8 +75,15 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   const addToCart = async (productId: number, quantity: number = 1) => {
-    if (!token) {
-      toast.error("Увійдіть в аккаунт для додавання в кошик");
+    if (!token || !isAuthenticated) {
+      toast.error("Будь ласка, увійдіть в аккаунт, щоб додати товар в кошик", {
+        duration: 4000,
+        icon: "🔒",
+      });
+      // Редирект на сторінку входу через 1 секунду
+      setTimeout(() => {
+        window.location.href = '/signin';
+      }, 1500);
       return;
     }
 

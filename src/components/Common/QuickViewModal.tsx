@@ -6,6 +6,7 @@ import { AppDispatch, useAppSelector } from "@/redux/store";
 import { useCart } from "@/app/context/CartContext";
 import { useDispatch } from "react-redux";
 import Image from "next/image";
+import Link from "next/link";
 import { usePreviewSlider } from "@/app/context/PreviewSliderContext";
 import { resetQuickView } from "@/redux/features/quickView-slice";
 import { updateproductDetails } from "@/redux/features/product-details";
@@ -407,6 +408,13 @@ const QuickViewModal = () => {
                 >
                   Add to Cart
                 </button>
+
+                <Link
+                  href={`/products/${product.id}`}
+                  className={`inline-flex font-medium text-white bg-green-600 py-3 px-7 rounded-md ease-out duration-200 hover:bg-green-700`}
+                >
+                  View Details
+                </Link>
 
                 <button
                   className={`inline-flex items-center gap-2 font-medium text-white bg-dark py-3 px-6 rounded-md ease-out duration-200 hover:bg-opacity-95 `}

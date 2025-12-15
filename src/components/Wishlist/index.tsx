@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from "react";
 import Breadcrumb from "../Common/Breadcrumb";
 import { useAuth } from "@/app/context/AuthContext";
+import { useWishlist } from "@/app/context/WishlistContext";
 import SingleItem from "./SingleItem";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
@@ -18,6 +19,7 @@ interface WishlistItem {
 export const Wishlist = () => {
   const { user, token } = useAuth();
   const router = useRouter();
+  const { items: contextItems, refreshWishlist: contextRefresh } = useWishlist();
   const [wishlistItems, setWishlistItems] = useState<WishlistItem[]>([]);
   const [loading, setLoading] = useState(false);
 
@@ -28,6 +30,10 @@ export const Wishlist = () => {
     }
     fetchWishlist();
   }, [token]);
+
+  useEffect(() => {
+    setWishlistItems(contextItems);
+  }, [contextItems]);
 
   const fetchWishlist = async () => {
     setLoading(true);
@@ -84,6 +90,7 @@ export const Wishlist = () => {
 
       if (response.ok) {
         setWishlistItems(prev => prev.filter(item => item.id !== itemId));
+        await contextRefresh();
         toast.success('Товар видалено з віш-ліста');
       } else {
         toast.error('Помилка видалення з віш-ліста');

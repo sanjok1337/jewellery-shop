@@ -47,45 +47,49 @@ const getProducts = async (req, res) => {
       params.push(maxPrice);
     }
 
-    // Пошук за назвою або описом
-    if (search) {
-      // Розділяємо пошуковий запит на окремі слова
-      const searchWords = search.trim().split(/\s+/).filter(word => word.length > 0);
+    // Пошук за назвою (тільки в назві для точності)
+    if (search && search.trim().length > 0) {
+      const searchTerm = search.trim().toLowerCase();
       
-      if (searchWords.length > 0) {
-        // Використовуємо FULLTEXT пошук для кращої релевантності
-        const fullTextSearch = searchWords.map(word => `+${word}*`).join(' ');
-        query += ` AND (
-          MATCH(p.name, p.description) AGAINST(? IN BOOLEAN MODE)
-          OR ${searchWords.map(() => 'p.name LIKE ?').join(' OR ')}
-          OR ${searchWords.map(() => 'p.description LIKE ?').join(' OR ')}
-        )`;
-        
-        params.push(fullTextSearch);
-        // Додаємо LIKE пошук для кожного слова як запасний варіант
-        searchWords.forEach(word => {
-          params.push(`%${word}%`);
-        });
-        searchWords.forEach(word => {
-          params.push(`%${word}%`);
-        });
-      }
+      console.log('🔍 Searching for:', searchTerm);
+      
+      // Пошук тільки в назві для більшої точності
+      query += ` AND LOWER(p.name) LIKE ?`;
+      
+      const searchPattern = `%${searchTerm}%`;
+      params.push(searchPattern);
+      console.log('🔍 Search pattern:', searchPattern);
     }
 
-    // Сортування
-    switch (sortBy) {
-      case 'price_asc':
-        query += ' ORDER BY p.price ASC';
-        break;
-      case 'price_desc':
-        query += ' ORDER BY p.price DESC';
-        break;
-      case 'name':
-        query += ' ORDER BY p.name ASC';
-        break;
-      case 'newest':
-      default:
-        query += ' ORDER BY p.created_at DESC';
+    // Сортування - якщо є пошук, сортуємо за релевантністю
+    if (search && search.trim().length > 0) {
+      const searchTerm = search.trim().toLowerCase();
+      // Спочатку точні збіги у назві, потім часткові у назві, потім в описі
+      query += ` ORDER BY 
+        CASE 
+          WHEN LOWER(p.name) = ? THEN 1
+          WHEN LOWER(p.name) LIKE ? THEN 2
+          WHEN LOWER(p.description) LIKE ? THEN 3
+          ELSE 4
+        END,
+        p.name ASC`;
+      params.push(searchTerm, `${searchTerm}%`, `%${searchTerm}%`);
+    } else {
+      // Звичайне сортування якщо немає пошуку
+      switch (sortBy) {
+        case 'price_asc':
+          query += ' ORDER BY p.price ASC';
+          break;
+        case 'price_desc':
+          query += ' ORDER BY p.price DESC';
+          break;
+        case 'name':
+          query += ' ORDER BY p.name ASC';
+          break;
+        case 'newest':
+        default:
+          query += ' ORDER BY p.created_at DESC';
+      }
     }
 
     // Пагінація
@@ -111,26 +115,14 @@ const getProducts = async (req, res) => {
       countQuery += ' AND p.price <= ?';
       countParams.push(maxPrice);
     }
-    if (search) {
-      // Розділяємо пошуковий запит на окремі слова для підрахунку
-      const searchWords = search.trim().split(/\s+/).filter(word => word.length > 0);
+    if (search && search.trim().length > 0) {
+      const searchTerm = search.trim().toLowerCase();
       
-      if (searchWords.length > 0) {
-        const fullTextSearch = searchWords.map(word => `+${word}*`).join(' ');
-        countQuery += ` AND (
-          MATCH(p.name, p.description) AGAINST(? IN BOOLEAN MODE)
-          OR ${searchWords.map(() => 'p.name LIKE ?').join(' OR ')}
-          OR ${searchWords.map(() => 'p.description LIKE ?').join(' OR ')}
-        )`;
-        
-        countParams.push(fullTextSearch);
-        searchWords.forEach(word => {
-          countParams.push(`%${word}%`);
-        });
-        searchWords.forEach(word => {
-          countParams.push(`%${word}%`);
-        });
-      }
+      // Пошук тільки в назві
+      countQuery += ` AND LOWER(p.name) LIKE ?`;
+      
+      const searchPattern = `%${searchTerm}%`;
+      countParams.push(searchPattern);
     }
 
     const [countResult] = await connection.query(countQuery, countParams);
@@ -255,19 +247,24 @@ const getSearchSuggestions = async (req, res) => {
     
     const connection = await pool.getConnection();
     
-    // Шукаємо товари, які відповідають запиту
-    const searchWords = query.trim().split(/\s+/).filter(word => word.length > 0);
-    const fullTextSearch = searchWords.map(word => `+${word}*`).join(' ');
+    // LIKE пошук з LOWER для регістронезалежного пошуку
+    const searchTerm = query.trim().toLowerCase();
+    const searchPattern = `%${searchTerm}%`;
     
     const [suggestions] = await connection.query(`
       SELECT DISTINCT p.name, p.id, pi.image_url
       FROM products p
       LEFT JOIN product_images pi ON p.id = pi.product_id AND pi.is_main = 1
-      WHERE MATCH(p.name, p.description) AGAINST(? IN BOOLEAN MODE)
-         OR p.name LIKE ?
-      ORDER BY p.name ASC
+      WHERE LOWER(p.name) LIKE ?
+      ORDER BY 
+        CASE 
+          WHEN LOWER(p.name) = ? THEN 1
+          WHEN LOWER(p.name) LIKE ? THEN 2
+          ELSE 3
+        END,
+        p.name ASC
       LIMIT 8
-    `, [fullTextSearch, `%${query}%`]);
+    `, [searchPattern, searchTerm, `${searchTerm}%`]);
     
     connection.release();
     

@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { useAuth } from '@/app/context/AuthContext';
 import { useWishlist } from '@/app/context/WishlistContext';
 import WishlistButton from '@/components/Common/WishlistButton';
+import Reviews from '@/components/ProductDetail/Reviews';
 import toast from 'react-hot-toast';
 
 interface Product {
@@ -320,6 +321,11 @@ export default function ProductPage() {
               </div>
             )}
           </div>
+        </div>
+
+        {/* Секція відгуків */}
+        <div className="mt-16 border-t pt-16">
+          <Reviews productId={productId} />
         </div>
       </div>
     </div>

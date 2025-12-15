@@ -7,6 +7,7 @@ import "swiper/css/pagination";
 import "swiper/css";
 
 import Image from "next/image";
+import Link from "next/link";
 
 const HeroCarousal = () => {
   return (
@@ -38,19 +39,19 @@ const HeroCarousal = () => {
             </div>
 
             <h1 className="font-semibold text-dark text-xl sm:text-3xl mb-3">
-              <a href="#">Exquisite Diamond Jewelry</a>
+              <Link href="/products/3" className="hover:text-blue transition-colors">Exquisite Diamond Jewelry</Link>
             </h1>
 
             <p>
             Exclusive collection of precious jewelry crafted by master artisans specially for you
             </p>
 
-            <a
-              href="#"
+            <Link
+              href="/products/3"
               className="inline-flex font-medium text-white text-custom-sm rounded-md bg-dark py-3 px-9 ease-out duration-200 hover:bg-blue mt-10"
             >
               Shop Now
-            </a>
+            </Link>
           </div>
 
           <div>
@@ -79,19 +80,19 @@ const HeroCarousal = () => {
             </div>
 
             <h1 className="font-semibold text-dark text-xl sm:text-3xl mb-3">
-              <a href="#">Exquisite Diamond Jewelry</a>
+              <Link href="/products/2" className="hover:text-blue transition-colors">Exquisite Diamond Jewelry</Link>
             </h1>
 
             <p>
               The finest collection of gold and silver jewelry for special moments in your life
             </p>
 
-            <a
-              href="#"
+            <Link
+              href="/products/2"
               className="inline-flex font-medium text-white text-custom-sm rounded-md bg-dark py-3 px-9 ease-out duration-200 hover:bg-blue mt-10"
             >
               Shop Now
-            </a>
+            </Link>
           </div>
 
           <div>

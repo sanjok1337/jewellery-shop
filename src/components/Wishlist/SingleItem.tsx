@@ -2,6 +2,7 @@ import React from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/app/context/AuthContext";
+import { useCart } from "@/app/context/CartContext";
 import toast from "react-hot-toast";
 
 interface WishlistItem {
@@ -21,6 +22,7 @@ interface SingleItemProps {
 const SingleItem = ({ item, onRemove }: SingleItemProps) => {
   const router = useRouter();
   const { token } = useAuth();
+  const { addToCart } = useCart();
 
   const handleAddToCart = async () => {
     if (!token) {
@@ -29,28 +31,7 @@ const SingleItem = ({ item, onRemove }: SingleItemProps) => {
       return;
     }
 
-    try {
-      const response = await fetch('http://localhost:5000/api/cart/add', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          productId: item.product_id,
-          quantity: 1
-        })
-      });
-
-      if (response.ok) {
-        toast.success('Товар додано в кошик!');
-      } else {
-        toast.error('Помилка додавання в кошик');
-      }
-    } catch (error) {
-      console.error('Add to cart error:', error);
-      toast.error('Помилка додавання в кошик');
-    }
+    await addToCart(item.product_id, 1);
   };
 
   return (

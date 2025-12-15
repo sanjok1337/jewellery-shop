@@ -74,7 +74,14 @@ export const WishlistProvider = ({ children }: WishlistProviderProps) => {
 
   const addToWishlist = async (productId: number) => {
     if (!token) {
-      toast.error('Увійдіть в аккаунт для додавання в віш-ліст');
+      toast.error('Будь ласка, увійдіть в аккаунт, щоб додати товар в віш-ліст', {
+        duration: 4000,
+        icon: "🔒",
+      });
+      // Редирект на сторінку входу через 1.5 секунди
+      setTimeout(() => {
+        window.location.href = '/signin';
+      }, 1500);
       return;
     }
 
@@ -160,7 +167,14 @@ export const WishlistProvider = ({ children }: WishlistProviderProps) => {
 
   const toggleWishlistItem = async (productId: number) => {
     if (!token) {
-      toast.error('Увійдіть в аккаунт для додавання в віш-ліст');
+      toast.error('Будь ласка, увійдіть в аккаунт, щоб додати товар в віш-ліст', {
+        duration: 4000,
+        icon: "🔒",
+      });
+      // Редирект на сторінку входу через 1.5 секунди
+      setTimeout(() => {
+        window.location.href = '/signin';
+      }, 1500);
       return;
     }
 

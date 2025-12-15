@@ -2,6 +2,7 @@ import React from "react";
 import HeroCarousel from "./HeroCarousel";
 import HeroFeature from "./HeroFeature";
 import Image from "next/image";
+import Link from "next/link";
 
 const Hero = () => {
   return (
@@ -25,11 +26,11 @@ const Hero = () => {
 
           <div className="xl:max-w-[393px] w-full">
             <div className="flex flex-col sm:flex-row xl:flex-col gap-5">
-              <div className="w-full relative rounded-[10px] bg-white p-4 sm:p-7.5">
+              <Link href="/products/3" className="w-full relative rounded-[10px] bg-white p-4 sm:p-7.5 block hover:shadow-lg transition-shadow">
                 <div className="flex items-center gap-14">
                   <div>
-                    <h2 className="max-w-[153px] font-semibold text-dark text-xl mb-20">
-                      <a href="#"> Gold Diamond Earrings </a>
+                    <h2 className="max-w-[153px] font-semibold text-dark text-xl mb-20 hover:text-blue transition-colors">
+                      Gold Diamond Earrings
                     </h2>
 
                     <div>
@@ -56,12 +57,12 @@ const Hero = () => {
                     />
                   </div>
                 </div>
-              </div>
-              <div className="w-full relative rounded-[10px] bg-white p-4 sm:p-7.5">
+              </Link>
+              <Link href="/products/1" className="w-full relative rounded-[10px] bg-white p-4 sm:p-7.5 block hover:shadow-lg transition-shadow">
                 <div className="flex items-center gap-14">
                   <div>
-                    <h2 className="max-w-[153px] font-semibold text-dark text-xl mb-20">
-                      <a href="#"> Silver Bracelet </a>
+                    <h2 className="max-w-[153px] font-semibold text-dark text-xl mb-20 hover:text-blue transition-colors">
+                      Silver Bracelet
                     </h2>
 
                     <div>
@@ -88,7 +89,7 @@ const Hero = () => {
                     />
                   </div>
                 </div>
-              </div>
+              </Link>
 
               
             </div>

@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import Breadcrumb from "../Common/Breadcrumb";
 import Image from "next/image";
 import Newsletter from "../Common/Newsletter";
+import Reviews from "./Reviews";
 import { useAuth } from "@/app/context/AuthContext";
 import { useWishlist } from "@/app/context/WishlistContext";
 import toast from "react-hot-toast";
@@ -277,6 +278,13 @@ const ProductDetail = ({ productId }: ProductDetailProps) => {
               )}
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* Секція відгуків */}
+      <section className="py-20 bg-gray-50">
+        <div className="mx-auto max-w-[1170px] px-4 sm:px-8 xl:px-0">
+          <Reviews productId={productId} />
         </div>
       </section>
 

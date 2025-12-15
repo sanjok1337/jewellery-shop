@@ -73,7 +73,7 @@ const SearchWithAutocomplete = ({ searchQuery, onSearchChange, onSearch }: Searc
         if (selectedIndex >= 0) {
           e.preventDefault();
           const selected = suggestions[selectedIndex];
-          window.location.href = `/shop-details/${selected.id}`;
+          window.location.href = `/products/${selected.id}`;
         }
         break;
       case 'Escape':
@@ -139,7 +139,7 @@ const SearchWithAutocomplete = ({ searchQuery, onSearchChange, onSearch }: Searc
           {suggestions.map((suggestion, index) => (
             <Link
               key={suggestion.id}
-              href={`/shop-details/${suggestion.id}`}
+              href={`/products/${suggestion.id}`}
               onClick={handleSuggestionClick}
               className={`flex items-center gap-3 px-4 py-3 hover:bg-gray-1 transition-colors border-b border-gray-2 last:border-b-0 ${
                 index === selectedIndex ? 'bg-gray-1' : ''

@@ -27,6 +27,7 @@ const ShopWithSidebar = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [totalProducts, setTotalProducts] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
   const [currentPage, setCurrentPage] = useState(1);
   const [sortBy, setSortBy] = useState('newest');
   const [categories, setCategories] = useState([]);
@@ -34,6 +35,7 @@ const ShopWithSidebar = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [priceRange, setPriceRange] = useState({ minPrice: 0, maxPrice: 1500 });
   const [selectedPriceRange, setSelectedPriceRange] = useState({ min: 0, max: 1500 });
+  const limit = 12;
 
   // Читаємо параметри з URL при монтуванні
   useEffect(() => {
@@ -49,6 +51,7 @@ const ShopWithSidebar = () => {
   }, [searchParams]);
 
   useEffect(() => {
+    console.log('🔄 Fetching products with:', { currentPage, sortBy, selectedCategory, searchQuery, selectedPriceRange });
     fetchProducts();
   }, [currentPage, sortBy, selectedCategory, searchQuery, selectedPriceRange]);
 
@@ -106,28 +109,85 @@ const ShopWithSidebar = () => {
   const fetchProducts = async () => {
     setLoading(true);
     try {
-      let url = `http://localhost:5000/api/products?page=${currentPage}&limit=12&sortBy=${sortBy}`;
+      let url = `http://localhost:5000/api/products?page=${currentPage}&limit=${limit}&sortBy=${sortBy}`;
       if (selectedCategory) {
         url += `&category=${encodeURIComponent(selectedCategory)}`;
       }
-      if (searchQuery) {
-        url += `&search=${encodeURIComponent(searchQuery)}`;
+      if (searchQuery && searchQuery.trim()) {
+        url += `&search=${encodeURIComponent(searchQuery.trim())}`;
       }
       if (selectedPriceRange.min !== priceRange.minPrice || selectedPriceRange.max !== priceRange.maxPrice) {
         url += `&minPrice=${selectedPriceRange.min}&maxPrice=${selectedPriceRange.max}`;
       }
       
+      console.log('📡 Fetching URL:', url);
       const response = await fetch(url);
       if (response.ok) {
         const data = await response.json();
+        console.log('📦 Got products:', data.products?.length, 'Total:', data.pagination?.total);
         setProducts(data.products || []);
         setTotalProducts(data.pagination?.total || 0);
+        setTotalPages(data.pagination?.pages || 1);
       }
     } catch (error) {
       console.error('Fetch products error:', error);
     } finally {
       setLoading(false);
     }
+  };
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const renderPaginationButtons = () => {
+    const buttons = [];
+    const maxVisible = 5;
+    
+    let startPage = Math.max(1, currentPage - Math.floor(maxVisible / 2));
+    let endPage = Math.min(totalPages, startPage + maxVisible - 1);
+    
+    if (endPage - startPage < maxVisible - 1) {
+      startPage = Math.max(1, endPage - maxVisible + 1);
+    }
+    
+    for (let i = startPage; i <= endPage; i++) {
+      buttons.push(
+        <li key={i}>
+          <button
+            onClick={() => handlePageChange(i)}
+            className={`flex py-1.5 px-3.5 duration-200 rounded-[3px] ${
+              i === currentPage
+                ? 'bg-blue text-white'
+                : 'hover:text-white hover:bg-blue'
+            }`}
+          >
+            {i}
+          </button>
+        </li>
+      );
+    }
+    
+    if (endPage < totalPages) {
+      buttons.push(
+        <li key="ellipsis">
+          <span className="flex py-1.5 px-3.5">...</span>
+        </li>
+      );
+      buttons.push(
+        <li key={totalPages}>
+          <button
+            onClick={() => handlePageChange(totalPages)}
+            className="flex py-1.5 px-3.5 duration-200 rounded-[3px] hover:text-white hover:bg-blue"
+          >
+            {totalPages}
+          </button>
+        </li>
+      );
+    }
+    
+    return buttons;
   };
 
   const handleStickyMenu = () => {
@@ -227,8 +287,49 @@ const ShopWithSidebar = () => {
                 </svg>
               </button>
 
-              <form onSubmit={(e) => e.preventDefault()}>
+              <div>
                 <div className="flex flex-col gap-6">
+                  {/* <!-- Search box --> */}
+                  <div className="bg-white shadow-1 rounded-lg py-4 px-5">
+                    <h3 className="font-semibold text-dark mb-4">
+                      Пошук
+                    </h3>
+                    <div className="relative">
+                      <input
+                        type="text"
+                        value={searchQuery}
+                        onChange={(e) => {
+                          setSearchQuery(e.target.value);
+                          setCurrentPage(1);
+                        }}
+                        placeholder="Пошук товарів..."
+                        className="w-full rounded-md border border-gray-3 bg-gray-1 py-2.5 pl-4 pr-10 outline-none focus:border-blue"
+                      />
+                      {searchQuery && (
+                        <button
+                          onClick={() => {
+                            setSearchQuery('');
+                            setCurrentPage(1);
+                          }}
+                          className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-5 hover:text-red"
+                        >
+                          <svg
+                            className="fill-current"
+                            width="18"
+                            height="18"
+                            viewBox="0 0 18 18"
+                            fill="none"
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <path
+                              d="M13.7071 4.29289C14.0976 4.68342 14.0976 5.31658 13.7071 5.70711L10.4142 9L13.7071 12.2929C14.0976 12.6834 14.0976 13.3166 13.7071 13.7071C13.3166 14.0976 12.6834 14.0976 12.2929 13.7071L9 10.4142L5.70711 13.7071C5.31658 14.0976 4.68342 14.0976 4.29289 13.7071C3.90237 13.3166 3.90237 12.6834 4.29289 12.2929L7.58579 9L4.29289 5.70711C3.90237 5.31658 3.90237 4.68342 4.29289 4.29289C4.68342 3.90237 5.31658 3.90237 5.70711 4.29289L9 7.58579L12.2929 4.29289C12.6834 3.90237 13.3166 3.90237 13.7071 4.29289Z"
+                            />
+                          </svg>
+                        </button>
+                      )}
+                    </div>
+                  </div>
+
                   {/* <!-- filter box --> */}
                   <div className="bg-white shadow-1 rounded-lg py-4 px-5">
                     <div className="flex items-center justify-between">
@@ -258,11 +359,8 @@ const ShopWithSidebar = () => {
                     onPriceChange={handlePriceChange}
                     priceRange={priceRange}
                   />
-
-                  {/* // <!-- price range box --> */}
-                  <PriceDropdown />
                 </div>
-              </form>
+              </div>
             </div>
             {/* // <!-- Sidebar End --> */}
 
@@ -407,121 +505,63 @@ const ShopWithSidebar = () => {
               {/* <!-- Products Grid Tab Content End --> */}
 
               {/* <!-- Products Pagination Start --> */}
-              <div className="flex justify-center mt-15">
-                <div className="bg-white shadow-1 rounded-md p-2">
-                  <ul className="flex items-center">
-                    <li>
-                      <button
-                        id="paginationLeft"
-                        aria-label="button for pagination left"
-                        type="button"
-                        disabled
-                        className="flex items-center justify-center w-8 h-9 ease-out duration-200 rounded-[3px disabled:text-gray-4"
-                      >
-                        <svg
-                          className="fill-current"
-                          width="18"
-                          height="18"
-                          viewBox="0 0 18 18"
-                          fill="none"
-                          xmlns="http://www.w3.org/2000/svg"
+              {totalPages > 1 && (
+                <div className="flex justify-center mt-15">
+                  <div className="bg-white shadow-1 rounded-md p-2">
+                    <ul className="flex items-center">
+                      <li>
+                        <button
+                          onClick={() => handlePageChange(currentPage - 1)}
+                          disabled={currentPage === 1}
+                          aria-label="button for pagination left"
+                          type="button"
+                          className="flex items-center justify-center w-8 h-9 ease-out duration-200 rounded-[3px] disabled:text-gray-4 disabled:cursor-not-allowed hover:text-white hover:bg-blue disabled:hover:bg-transparent disabled:hover:text-gray-4"
                         >
-                          <path
-                            d="M12.1782 16.1156C12.0095 16.1156 11.8407 16.0594 11.7282 15.9187L5.37197 9.45C5.11885 9.19687 5.11885 8.80312 5.37197 8.55L11.7282 2.08125C11.9813 1.82812 12.3751 1.82812 12.6282 2.08125C12.8813 2.33437 12.8813 2.72812 12.6282 2.98125L6.72197 9L12.6563 15.0187C12.9095 15.2719 12.9095 15.6656 12.6563 15.9187C12.4876 16.0312 12.347 16.1156 12.1782 16.1156Z"
-                            fill=""
-                          />
-                        </svg>
-                      </button>
-                    </li>
+                          <svg
+                            className="fill-current"
+                            width="18"
+                            height="18"
+                            viewBox="0 0 18 18"
+                            fill="none"
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <path
+                              d="M12.1782 16.1156C12.0095 16.1156 11.8407 16.0594 11.7282 15.9187L5.37197 9.45C5.11885 9.19687 5.11885 8.80312 5.37197 8.55L11.7282 2.08125C11.9813 1.82812 12.3751 1.82812 12.6282 2.08125C12.8813 2.33437 12.8813 2.72812 12.6282 2.98125L6.72197 9L12.6563 15.0187C12.9095 15.2719 12.9095 15.6656 12.6563 15.9187C12.4876 16.0312 12.347 16.1156 12.1782 16.1156Z"
+                              fill=""
+                            />
+                          </svg>
+                        </button>
+                      </li>
 
-                    <li>
-                      <a
-                        href="#"
-                        className="flex py-1.5 px-3.5 duration-200 rounded-[3px] bg-blue text-white hover:text-white hover:bg-blue"
-                      >
-                        1
-                      </a>
-                    </li>
+                      {renderPaginationButtons()}
 
-                    <li>
-                      <a
-                        href="#"
-                        className="flex py-1.5 px-3.5 duration-200 rounded-[3px] hover:text-white hover:bg-blue"
-                      >
-                        2
-                      </a>
-                    </li>
-
-                    <li>
-                      <a
-                        href="#"
-                        className="flex py-1.5 px-3.5 duration-200 rounded-[3px] hover:text-white hover:bg-blue"
-                      >
-                        3
-                      </a>
-                    </li>
-
-                    <li>
-                      <a
-                        href="#"
-                        className="flex py-1.5 px-3.5 duration-200 rounded-[3px] hover:text-white hover:bg-blue"
-                      >
-                        4
-                      </a>
-                    </li>
-
-                    <li>
-                      <a
-                        href="#"
-                        className="flex py-1.5 px-3.5 duration-200 rounded-[3px] hover:text-white hover:bg-blue"
-                      >
-                        5
-                      </a>
-                    </li>
-
-                    <li>
-                      <a
-                        href="#"
-                        className="flex py-1.5 px-3.5 duration-200 rounded-[3px] hover:text-white hover:bg-blue"
-                      >
-                        ...
-                      </a>
-                    </li>
-
-                    <li>
-                      <a
-                        href="#"
-                        className="flex py-1.5 px-3.5 duration-200 rounded-[3px] hover:text-white hover:bg-blue"
-                      >
-                        10
-                      </a>
-                    </li>
-
-                    <li>
-                      <button
-                        id="paginationLeft"
-                        aria-label="button for pagination left"
-                        type="button"
-                        className="flex items-center justify-center w-8 h-9 ease-out duration-200 rounded-[3px] hover:text-white hover:bg-blue disabled:text-gray-4"
-                      >
-                        <svg
-                          className="fill-current"
-                          width="18"
-                          height="18"
-                          viewBox="0 0 18 18"
-                          fill="none"
-                          xmlns="http://www.w3.org/2000/svg"
+                      <li>
+                        <button
+                          onClick={() => handlePageChange(currentPage + 1)}
+                          disabled={currentPage === totalPages}
+                          aria-label="button for pagination right"
+                          type="button"
+                          className="flex items-center justify-center w-8 h-9 ease-out duration-200 rounded-[3px] disabled:text-gray-4 disabled:cursor-not-allowed hover:text-white hover:bg-blue disabled:hover:bg-transparent disabled:hover:text-gray-4"
                         >
-                          <path
-                            d="M5.82197 16.1156C5.65322 16.1156 5.5126 16.0594 5.37197 15.9469C5.11885 15.6937 5.11885 15.3 5.37197 15.0469L11.2782 9L5.37197 2.98125C5.11885 2.72812 5.11885 2.33437 5.37197 2.08125C5.6251 1.82812 6.01885 1.82812 6.27197 2.08125L12.6282 8.55C12.8813 8.80312 12.8813 9.19687 12.6282 9.45L6.27197 15.9187C6.15947 16.0312 5.99072 16.1156 5.82197 16.1156Z"
-                            fill=""
-                          />
-                        </svg>
-                      </button>
-                    </li>
-                  </ul>
+                          <svg
+                            className="fill-current"
+                            width="18"
+                            height="18"
+                            viewBox="0 0 18 18"
+                            fill="none"
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <path
+                              d="M5.82197 16.1156C5.65322 16.1156 5.5126 16.0594 5.37197 15.9469C5.11885 15.6937 5.11885 15.3 5.37197 15.0469L11.2782 9L5.37197 2.98125C5.11885 2.72812 5.11885 2.33437 5.37197 2.08125C5.6251 1.82812 6.01885 1.82812 6.27197 2.08125L12.6282 8.55C12.8813 8.80312 12.8813 9.19687 12.6282 9.45L6.27197 15.9187C6.15947 16.0312 5.99072 16.1156 5.82197 16.1156Z"
+                              fill=""
+                            />
+                          </svg>
+                        </button>
+                      </li>
+                    </ul>
+                  </div>
                 </div>
-              </div>
+              )}
               {/* <!-- Products Pagination End --> */}
             </div>
             {/* // <!-- Content End --> */}
