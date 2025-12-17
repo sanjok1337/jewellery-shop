@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Breadcrumb from "@/components/Common/Breadcrumb";
 import Link from "next/link";
@@ -27,9 +27,9 @@ const Signin = () => {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    // Валідація
+    // Р’Р°Р»С–РґР°С†С–СЏ
     if (!formData.email.trim() || !formData.password) {
-      toast.error("Email та пароль обов'язкові");
+      toast.error("Email С‚Р° РїР°СЂРѕР»СЊ РѕР±РѕРІ'СЏР·РєРѕРІС–");
       return;
     }
 
@@ -47,17 +47,17 @@ const Signin = () => {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message || "Помилка входу");
+        throw new Error(data.message || "РџРѕРјРёР»РєР° РІС…РѕРґСѓ");
       }
 
-      // Зберігаємо токен через AuthContext
+      // Р—Р±РµСЂС–РіР°С”РјРѕ С‚РѕРєРµРЅ С‡РµСЂРµР· AuthContext
       login(data.token, data.user);
-      toast.success("Вхід успішний!");
+      toast.success("Р’С…С–Рґ СѓСЃРїС–С€РЅРёР№!");
       
-      // Перенаправляємо на головну сторінку
+      // РџРµСЂРµРЅР°РїСЂР°РІР»СЏС”РјРѕ РЅР° РіРѕР»РѕРІРЅСѓ СЃС‚РѕСЂС–РЅРєСѓ
       router.push("/");
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Помилка входу");
+      toast.error(error instanceof Error ? error.message : "РџРѕРјРёР»РєР° РІС…РѕРґСѓ");
     } finally {
       setLoading(false);
     }
@@ -90,7 +90,7 @@ const Signin = () => {
                     placeholder="Enter your email"
                     value={formData.email}
                     onChange={handleChange}
-                    className="rounded-lg border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-3 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
+                    className="rounded-lg border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-3 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-gold/30"
                   />
                 </div>
 
@@ -107,14 +107,14 @@ const Signin = () => {
                     value={formData.password}
                     onChange={handleChange}
                     autoComplete="on"
-                    className="rounded-lg border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-3 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
+                    className="rounded-lg border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-3 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-gold/30"
                   />
                 </div>
 
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full flex justify-center font-medium text-white bg-dark py-3 px-6 rounded-lg ease-out duration-200 hover:bg-blue mt-7.5 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full flex justify-center font-medium text-white bg-dark py-3 px-6 rounded-lg ease-out duration-200 hover:bg-gold mt-7.5 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {loading ? "Signing in..." : "Sign in to account"}
                 </button>
@@ -200,7 +200,7 @@ const Signin = () => {
                   Don&apos;t have an account?
                   <Link
                     href="/signup"
-                    className="text-dark ease-out duration-200 hover:text-blue pl-2"
+                    className="text-dark ease-out duration-200 hover:text-gold pl-2"
                   >
                     Sign Up Now!
                   </Link>
@@ -215,3 +215,4 @@ const Signin = () => {
 };
 
 export default Signin;
+

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 import React, { useState, useEffect } from "react";
 import SingleItem from "./SingleItem";
 import Image from "next/image";
@@ -25,21 +25,21 @@ const BestSeller = () => {
 
   const fetchProducts = async () => {
     try {
-      console.log('🔄 Fetching best sellers from API...');
+      console.log('рџ”„ Fetching best sellers from API...');
       const response = await fetch('http://localhost:5000/api/products?limit=4&sortBy=price_desc');
-      console.log('📡 Best sellers response status:', response.status, response.ok);
+      console.log('рџ“Ў Best sellers response status:', response.status, response.ok);
       
       if (response.ok) {
         const data = await response.json();
-        console.log('📦 Best sellers API Response:', data);
-        console.log('🏷️ Best sellers products array:', data.products);
-        console.log('📊 Best sellers products count:', data.products?.length || 0);
+        console.log('рџ“¦ Best sellers API Response:', data);
+        console.log('рџЏ·пёЏ Best sellers products array:', data.products);
+        console.log('рџ“Љ Best sellers products count:', data.products?.length || 0);
         setProducts(data.products || []);
       } else {
-        console.error('❌ Best sellers API request failed:', response.status, response.statusText);
+        console.error('вќЊ Best sellers API request failed:', response.status, response.statusText);
       }
     } catch (error) {
-      console.error('❌ Fetch best sellers error:', error);
+      console.error('вќЊ Fetch best sellers error:', error);
     } finally {
       setLoading(false);
     }
@@ -50,7 +50,7 @@ const BestSeller = () => {
         {/* <!-- section title --> */}
         <div className="mb-10 flex items-center justify-between">
           <div>
-            <span className="flex items-center gap-2.5 font-medium text-dark mb-1.5">
+            <span className="flex items-center gap-2.5 font-medium text-gold mb-1.5">
               <Image
                 src="/images/icons/icon-07.svg"
                 alt="icon"
@@ -65,7 +65,7 @@ const BestSeller = () => {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-7.5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-7.5 gap-y-9">
           {/* <!-- Best Sellers item --> */}
           {loading ? (
             <div className="col-span-full text-center py-8">
@@ -73,7 +73,7 @@ const BestSeller = () => {
             </div>
           ) : products.length > 0 ? (
             products.map((product) => {
-              // Адаптуємо дані з API до формату, який очікує SingleItem
+              // РђРґР°РїС‚СѓС”РјРѕ РґР°РЅС– Р· API РґРѕ С„РѕСЂРјР°С‚Сѓ, СЏРєРёР№ РѕС‡С–РєСѓС” SingleItem
               const adaptedProduct = {
                 id: product.id,
                 title: product.name,
@@ -123,3 +123,4 @@ const BestSeller = () => {
 };
 
 export default BestSeller;
+

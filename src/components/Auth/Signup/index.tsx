@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Breadcrumb from "@/components/Common/Breadcrumb";
 import Link from "next/link";
@@ -29,19 +29,19 @@ const Signup = () => {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    // Валідація
+    // Р’Р°Р»С–РґР°С†С–СЏ
     if (!formData.name.trim() || !formData.email.trim() || !formData.password) {
-      toast.error("Всі поля обов'язкові");
+      toast.error("Р’СЃС– РїРѕР»СЏ РѕР±РѕРІ'СЏР·РєРѕРІС–");
       return;
     }
 
     if (formData.password !== formData.confirmPassword) {
-      toast.error("Паролі не збігаються");
+      toast.error("РџР°СЂРѕР»С– РЅРµ Р·Р±С–РіР°СЋС‚СЊСЃСЏ");
       return;
     }
 
     if (formData.password.length < 6) {
-      toast.error("Пароль має бути мінімум 6 символів");
+      toast.error("РџР°СЂРѕР»СЊ РјР°С” Р±СѓС‚Рё РјС–РЅС–РјСѓРј 6 СЃРёРјРІРѕР»С–РІ");
       return;
     }
 
@@ -63,17 +63,17 @@ const Signup = () => {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message || "Помилка реєстрації");
+        throw new Error(data.message || "РџРѕРјРёР»РєР° СЂРµС”СЃС‚СЂР°С†С–С—");
       }
 
-      // Зберігаємо токен через AuthContext
+      // Р—Р±РµСЂС–РіР°С”РјРѕ С‚РѕРєРµРЅ С‡РµСЂРµР· AuthContext
       login(data.token, data.user);
-      toast.success("Реєстрація успішна!");
+      toast.success("Р РµС”СЃС‚СЂР°С†С–СЏ СѓСЃРїС–С€РЅР°!");
       
-      // Перенаправляємо на головну сторінку
+      // РџРµСЂРµРЅР°РїСЂР°РІР»СЏС”РјРѕ РЅР° РіРѕР»РѕРІРЅСѓ СЃС‚РѕСЂС–РЅРєСѓ
       router.push("/");
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Помилка реєстрації");
+      toast.error(error instanceof Error ? error.message : "РџРѕРјРёР»РєР° СЂРµС”СЃС‚СЂР°С†С–С—");
     } finally {
       setLoading(false);
     }
@@ -176,7 +176,7 @@ const Signup = () => {
                     placeholder="Enter your full name"
                     value={formData.name}
                     onChange={handleChange}
-                    className="rounded-lg border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-3 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
+                    className="rounded-lg border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-3 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-gold/30"
                   />
                 </div>
 
@@ -192,7 +192,7 @@ const Signup = () => {
                     placeholder="Enter your email address"
                     value={formData.email}
                     onChange={handleChange}
-                    className="rounded-lg border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-3 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
+                    className="rounded-lg border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-3 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-gold/30"
                   />
                 </div>
 
@@ -209,7 +209,7 @@ const Signup = () => {
                     value={formData.password}
                     onChange={handleChange}
                     autoComplete="on"
-                    className="rounded-lg border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-3 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
+                    className="rounded-lg border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-3 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-gold/30"
                   />
                 </div>
 
@@ -226,14 +226,14 @@ const Signup = () => {
                     value={formData.confirmPassword}
                     onChange={handleChange}
                     autoComplete="on"
-                    className="rounded-lg border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-3 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
+                    className="rounded-lg border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-3 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-gold/30"
                   />
                 </div>
 
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full flex justify-center font-medium text-white bg-dark py-3 px-6 rounded-lg ease-out duration-200 hover:bg-blue mt-7.5 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full flex justify-center font-medium text-white bg-dark py-3 px-6 rounded-lg ease-out duration-200 hover:bg-gold mt-7.5 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {loading ? "Creating Account..." : "Create Account"}
                 </button>
@@ -242,7 +242,7 @@ const Signup = () => {
                   Already have an account?
                   <Link
                     href="/signin"
-                    className="text-dark ease-out duration-200 hover:text-blue pl-2"
+                    className="text-dark ease-out duration-200 hover:text-gold pl-2"
                   >
                     Sign in Now
                   </Link>
@@ -257,3 +257,4 @@ const Signup = () => {
 };
 
 export default Signup;
+

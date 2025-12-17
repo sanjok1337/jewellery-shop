@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 import React, { use, useEffect, useState } from "react";
 import Breadcrumb from "../Common/Breadcrumb";
 import Image from "next/image";
@@ -110,7 +110,7 @@ const ShopDetails = () => {
                       <button
                         onClick={handlePreviewSlider}
                         aria-label="button for zoom"
-                        className="gallery__Image w-11 h-11 rounded-[5px] bg-gray-1 shadow-1 flex items-center justify-center ease-out duration-200 text-dark hover:text-blue absolute top-4 lg:top-6 right-4 lg:right-6 z-50"
+                        className="gallery__Image w-11 h-11 rounded-[5px] bg-gray-1 shadow-1 flex items-center justify-center ease-out duration-200 text-dark hover:text-gold absolute top-4 lg:top-6 right-4 lg:right-6 z-50"
                       >
                         <svg
                           className="fill-current"
@@ -620,7 +620,7 @@ const ShopDetails = () => {
                       <div className="flex items-center rounded-md border border-gray-3">
                         <button
                           aria-label="button for remove product"
-                          className="flex items-center justify-center w-12 h-12 ease-out duration-200 hover:text-blue"
+                          className="flex items-center justify-center w-12 h-12 ease-out duration-200 hover:text-gold"
                           onClick={() =>
                             quantity > 1 && setQuantity(quantity - 1)
                           }
@@ -647,7 +647,7 @@ const ShopDetails = () => {
                         <button
                           onClick={() => setQuantity(quantity + 1)}
                           aria-label="button for add product"
-                          className="flex items-center justify-center w-12 h-12 ease-out duration-200 hover:text-blue"
+                          className="flex items-center justify-center w-12 h-12 ease-out duration-200 hover:text-gold"
                         >
                           <svg
                             className="fill-current"
@@ -711,9 +711,9 @@ const ShopDetails = () => {
                   <button
                     key={key}
                     onClick={() => setActiveTab(item.id)}
-                    className={`font-medium lg:text-lg ease-out duration-200 hover:text-blue relative before:h-0.5 before:bg-blue before:absolute before:left-0 before:bottom-0 before:ease-out before:duration-200 hover:before:w-full ${
+                    className={`font-medium lg:text-lg ease-out duration-200 hover:text-gold relative before:h-0.5 before:bg-gold before:absolute before:left-0 before:bottom-0 before:ease-out before:duration-200 hover:before:w-full ${
                       activeTab === item.id
-                        ? "text-blue before:w-full"
+                        ? "text-gold before:w-full"
                         : "text-dark before:w-0"
                     }`}
                   >
@@ -1039,9 +1039,9 @@ const ShopDetails = () => {
                         </div>
 
                         <p className="text-dark mt-6">
-                          “Lorem ipsum dolor sit amet, adipiscing elit. Donec
+                          вЂњLorem ipsum dolor sit amet, adipiscing elit. Donec
                           malesuada justo vitaeaugue suscipit beautiful
-                          vehicula’’
+                          vehiculaвЂ™вЂ™
                         </p>
                       </div>
 
@@ -1153,9 +1153,9 @@ const ShopDetails = () => {
                         </div>
 
                         <p className="text-dark mt-6">
-                          “Lorem ipsum dolor sit amet, adipiscing elit. Donec
+                          вЂњLorem ipsum dolor sit amet, adipiscing elit. Donec
                           malesuada justo vitaeaugue suscipit beautiful
-                          vehicula’’
+                          vehiculaвЂ™вЂ™
                         </p>
                       </div>
 
@@ -1267,9 +1267,9 @@ const ShopDetails = () => {
                         </div>
 
                         <p className="text-dark mt-6">
-                          “Lorem ipsum dolor sit amet, adipiscing elit. Donec
+                          вЂњLorem ipsum dolor sit amet, adipiscing elit. Donec
                           malesuada justo vitaeaugue suscipit beautiful
-                          vehicula’’
+                          vehiculaвЂ™вЂ™
                         </p>
                       </div>
                     </div>
@@ -1452,3 +1452,4 @@ const ShopDetails = () => {
 };
 
 export default ShopDetails;
+

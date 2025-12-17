@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 import React from "react";
 
 import { Product } from "@/types/product";
@@ -40,7 +40,7 @@ const SingleListItem = ({ item }: { item: Product }) => {
                 openModal(item.id);
               }}
               aria-label="button for quick view"
-              className="flex items-center justify-center w-9 h-9 rounded-[5px] shadow-1 ease-out duration-200 text-dark bg-white hover:text-blue"
+              className="flex items-center justify-center w-9 h-9 rounded-[5px] shadow-1 ease-out duration-200 text-dark bg-white hover:text-gold"
             >
               <svg
                 className="fill-current"
@@ -78,7 +78,7 @@ const SingleListItem = ({ item }: { item: Product }) => {
 
         <div className="w-full flex flex-col gap-5 sm:flex-row sm:items-center justify-center sm:justify-between py-5 px-4 sm:px-7.5 lg:pl-11 lg:pr-12">
           <div>
-            <h3 className="font-medium text-dark ease-out duration-200 hover:text-blue mb-1.5">
+            <h3 className="font-medium text-dark ease-out duration-200 hover:text-gold mb-1.5">
               <Link href={`/products/${item.id}`}> {item.title} </Link>
             </h3>
 
@@ -131,3 +131,4 @@ const SingleListItem = ({ item }: { item: Product }) => {
 };
 
 export default SingleListItem;
+

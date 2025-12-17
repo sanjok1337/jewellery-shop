@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 import React, { useState, useEffect } from "react";
 import Breadcrumb from "../Common/Breadcrumb";
 import { useAuth } from "@/app/context/AuthContext";
@@ -48,11 +48,11 @@ export const Wishlist = () => {
         const data = await response.json();
         setWishlistItems(data.items);
       } else {
-        toast.error('Помилка завантаження віш-ліста');
+        toast.error('РџРѕРјРёР»РєР° Р·Р°РІР°РЅС‚Р°Р¶РµРЅРЅСЏ РІС–С€-Р»С–СЃС‚Р°');
       }
     } catch (error) {
       console.error('Fetch wishlist error:', error);
-      toast.error('Помилка завантаження віш-ліста');
+      toast.error('РџРѕРјРёР»РєР° Р·Р°РІР°РЅС‚Р°Р¶РµРЅРЅСЏ РІС–С€-Р»С–СЃС‚Р°');
     } finally {
       setLoading(false);
     }
@@ -69,13 +69,13 @@ export const Wishlist = () => {
 
       if (response.ok) {
         setWishlistItems([]);
-        toast.success('Віш-ліст очищено');
+        toast.success('Р’С–С€-Р»С–СЃС‚ РѕС‡РёС‰РµРЅРѕ');
       } else {
-        toast.error('Помилка очищення віш-ліста');
+        toast.error('РџРѕРјРёР»РєР° РѕС‡РёС‰РµРЅРЅСЏ РІС–С€-Р»С–СЃС‚Р°');
       }
     } catch (error) {
       console.error('Clear wishlist error:', error);
-      toast.error('Помилка очищення віш-ліста');
+      toast.error('РџРѕРјРёР»РєР° РѕС‡РёС‰РµРЅРЅСЏ РІС–С€-Р»С–СЃС‚Р°');
     }
   };
 
@@ -91,13 +91,13 @@ export const Wishlist = () => {
       if (response.ok) {
         setWishlistItems(prev => prev.filter(item => item.id !== itemId));
         await contextRefresh();
-        toast.success('Product видалено з віш-ліста');
+        toast.success('Product РІРёРґР°Р»РµРЅРѕ Р· РІС–С€-Р»С–СЃС‚Р°');
       } else {
-        toast.error('Помилка видалення з віш-ліста');
+        toast.error('РџРѕРјРёР»РєР° РІРёРґР°Р»РµРЅРЅСЏ Р· РІС–С€-Р»С–СЃС‚Р°');
       }
     } catch (error) {
       console.error('Remove from wishlist error:', error);
-      toast.error('Помилка видалення з віш-ліста');
+      toast.error('РџРѕРјРёР»РєР° РІРёРґР°Р»РµРЅРЅСЏ Р· РІС–С€-Р»С–СЃС‚Р°');
     }
   };
 
@@ -113,7 +113,7 @@ export const Wishlist = () => {
             {wishlistItems.length > 0 && (
               <button 
                 onClick={clearWishlist}
-                className="text-blue hover:text-red transition-colors"
+                className="text-gold hover:text-red transition-colors"
               >
                 Clear Wishlist
               </button>
@@ -123,16 +123,16 @@ export const Wishlist = () => {
           <div className="bg-white rounded-[10px] shadow-1">
             {loading ? (
               <div className="py-20 text-center">
-                <p>Завантаження віш-ліста...</p>
+                <p>Р—Р°РІР°РЅС‚Р°Р¶РµРЅРЅСЏ РІС–С€-Р»С–СЃС‚Р°...</p>
               </div>
             ) : wishlistItems.length === 0 ? (
               <div className="py-20 text-center">
-                <p className="text-gray-600 mb-4">Your Wishlist порожній</p>
+                <p className="text-gray-600 mb-4">Your Wishlist РїРѕСЂРѕР¶РЅС–Р№</p>
                 <button 
                   onClick={() => router.push('/shop-without-sidebar')}
                   className="bg-red text-white px-6 py-3 rounded hover:bg-red/90 transition-colors"
                 >
-                  Перейти до покупок
+                  РџРµСЂРµР№С‚Рё РґРѕ РїРѕРєСѓРїРѕРє
                 </button>
               </div>
             ) : (
@@ -175,3 +175,4 @@ export const Wishlist = () => {
     </>
   );
 };
+

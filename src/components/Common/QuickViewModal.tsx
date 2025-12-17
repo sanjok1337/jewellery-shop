@@ -96,11 +96,11 @@ const QuickViewModal = () => {
         } fixed top-0 left-0 overflow-y-auto no-scrollbar w-full h-screen sm:py-20 xl:py-25 2xl:py-[230px] bg-dark/70 sm:px-8 px-4 py-5`}
       >
         <div className="flex items-center justify-center ">
-          <div className="w-full max-w-[1100px] rounded-xl shadow-3 bg-white p-7.5 relative modal-content">
+          <div className="w-full max-w-[1100px] rounded-2xl shadow-xl bg-white p-7.5 relative modal-content border border-gold-light-3">
           <button
             onClick={() => closeModal()}
             aria-label="button for close modal"
-            className="absolute top-0 right-0 sm:top-6 sm:right-6 flex items-center justify-center w-10 h-10 rounded-full ease-in duration-150 bg-meta text-body hover:text-dark"
+            className="absolute top-0 right-0 sm:top-6 sm:right-6 flex items-center justify-center w-10 h-10 rounded-full ease-in duration-150 bg-champagne text-gray-600 hover:text-gold-dark hover:bg-champagne-dark"
           >
             <svg
               className="fill-current"
@@ -132,8 +132,8 @@ const QuickViewModal = () => {
                       <button
                         onClick={() => setActivePreview(key)}
                         key={key}
-                        className={`flex items-center justify-center w-20 h-20 overflow-hidden rounded-lg bg-gray-1 ease-out duration-200 hover:border-2 hover:border-blue ${
-                          activePreview === key && "border-2 border-blue"
+                        className={`flex items-center justify-center w-20 h-20 overflow-hidden rounded-xl bg-champagne-light ease-out duration-200 border-2 hover:border-gold ${
+                          activePreview === key ? "border-gold shadow-md" : "border-transparent"
                         }`}
                       >
                         {img ? (
@@ -153,7 +153,7 @@ const QuickViewModal = () => {
                     ))}
                   </div>
 
-                  <div className="relative z-1 overflow-hidden flex items-center justify-center w-full sm:min-h-[508px] bg-gray-1 rounded-lg border border-gray-3">
+                  <div className="relative z-1 overflow-hidden flex items-center justify-center w-full sm:min-h-[508px] bg-gradient-to-br from-champagne-light to-white rounded-2xl border border-gold-light-3">
                     <div>
                       {product.images?.[activePreview] ? (
                         <Image
@@ -175,7 +175,7 @@ const QuickViewModal = () => {
 
           <div className="max-w-[445px] w-full">
               {product.discount_percentage > 0 && (
-                <span className="inline-block text-custom-xs font-medium text-white py-1 px-3 bg-green mb-6.5">
+                <span className="inline-block text-custom-xs font-medium text-white py-1.5 px-4 bg-gradient-to-r from-rose to-rose-dark rounded-full mb-6.5">
                   SALE {product.discount_percentage}% OFF
                 </span>
               )}
@@ -191,7 +191,7 @@ const QuickViewModal = () => {
                     {[1, 2, 3, 4, 5].map((star) => (
                       <svg
                         key={star}
-                        className={star <= Math.round(product.avgRating) ? "fill-[#FFA645]" : "fill-gray-4"}
+                        className={star <= Math.round(product.avgRating) ? "fill-gold" : "fill-gray-300"}
                         width="18"
                         height="18"
                         viewBox="0 0 18 18"
@@ -279,7 +279,7 @@ const QuickViewModal = () => {
                     <button
                       onClick={() => quantity > 1 && setQuantity(quantity - 1)}
                       aria-label="button for remove product"
-                      className="flex items-center justify-center w-10 h-10 rounded-[5px] bg-gray-2 text-dark ease-out duration-200 hover:text-blue"
+                      className="flex items-center justify-center w-10 h-10 rounded-lg bg-champagne text-dark ease-out duration-200 hover:text-gold-dark hover:bg-champagne-dark"
                       disabled={quantity < 0 && true}
                     >
                       <svg
@@ -300,7 +300,7 @@ const QuickViewModal = () => {
                     </button>
 
                     <span
-                      className="flex items-center justify-center w-20 h-10 rounded-[5px] border border-gray-4 bg-white font-medium text-dark"
+                      className="flex items-center justify-center w-20 h-10 rounded-lg border border-gold-light-2 bg-white font-medium text-dark"
                       x-text="quantity"
                     >
                       {quantity}
@@ -309,7 +309,7 @@ const QuickViewModal = () => {
                     <button
                       onClick={() => setQuantity(quantity + 1)}
                       aria-label="button for add product"
-                      className="flex items-center justify-center w-10 h-10 rounded-[5px] bg-gray-2 text-dark ease-out duration-200 hover:text-blue"
+                      className="flex items-center justify-center w-10 h-10 rounded-lg bg-champagne text-dark ease-out duration-200 hover:text-gold-dark hover:bg-champagne-dark"
                     >
                       <svg
                         className="fill-current"
@@ -341,7 +341,7 @@ const QuickViewModal = () => {
                 <button
                   disabled={quantity === 0 && true}
                   onClick={() => handleAddToCart()}
-                  className={`inline-flex font-medium text-white bg-blue py-3 px-7 rounded-md ease-out duration-200 hover:bg-blue-dark
+                  className={`inline-flex font-medium text-white bg-gradient-to-r from-gold to-gold-dark py-3 px-7 rounded-full ease-out duration-200 hover:from-gold-dark hover:to-gold shadow-md
                   `}
                 >
                   Add to Cart
@@ -349,13 +349,14 @@ const QuickViewModal = () => {
 
                 <Link
                   href={`/products/${product.id}`}
-                  className={`inline-flex font-medium text-white bg-green-600 py-3 px-7 rounded-md ease-out duration-200 hover:bg-green-700`}
+                  onClick={() => closeModal()}
+                  className={`inline-flex font-medium text-white bg-gradient-to-r from-rose to-rose-dark py-3 px-7 rounded-full ease-out duration-200 hover:from-rose-dark hover:to-rose shadow-md`}
                 >
                   View Details
                 </Link>
 
                 <button
-                  className={`inline-flex items-center gap-2 font-medium text-white bg-dark py-3 px-6 rounded-md ease-out duration-200 hover:bg-opacity-95 `}
+                  className={`inline-flex items-center gap-2 font-medium text-gold-dark bg-champagne py-3 px-6 rounded-full ease-out duration-200 hover:bg-champagne-dark border border-gold-light-2`}
                 >
                   <svg
                     className="fill-current"

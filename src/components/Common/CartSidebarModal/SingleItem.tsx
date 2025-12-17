@@ -1,5 +1,7 @@
 import React from "react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
+import { useCartModalContext } from "@/app/context/CartSidebarModalContext";
 
 interface SingleItemProps {
   item: {
@@ -14,34 +16,48 @@ interface SingleItemProps {
 }
 
 const SingleItem = ({ item, removeFromCart }: SingleItemProps) => {
+  const { closeCartModal } = useCartModalContext();
+  const router = useRouter();
+  
   const handleRemoveFromCart = () => {
     removeFromCart(item.id);
   };
 
+  const handleViewProduct = () => {
+    closeCartModal();
+    router.push(`/products/${item.product_id}`);
+  };
+
   return (
-    <div className="flex items-center justify-between gap-5">
-      <div className="w-full flex items-center gap-6">
-        <div className="flex items-center justify-center rounded-[10px] bg-gray-3 max-w-[90px] w-full h-22.5">
+    <div className="flex items-center justify-between gap-5 p-4 rounded-xl bg-white border border-gold-light-3 shadow-sm hover:shadow-md transition-shadow">
+      <div className="w-full flex items-center gap-4">
+        <button 
+          onClick={handleViewProduct}
+          className="flex items-center justify-center rounded-xl bg-champagne-light max-w-[80px] w-full h-20 p-2 border border-gold-light-3 cursor-pointer"
+        >
           <Image 
             src={item.image_url || '/images/products/product-1.png'} 
             alt={item.name} 
-            width={100} 
-            height={100} 
+            width={70} 
+            height={70}
+            className="object-contain"
           />
-        </div>
+        </button>
 
         <div>
-          <h3 className="font-medium text-dark mb-1 ease-out duration-200 hover:text-blue">
-            <a href={`/products/${item.product_id}`}> {item.name} </a>
+          <h3 className="font-medium text-dark mb-1 ease-out duration-200 hover:text-gold">
+            <button onClick={handleViewProduct} className="text-left hover:text-gold transition-colors"> {item.name} </button>
           </h3>
-          <p className="text-custom-sm">Price: ${item.price} x {item.quantity}</p>
+          <p className="text-custom-sm text-gray-500">
+            <span className="text-gold-dark font-semibold">${item.price}</span> × {item.quantity}
+          </p>
         </div>
       </div>
 
       <button
         onClick={handleRemoveFromCart}
         aria-label="button for remove product from cart"
-        className="flex items-center justify-center rounded-lg max-w-[38px] w-full h-9.5 bg-gray-2 border border-gray-3 text-dark ease-out duration-200 hover:bg-red-light-6 hover:border-red-light-4 hover:text-red"
+        className="flex items-center justify-center rounded-full max-w-[38px] w-full h-9.5 bg-champagne border border-gold-light-2 text-gold-dark ease-out duration-200 hover:bg-rose-light hover:border-rose hover:text-rose-dark"
       >
         <svg
           className="fill-current"

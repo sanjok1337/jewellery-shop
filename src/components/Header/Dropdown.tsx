@@ -1,4 +1,4 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 
@@ -15,7 +15,7 @@ const Dropdown = ({ menuItem, stickyMenu }) => {
     >
       <a
         href="#"
-        className={`hover:text-blue text-custom-sm font-medium text-dark flex items-center gap-1.5 capitalize ${
+        className={`hover:text-gold text-custom-sm font-medium text-dark flex items-center gap-1.5 capitalize ${
           stickyMenu ? "xl:py-4" : "xl:py-6"
         } ${pathUrl.includes(menuItem.title) && "!text-blue"}`}
       >
@@ -49,7 +49,7 @@ const Dropdown = ({ menuItem, stickyMenu }) => {
           <li key={i}>
             <Link
               href={item.path}
-              className={`flex text-custom-sm hover:text-blue hover:bg-gray-1 py-[7px] px-4.5 ${
+              className={`flex text-custom-sm hover:text-gold hover:bg-gray-1 py-[7px] px-4.5 ${
                 pathUrl === item.path && "text-blue bg-gray-1"
               } `}
             >
@@ -63,3 +63,4 @@ const Dropdown = ({ menuItem, stickyMenu }) => {
 };
 
 export default Dropdown;
+

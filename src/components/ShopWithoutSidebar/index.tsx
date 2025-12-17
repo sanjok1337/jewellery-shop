@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 import React, { useState, useEffect } from "react";
 import Breadcrumb from "../Common/Breadcrumb";
 
@@ -71,8 +71,8 @@ const ShopWithoutSidebar = () => {
             onClick={() => handlePageChange(i)}
             className={`flex py-1.5 px-3.5 duration-200 rounded-[3px] ${
               i === currentPage
-                ? 'bg-blue text-white'
-                : 'hover:text-white hover:bg-blue'
+                ? 'bg-gold text-white'
+                : 'hover:text-white hover:bg-gold'
             }`}
           >
             {i}
@@ -91,7 +91,7 @@ const ShopWithoutSidebar = () => {
         <li key={totalPages}>
           <button
             onClick={() => handlePageChange(totalPages)}
-            className="flex py-1.5 px-3.5 duration-200 rounded-[3px] hover:text-white hover:bg-blue"
+            className="flex py-1.5 px-3.5 duration-200 rounded-[3px] hover:text-white hover:bg-gold"
           >
             {totalPages}
           </button>
@@ -111,7 +111,7 @@ const ShopWithoutSidebar = () => {
 
   const handleSortChange = (value: string) => {
     setSortBy(value);
-    setCurrentPage(1); // Скидаємо на першу сторінку при зміні сортування
+    setCurrentPage(1); // РЎРєРёРґР°С”РјРѕ РЅР° РїРµСЂС€Сѓ СЃС‚РѕСЂС–РЅРєСѓ РїСЂРё Р·РјС–РЅС– СЃРѕСЂС‚СѓРІР°РЅРЅСЏ
   };
 
   return (
@@ -144,9 +144,9 @@ const ShopWithoutSidebar = () => {
                       aria-label="button for product grid tab"
                       className={`${
                         productStyle === "grid"
-                          ? "bg-blue border-blue text-white"
+                          ? "bg-gold border-gold text-white"
                           : "text-dark bg-gray-1 border-gray-3"
-                      } flex items-center justify-center w-10.5 h-9 rounded-[5px] border ease-out duration-200 hover:bg-blue hover:border-blue hover:text-white`}
+                      } flex items-center justify-center w-10.5 h-9 rounded-[5px] border ease-out duration-200 hover:bg-gold hover:border-gold hover:text-white`}
                     >
                       <svg
                         className="fill-current"
@@ -188,9 +188,9 @@ const ShopWithoutSidebar = () => {
                       aria-label="button for product list tab"
                       className={`${
                         productStyle === "list"
-                          ? "bg-blue border-blue text-white"
+                          ? "bg-gold border-gold text-white"
                           : "text-dark bg-gray-1 border-gray-3"
-                      } flex items-center justify-center w-10.5 h-9 rounded-[5px] border ease-out duration-200 hover:bg-blue hover:border-blue hover:text-white`}
+                      } flex items-center justify-center w-10.5 h-9 rounded-[5px] border ease-out duration-200 hover:bg-gold hover:border-gold hover:text-white`}
                     >
                       <svg
                         className="fill-current"
@@ -232,7 +232,7 @@ const ShopWithoutSidebar = () => {
                   </div>
                 ) : products.length > 0 ? (
                   products.map((product) => {
-                    // Адаптуємо дані з API до формату, який очікують компоненти
+                    // РђРґР°РїС‚СѓС”РјРѕ РґР°РЅС– Р· API РґРѕ С„РѕСЂРјР°С‚Сѓ, СЏРєРёР№ РѕС‡С–РєСѓСЋС‚СЊ РєРѕРјРїРѕРЅРµРЅС‚Рё
                     const adaptedProduct = {
                       id: product.id,
                       title: product.name,
@@ -274,7 +274,7 @@ const ShopWithoutSidebar = () => {
                           disabled={currentPage === 1}
                           aria-label="button for pagination left"
                           type="button"
-                          className="flex items-center justify-center w-8 h-9 ease-out duration-200 rounded-[3px] disabled:text-gray-4 disabled:cursor-not-allowed hover:text-white hover:bg-blue disabled:hover:bg-transparent disabled:hover:text-gray-4"
+                          className="flex items-center justify-center w-8 h-9 ease-out duration-200 rounded-[3px] disabled:text-gray-4 disabled:cursor-not-allowed hover:text-white hover:bg-gold disabled:hover:bg-transparent disabled:hover:text-gray-4"
                         >
                           <svg
                             className="fill-current"
@@ -300,7 +300,7 @@ const ShopWithoutSidebar = () => {
                           disabled={currentPage === totalPages}
                           aria-label="button for pagination right"
                           type="button"
-                          className="flex items-center justify-center w-8 h-9 ease-out duration-200 rounded-[3px] disabled:text-gray-4 disabled:cursor-not-allowed hover:text-white hover:bg-blue disabled:hover:bg-transparent disabled:hover:text-gray-4"
+                          className="flex items-center justify-center w-8 h-9 ease-out duration-200 rounded-[3px] disabled:text-gray-4 disabled:cursor-not-allowed hover:text-white hover:bg-gold disabled:hover:bg-transparent disabled:hover:text-gray-4"
                         >
                           <svg
                             className="fill-current"
@@ -332,3 +332,4 @@ const ShopWithoutSidebar = () => {
 };
 
 export default ShopWithoutSidebar;
+

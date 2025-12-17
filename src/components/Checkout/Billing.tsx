@@ -1,4 +1,4 @@
-import React from "react";
+﻿import React from "react";
 
 interface Address {
   id: number;
@@ -30,8 +30,8 @@ const Billing = ({ addresses = [], selectedAddress, onSelectAddress }: BillingPr
         {addresses.length === 0 ? (
           <div className="text-center py-8">
             <p className="text-dark-5 mb-4">You don't have any saved addresses</p>
-            <a href="/my-account" className="text-blue hover:underline">
-              Додати адресу в особистому кабінеті
+            <a href="/my-account" className="text-gold hover:underline">
+              Р”РѕРґР°С‚Рё Р°РґСЂРµСЃСѓ РІ РѕСЃРѕР±РёСЃС‚РѕРјСѓ РєР°Р±С–РЅРµС‚С–
             </a>
           </div>
         ) : (
@@ -43,8 +43,8 @@ const Billing = ({ addresses = [], selectedAddress, onSelectAddress }: BillingPr
                 onClick={() => onSelectAddress?.(address)}
                 className={`border-2 rounded-lg p-4 cursor-pointer transition-all ${
                   selectedAddress?.id === address.id
-                    ? 'border-blue bg-blue/5'
-                    : 'border-gray-3 hover:border-blue/50'
+                    ? 'border-gold bg-gold/5'
+                    : 'border-gray-3 hover:border-gold/50'
                 }`}
               >
                 <div className="flex items-start gap-3">
@@ -67,8 +67,8 @@ const Billing = ({ addresses = [], selectedAddress, onSelectAddress }: BillingPr
                     </p>
                     <p className="text-dark">{address.country}</p>
                     {address.is_default && (
-                      <span className="inline-block mt-2 px-2 py-1 bg-blue/10 text-blue text-xs rounded">
-                        За замовчуванням
+                      <span className="inline-block mt-2 px-2 py-1 bg-gold/10 text-gold text-xs rounded">
+                        Р—Р° Р·Р°РјРѕРІС‡СѓРІР°РЅРЅСЏРј
                       </span>
                     )}
                   </div>
@@ -92,7 +92,7 @@ const Billing = ({ addresses = [], selectedAddress, onSelectAddress }: BillingPr
               name="firstName"
               id="firstName"
               placeholder="Jhon"
-              className="rounded-md border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
+              className="rounded-md border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-gold/30"
             />
           </div>
 
@@ -106,7 +106,7 @@ const Billing = ({ addresses = [], selectedAddress, onSelectAddress }: BillingPr
               name="lastName"
               id="lastName"
               placeholder="Deo"
-              className="rounded-md border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
+              className="rounded-md border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-gold/30"
             />
           </div>
         </div>
@@ -120,7 +120,7 @@ const Billing = ({ addresses = [], selectedAddress, onSelectAddress }: BillingPr
             type="text"
             name="companyName"
             id="companyName"
-            className="rounded-md border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
+            className="rounded-md border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-gold/30"
           />
         </div>
 
@@ -131,7 +131,7 @@ const Billing = ({ addresses = [], selectedAddress, onSelectAddress }: BillingPr
           </label>
 
           <div className="relative">
-            <select className="w-full bg-gray-1 rounded-md border border-gray-3 text-dark-4 py-3 pl-5 pr-9 duration-200 appearance-none outline-none focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20">
+            <select className="w-full bg-gray-1 rounded-md border border-gray-3 text-dark-4 py-3 pl-5 pr-9 duration-200 appearance-none outline-none focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-gold/30">
               <option value="0">Australia</option>
               <option value="1">America</option>
               <option value="2">England</option>
@@ -168,7 +168,7 @@ const Billing = ({ addresses = [], selectedAddress, onSelectAddress }: BillingPr
             name="address"
             id="address"
             placeholder="House number and street name"
-            className="rounded-md border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
+            className="rounded-md border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-gold/30"
           />
 
           <div className="mt-5">
@@ -177,7 +177,7 @@ const Billing = ({ addresses = [], selectedAddress, onSelectAddress }: BillingPr
               name="address"
               id="addressTwo"
               placeholder="Apartment, suite, unit, etc. (optional)"
-              className="rounded-md border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
+              className="rounded-md border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-gold/30"
             />
           </div>
         </div>
@@ -191,7 +191,7 @@ const Billing = ({ addresses = [], selectedAddress, onSelectAddress }: BillingPr
             type="text"
             name="town"
             id="town"
-            className="rounded-md border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
+            className="rounded-md border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-gold/30"
           />
         </div>
 
@@ -204,7 +204,7 @@ const Billing = ({ addresses = [], selectedAddress, onSelectAddress }: BillingPr
             type="text"
             name="country"
             id="country"
-            className="rounded-md border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
+            className="rounded-md border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-gold/30"
           />
         </div>
 
@@ -217,7 +217,7 @@ const Billing = ({ addresses = [], selectedAddress, onSelectAddress }: BillingPr
             type="text"
             name="phone"
             id="phone"
-            className="rounded-md border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
+            className="rounded-md border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-gold/30"
           />
         </div>
 
@@ -230,7 +230,7 @@ const Billing = ({ addresses = [], selectedAddress, onSelectAddress }: BillingPr
             type="email"
             name="email"
             id="email"
-            className="rounded-md border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
+            className="rounded-md border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-gold/30"
           />
         </div>
 
@@ -281,3 +281,5 @@ const Billing = ({ addresses = [], selectedAddress, onSelectAddress }: BillingPr
 };
 
 export default Billing;
+
+

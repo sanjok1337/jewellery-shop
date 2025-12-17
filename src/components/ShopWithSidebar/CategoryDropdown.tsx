@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 
@@ -6,14 +6,14 @@ const CategoryItem = ({ category, isSelected, onToggle }) => {
   return (
     <button
       className={`${
-        isSelected && "text-blue"
-      } group flex items-center justify-between ease-out duration-200 hover:text-blue `}
+        isSelected && "text-gold"
+      } group flex items-center justify-between ease-out duration-200 hover:text-gold `}
       onClick={onToggle}
     >
       <div className="flex items-center gap-2">
         <div
           className={`cursor-pointer flex items-center justify-center rounded w-4 h-4 border ${
-            isSelected ? "border-blue bg-blue" : "bg-white border-gray-3"
+            isSelected ? "border-gold bg-gold" : "bg-white border-gray-3"
           }`}
         >
           <svg
@@ -39,8 +39,8 @@ const CategoryItem = ({ category, isSelected, onToggle }) => {
 
       <span
         className={`${
-          isSelected ? "text-white bg-blue" : "bg-gray-2"
-        } inline-flex rounded-[30px] text-custom-xs px-2 ease-out duration-200 group-hover:text-white group-hover:bg-blue`}
+          isSelected ? "text-white bg-gold" : "bg-gray-2"
+        } inline-flex rounded-[30px] text-custom-xs px-2 ease-out duration-200 group-hover:text-white group-hover:bg-gold`}
       >
         {category.products}
       </span>
@@ -53,7 +53,7 @@ const CategoryDropdown = ({ categories, onCategoryChange, selectedCategory }) =>
 
   const handleCategoryToggle = (categoryName) => {
     if (selectedCategory === categoryName) {
-      onCategoryChange(''); // Зняти вибір
+      onCategoryChange(''); // Р—РЅСЏС‚Рё РІРёР±С–СЂ
     } else {
       onCategoryChange(categoryName);
     }
@@ -116,3 +116,5 @@ const CategoryDropdown = ({ categories, onCategoryChange, selectedCategory }) =>
 };
 
 export default CategoryDropdown;
+
+

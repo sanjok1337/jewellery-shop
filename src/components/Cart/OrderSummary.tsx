@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+﻿import React, { useMemo } from "react";
 import { useCart } from "@/app/context/CartContext";
 import { useRouter } from "next/navigation";
 
@@ -58,7 +58,7 @@ const OrderSummary = () => {
           {/* <!-- checkout button --> */}
           <button
             onClick={() => router.push('/checkout')}
-            className="w-full flex justify-center font-medium text-white bg-blue py-3 px-6 rounded-md ease-out duration-200 hover:bg-blue-dark mt-7.5"
+            className="w-full flex justify-center font-medium text-white bg-gradient-to-r from-gold to-gold-dark py-3 px-6 rounded-full shadow-md ease-out duration-200 hover:from-gold-dark hover:to-gold mt-7.5"
           >
             Process to Checkout
           </button>
@@ -69,3 +69,4 @@ const OrderSummary = () => {
 };
 
 export default OrderSummary;
+

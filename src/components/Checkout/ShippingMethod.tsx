@@ -1,4 +1,4 @@
-import React from "react";
+﻿import React from "react";
 import Image from "next/image";
 
 interface ShippingMethodProps {
@@ -30,7 +30,7 @@ const ShippingMethod = ({ selectedMethod = "standard", onMethodChange }: Shippin
               <div
                 className={`flex h-4 w-4 items-center justify-center rounded-full ${
                   selectedMethod === "free"
-                    ? "border-4 border-blue"
+                    ? "border-4 border-gold"
                     : "border border-gray-4"
                 }`}
               ></div>
@@ -53,7 +53,7 @@ const ShippingMethod = ({ selectedMethod = "standard", onMethodChange }: Shippin
               <div
                 className={`flex h-4 w-4 items-center justify-center rounded-full ${
                   selectedMethod === "standard"
-                    ? "border-4 border-blue"
+                    ? "border-4 border-gold"
                     : "border border-gray-4"
                 }`}
               ></div>
@@ -93,7 +93,7 @@ const ShippingMethod = ({ selectedMethod = "standard", onMethodChange }: Shippin
               <div
                 className={`flex h-4 w-4 items-center justify-center rounded-full ${
                   selectedMethod === "express"
-                    ? "border-4 border-blue"
+                    ? "border-4 border-gold"
                     : "border border-gray-4"
                 }`}
               ></div>
@@ -124,3 +124,4 @@ const ShippingMethod = ({ selectedMethod = "standard", onMethodChange }: Shippin
 };
 
 export default ShippingMethod;
+

@@ -127,31 +127,34 @@ const ProductDetail = ({ productId }: ProductDetailProps) => {
         ]}
       />
 
-      <section className="pb-20 pt-12.5">
+      <section className="pb-20 pt-12.5 bg-gradient-to-b from-champagne-light-2 to-white">
         <div className="mx-auto max-w-[1170px] px-4 sm:px-8 xl:px-0">
           <div className="grid grid-cols-1 gap-7.5 lg:grid-cols-2 xl:gap-12.5">
             
             {/* Images Section */}
             <div className="w-full">
               <div className="mb-4">
-                <div className="relative aspect-square w-full overflow-hidden rounded-xl bg-gray-2 flex items-center justify-center p-4">
-                  <Image
-                    src={productImages[activeImage]}
-                    alt={product.name}
-                    fill
-                    className="object-contain"
-                  />
+                <div className="relative w-full overflow-hidden rounded-2xl bg-white shadow-lg border border-gold-light-3" style={{ minHeight: '500px' }}>
+                  <div className="relative w-full h-full flex items-center justify-center p-6">
+                    <Image
+                      src={productImages[activeImage]}
+                      alt={product.name}
+                      width={500}
+                      height={500}
+                      className="object-contain max-h-[480px] w-auto transition-transform duration-500 hover:scale-105"
+                    />
+                  </div>
                 </div>
               </div>
               
               {/* Thumbnail images */}
-              <div className="flex gap-2.5">
+              <div className="flex gap-3 justify-center">
                 {productImages.map((image, index) => (
                   <button
                     key={index}
                     onClick={() => setActiveImage(index)}
-                    className={`relative aspect-square w-20 overflow-hidden rounded border-2 ${
-                      activeImage === index ? 'border-red' : 'border-gray-3'
+                    className={`relative aspect-square w-20 overflow-hidden rounded-xl border-2 transition-all duration-300 shadow-sm hover:shadow-md ${
+                      activeImage === index ? 'border-gold ring-2 ring-gold-light-2' : 'border-gray-3 hover:border-gold-light'
                     }`}
                   >
                     <Image
@@ -166,26 +169,32 @@ const ProductDetail = ({ productId }: ProductDetailProps) => {
             </div>
 
             {/* Product Info Section */}
-            <div className="w-full">
-              <h1 className="mb-4 text-2xl font-bold text-dark lg:text-3xl">
+            <div className="w-full bg-white rounded-2xl p-8 shadow-lg border border-gold-light-4">
+              {/* Category badge */}
+              {product.category && (
+                <span className="inline-block px-4 py-1.5 bg-gold-light-4 text-gold-dark rounded-full text-sm font-medium mb-4">
+                  {product.category}
+                </span>
+              )}
+
+              <h1 className="mb-4 text-2xl font-bold text-dark lg:text-3xl tracking-tight">
                 {product.name}
               </h1>
 
-              {product.category && (
-                <p className="mb-3 text-sm text-gray-6">
-                  Category: <span className="text-dark">{product.category}</span>
-                </p>
-              )}
-
-              <div className="mb-6">
-                <p className="text-3xl font-bold text-red">
+              <div className="mb-6 flex items-baseline gap-2">
+                <p className="text-4xl font-bold bg-gradient-to-r from-gold-dark to-gold bg-clip-text text-transparent">
                   ${product.price}
                 </p>
               </div>
 
               {product.description && (
-                <div className="mb-6">
-                  <h3 className="mb-2 text-lg font-semibold text-dark">Description</h3>
+                <div className="mb-6 pb-6 border-b border-gold-light-3">
+                  <h3 className="mb-3 text-lg font-semibold text-dark flex items-center gap-2">
+                    <svg className="w-5 h-5 text-gold" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                    </svg>
+                    Description
+                  </h3>
                   <p className="text-body leading-relaxed">
                     {product.description}
                   </p>
@@ -194,29 +203,29 @@ const ProductDetail = ({ productId }: ProductDetailProps) => {
 
               {/* Quantity and Stock */}
               <div className="mb-6">
-                <div className="flex items-center gap-4">
+                <div className="flex flex-wrap items-center gap-6">
                   <div className="flex items-center">
                     <label className="mr-3 text-sm font-medium text-dark">
                       Quantity:
                     </label>
-                    <div className="flex items-center">
+                    <div className="flex items-center rounded-lg overflow-hidden border border-gold-light-2">
                       <button
                         onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                        className="flex h-10 w-10 items-center justify-center border border-gray-3 text-dark hover:bg-gray-2"
+                        className="flex h-11 w-11 items-center justify-center bg-gold-light-4 text-gold-dark hover:bg-gold-light-3 transition-colors font-bold text-lg"
                       >
-                        -
+                        −
                       </button>
                       <input
                         type="number"
                         value={quantity}
                         onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value) || 1))}
-                        className="h-10 w-16 border-b border-t border-gray-3 text-center text-dark"
+                        className="h-11 w-16 border-0 text-center text-dark font-semibold bg-white focus:outline-none"
                         min="1"
                         max={product.stock_quantity || 999}
                       />
                       <button
                         onClick={() => setQuantity(quantity + 1)}
-                        className="flex h-10 w-10 items-center justify-center border border-gray-3 text-dark hover:bg-gray-2"
+                        className="flex h-11 w-11 items-center justify-center bg-gold-light-4 text-gold-dark hover:bg-gold-light-3 transition-colors font-bold text-lg"
                       >
                         +
                       </button>
@@ -224,10 +233,10 @@ const ProductDetail = ({ productId }: ProductDetailProps) => {
                   </div>
                   
                   {product.stock_quantity && product.stock_quantity > 0 && (
-                    <div className="flex items-center gap-2 text-sm text-green-600">
+                    <div className="flex items-center gap-2 px-4 py-2 bg-green-light-6 rounded-full">
                       <svg
-                        width="20"
-                        height="20"
+                        width="18"
+                        height="18"
                         viewBox="0 0 20 20"
                         fill="none"
                         xmlns="http://www.w3.org/2000/svg"
@@ -248,7 +257,7 @@ const ProductDetail = ({ productId }: ProductDetailProps) => {
                           </clipPath>
                         </defs>
                       </svg>
-                      <span className="font-medium">In Stock: {product.stock_quantity} pcs.</span>
+                      <span className="font-medium text-green-dark text-sm">In Stock: {product.stock_quantity} pcs.</span>
                     </div>
                   )}
                 </div>
@@ -258,18 +267,18 @@ const ProductDetail = ({ productId }: ProductDetailProps) => {
               <div className="mb-8 flex flex-col gap-4 sm:flex-row">
                 <button
                   onClick={addToCart}
-                  className="flex-1 bg-red py-3 px-6 text-white font-semibold hover:bg-red/90 transition-colors"
+                  className="flex-1 bg-gradient-to-r from-gold-dark to-gold py-4 px-8 text-white font-semibold rounded-xl hover:from-gold hover:to-gold-dark transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
                   disabled={product.stock_quantity === 0}
                 >
-                  {product.stock_quantity === 0 ? 'Out of Stock' : 'Add to Cart'}
+                  {product.stock_quantity === 0 ? 'Out of Stock' : '🛒 Add to Cart'}
                 </button>
                 
                 <button
                   onClick={handleAddToWishlist}
-                  className={`flex items-center justify-center border py-3 px-6 transition-colors ${
+                  className={`flex items-center justify-center border-2 py-4 px-6 rounded-xl transition-all duration-300 ${
                     product?.id && isInWishlist(product.id)
-                      ? 'border-red bg-red text-white hover:bg-red/90'
-                      : 'border-red text-red hover:bg-red hover:text-white'
+                      ? 'border-rose bg-rose text-white hover:bg-rose-dark shadow-lg'
+                      : 'border-rose text-rose hover:bg-rose hover:text-white hover:shadow-lg'
                   }`}
                 >
                   <svg
@@ -286,14 +295,17 @@ const ProductDetail = ({ productId }: ProductDetailProps) => {
                       d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
                     />
                   </svg>
-                  {product?.id && isInWishlist(product.id) ? 'Remove from Wishlist' : 'Add to Wishlist'}
+                  {product?.id && isInWishlist(product.id) ? 'In Wishlist' : 'Wishlist'}
                 </button>
               </div>
 
               {/* Additional Info */}
               {product.created_at && (
-                <div className="border-t border-gray-3 pt-6">
-                  <p className="text-sm text-gray-6">
+                <div className="border-t border-gold-light-3 pt-6">
+                  <p className="text-sm text-gray-5 flex items-center gap-2">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
                     Added: {new Date(product.created_at).toLocaleDateString('en-US')}
                   </p>
                 </div>

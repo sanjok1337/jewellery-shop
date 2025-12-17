@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { useCallback, useRef } from "react";
 import testimonialsData from "./testimonialsData";
@@ -30,7 +30,7 @@ const Testimonials = () => {
             {/* <!-- section title --> */}
             <div className="mb-10 flex items-center justify-between">
               <div>
-                <span className="flex items-center gap-2.5 font-medium text-dark mb-1.5">
+                <span className="flex items-center gap-2.5 font-medium text-gold mb-1.5">
                   <Image
                     src="/images/icons/icon-08.svg"
                     alt="icon"
@@ -116,3 +116,4 @@ const Testimonials = () => {
 };
 
 export default Testimonials;
+

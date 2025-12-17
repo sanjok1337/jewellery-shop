@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
 
@@ -29,9 +29,9 @@ const CounDown = () => {
   return (
     <section className="overflow-hidden py-20">
       <div className="max-w-[1170px] w-full mx-auto px-4 sm:px-8 xl:px-0">
-        <div className="relative overflow-hidden z-1 rounded-lg bg-[#D0E9F3] p-4 sm:p-7.5 lg:p-10 xl:p-15">
+        <div className="relative overflow-hidden z-1 rounded-lg bg-gradient-to-br from-champagne via-champagne-light to-gold-light-3 p-4 sm:p-7.5 lg:p-10 xl:p-15">
           <div className="max-w-[422px] w-full">
-            <span className="block font-medium text-custom-1 text-blue mb-2.5">
+            <span className="block font-medium text-custom-1 text-gold-dark mb-2.5">
               Don't Miss!!
             </span>
 
@@ -50,7 +50,7 @@ const CounDown = () => {
               {/* <!-- timer day --> */}
               <div>
                 <span
-                  className="min-w-[64px] h-14.5 font-semibold text-xl lg:text-3xl text-dark rounded-lg flex items-center justify-center bg-white shadow-2 px-4 mb-2"
+                  className="min-w-[64px] h-14.5 font-semibold text-xl lg:text-3xl text-dark rounded-lg flex items-center justify-center bg-white/80 shadow-lg border border-gold-light-3 px-4 mb-2"
                   x-text="days"
                 >
                   {" "}
@@ -64,7 +64,7 @@ const CounDown = () => {
               {/* <!-- timer hours --> */}
               <div>
                 <span
-                  className="min-w-[64px] h-14.5 font-semibold text-xl lg:text-3xl text-dark rounded-lg flex items-center justify-center bg-white shadow-2 px-4 mb-2"
+                  className="min-w-[64px] h-14.5 font-semibold text-xl lg:text-3xl text-dark rounded-lg flex items-center justify-center bg-white/80 shadow-lg border border-gold-light-3 px-4 mb-2"
                   x-text="hours"
                 >
                   {" "}
@@ -78,7 +78,7 @@ const CounDown = () => {
               {/* <!-- timer minutes --> */}
               <div>
                 <span
-                  className="min-w-[64px] h-14.5 font-semibold text-xl lg:text-3xl text-dark rounded-lg flex items-center justify-center bg-white shadow-2 px-4 mb-2"
+                  className="min-w-[64px] h-14.5 font-semibold text-xl lg:text-3xl text-dark rounded-lg flex items-center justify-center bg-white/80 shadow-lg border border-gold-light-3 px-4 mb-2"
                   x-text="minutes"
                 >
                   {minutes < 10 ? "0" + minutes : minutes}{" "}
@@ -91,7 +91,7 @@ const CounDown = () => {
               {/* <!-- timer seconds --> */}
               <div>
                 <span
-                  className="min-w-[64px] h-14.5 font-semibold text-xl lg:text-3xl text-dark rounded-lg flex items-center justify-center bg-white shadow-2 px-4 mb-2"
+                  className="min-w-[64px] h-14.5 font-semibold text-xl lg:text-3xl text-dark rounded-lg flex items-center justify-center bg-white/80 shadow-lg border border-gold-light-3 px-4 mb-2"
                   x-text="seconds"
                 >
                   {seconds < 10 ? "0" + seconds : seconds}{" "}
@@ -105,7 +105,7 @@ const CounDown = () => {
 
             <a
               href="#"
-              className="inline-flex font-medium text-custom-sm text-white bg-blue py-3 px-9.5 rounded-md ease-out duration-200 hover:bg-blue-dark mt-7.5"
+              className="inline-flex font-medium text-custom-sm text-white bg-gradient-to-r from-gold to-gold-dark py-3 px-9.5 rounded-full shadow-md ease-out duration-200 hover:from-gold-dark hover:to-gold mt-7.5"
             >
               Check it Out!
             </a>
@@ -133,3 +133,7 @@ const CounDown = () => {
 };
 
 export default CounDown;
+
+
+
+

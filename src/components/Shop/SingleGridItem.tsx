@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 import React from "react";
 import { Product } from "@/types/product";
 import { useModalContext } from "@/app/context/QuickViewModalContext";
@@ -39,7 +39,7 @@ const SingleGridItem = ({ item }: { item: Product }) => {
             }}
             id="newOne"
             aria-label="button for quick view"
-            className="flex items-center justify-center w-9 h-9 rounded-[5px] shadow-1 ease-out duration-200 text-dark bg-white hover:text-blue"
+            className="flex items-center justify-center w-9 h-9 rounded-[5px] shadow-1 ease-out duration-200 text-dark bg-white hover:text-gold"
           >
             <svg
               className="fill-current"
@@ -112,7 +112,7 @@ const SingleGridItem = ({ item }: { item: Product }) => {
         <p className="text-custom-sm">({item.reviews})</p>
       </div>
 
-      <h3 className="font-medium text-dark ease-out duration-200 hover:text-blue mb-1.5">
+      <h3 className="font-medium text-dark ease-out duration-200 hover:text-gold mb-1.5">
         <Link href={`/products/${item.id}`}> {item.title} </Link>
       </h3>
 
@@ -125,3 +125,4 @@ const SingleGridItem = ({ item }: { item: Product }) => {
 };
 
 export default SingleGridItem;
+

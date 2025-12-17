@@ -26,6 +26,31 @@ const config: Config = {
       transparent: "transparent",
       white: "#FFFFFF",
       body: "#6C6F93",
+      // Jewelry theme colors
+      gold: {
+        DEFAULT: "#D4AF37",
+        dark: "#B8941F",
+        light: "#E5C158",
+        "light-2": "#F0D77A",
+        "light-3": "#F7E9B0",
+        "light-4": "#FBF4D9",
+        "light-5": "#FDFAED",
+      },
+      rose: {
+        DEFAULT: "#B76E79",
+        dark: "#9D5A65",
+        light: "#C9888F",
+        "light-2": "#DBA5AB",
+        "light-3": "#ECC3C7",
+        "light-4": "#F5E0E2",
+        "light-5": "#FAF0F1",
+      },
+      champagne: {
+        DEFAULT: "#F7E7CE",
+        dark: "#E5D4B8",
+        light: "#FAF0E4",
+        "light-2": "#FCF6EE",
+      },
       meta: {
         DEFAULT: "#F7F9FC",
         2: "#495270",

@@ -1,4 +1,4 @@
-import React from "react";
+﻿import React from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/app/context/AuthContext";
@@ -26,7 +26,7 @@ const SingleItem = ({ item, onRemove }: SingleItemProps) => {
 
   const handleAddToCart = async () => {
     if (!token) {
-      toast.error('Увійдіть в аккаунт для додавання в кошик');
+      toast.error('РЈРІС–Р№РґС–С‚СЊ РІ Р°РєРєР°СѓРЅС‚ РґР»СЏ РґРѕРґР°РІР°РЅРЅСЏ РІ РєРѕС€РёРє');
       router.push('/signin');
       return;
     }
@@ -77,7 +77,7 @@ const SingleItem = ({ item, onRemove }: SingleItemProps) => {
             </div>
 
             <div>
-              <h3 className="text-dark ease-out duration-200 hover:text-blue">
+              <h3 className="text-dark ease-out duration-200 hover:text-gold">
                 <button 
                   onClick={() => router.push(`/products/${item.product_id}`)}
                   className="hover:text-red transition-colors"
@@ -126,9 +126,9 @@ const SingleItem = ({ item, onRemove }: SingleItemProps) => {
       <div className="min-w-[150px] flex justify-end">
         <button
           onClick={handleAddToCart}
-          className="inline-flex text-dark hover:text-white bg-gray-1 border border-gray-3 py-2.5 px-6 rounded-md ease-out duration-200 hover:bg-blue hover:border-gray-3"
+          className="inline-flex text-dark hover:text-white bg-gray-1 border border-gray-3 py-2.5 px-6 rounded-md ease-out duration-200 hover:bg-gold hover:border-gray-3"
         >
-          Додати в кошик
+          Р”РѕРґР°С‚Рё РІ РєРѕС€РёРє
         </button>
       </div>
     </div>
@@ -136,3 +136,5 @@ const SingleItem = ({ item, onRemove }: SingleItemProps) => {
 };
 
 export default SingleItem;
+
+

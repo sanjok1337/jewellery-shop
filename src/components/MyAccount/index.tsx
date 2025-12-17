@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Breadcrumb from "../Common/Breadcrumb";
@@ -23,7 +23,7 @@ const MyAccount = () => {
   const [addresses, setAddresses] = useState<Address[]>([]);
   const [loading, setLoading] = useState(false);
   
-  // Стан для зміни пароля
+  // РЎС‚Р°РЅ РґР»СЏ Р·РјС–РЅРё РїР°СЂРѕР»СЏ
   const [passwordData, setPasswordData] = useState({
     oldPassword: '',
     newPassword: '',
@@ -31,7 +31,7 @@ const MyAccount = () => {
   });
   const [passwordLoading, setPasswordLoading] = useState(false);
 
-  // Стан для зміни email
+  // РЎС‚Р°РЅ РґР»СЏ Р·РјС–РЅРё email
   const [emailData, setEmailData] = useState({
     newEmail: ''
   });
@@ -39,7 +39,7 @@ const MyAccount = () => {
 
   const { user, token, logout, login } = useAuth();
 
-  // Завантаження адрес
+  // Р—Р°РІР°РЅС‚Р°Р¶РµРЅРЅСЏ Р°РґСЂРµСЃ
   useEffect(() => {
     if (token && activeTab === "addresses") {
       fetchAddresses();
@@ -60,10 +60,10 @@ const MyAccount = () => {
       if (response.ok) {
         setAddresses(data.addresses);
       } else {
-        toast.error(data.message || "Помилка завантаження адрес");
+        toast.error(data.message || "РџРѕРјРёР»РєР° Р·Р°РІР°РЅС‚Р°Р¶РµРЅРЅСЏ Р°РґСЂРµСЃ");
       }
     } catch (error) {
-      toast.error("Помилка з'єднання з сервером");
+      toast.error("РџРѕРјРёР»РєР° Р·'С”РґРЅР°РЅРЅСЏ Р· СЃРµСЂРІРµСЂРѕРј");
     } finally {
       setLoading(false);
     }
@@ -79,26 +79,26 @@ const MyAccount = () => {
 
   const handleLogout = () => {
     logout();
-    toast.success("Ви вийшли з облікового запису");
+    toast.success("Р’Рё РІРёР№С€Р»Рё Р· РѕР±Р»С–РєРѕРІРѕРіРѕ Р·Р°РїРёСЃСѓ");
     router.push("/");
   };
 
-  // Функція для зміни пароля
+  // Р¤СѓРЅРєС†С–СЏ РґР»СЏ Р·РјС–РЅРё РїР°СЂРѕР»СЏ
   const handleChangePassword = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!passwordData.oldPassword || !passwordData.newPassword || !passwordData.confirmNewPassword) {
-      toast.error('Заповніть всі поля');
+      toast.error('Р—Р°РїРѕРІРЅС–С‚СЊ РІСЃС– РїРѕР»СЏ');
       return;
     }
 
     if (passwordData.newPassword !== passwordData.confirmNewPassword) {
-      toast.error('Нові паролі не співпадають');
+      toast.error('РќРѕРІС– РїР°СЂРѕР»С– РЅРµ СЃРїС–РІРїР°РґР°СЋС‚СЊ');
       return;
     }
 
     if (passwordData.newPassword.length < 6) {
-      toast.error('New Password повинен містити мінімум 6 символів');
+      toast.error('New Password РїРѕРІРёРЅРµРЅ РјС–СЃС‚РёС‚Рё РјС–РЅС–РјСѓРј 6 СЃРёРјРІРѕР»С–РІ');
       return;
     }
 
@@ -120,35 +120,35 @@ const MyAccount = () => {
       const data = await response.json();
 
       if (response.ok) {
-        toast.success(data.message || 'Пароль успішно змінено');
+        toast.success(data.message || 'РџР°СЂРѕР»СЊ СѓСЃРїС–С€РЅРѕ Р·РјС–РЅРµРЅРѕ');
         setPasswordData({
           oldPassword: '',
           newPassword: '',
           confirmNewPassword: ''
         });
       } else {
-        toast.error(data.error || 'Помилка зміни пароля');
+        toast.error(data.error || 'РџРѕРјРёР»РєР° Р·РјС–РЅРё РїР°СЂРѕР»СЏ');
       }
     } catch (error) {
-      console.error('Помилка зміни пароля:', error);
-      toast.error('Помилка зміни пароля');
+      console.error('РџРѕРјРёР»РєР° Р·РјС–РЅРё РїР°СЂРѕР»СЏ:', error);
+      toast.error('РџРѕРјРёР»РєР° Р·РјС–РЅРё РїР°СЂРѕР»СЏ');
     } finally {
       setPasswordLoading(false);
     }
   };
 
-  // Функція для зміни email
+  // Р¤СѓРЅРєС†С–СЏ РґР»СЏ Р·РјС–РЅРё email
   const handleChangeEmail = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!emailData.newEmail) {
-      toast.error('Введіть новий email');
+      toast.error('Р’РІРµРґС–С‚СЊ РЅРѕРІРёР№ email');
       return;
     }
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(emailData.newEmail)) {
-      toast.error('Неправильний формат email');
+      toast.error('РќРµРїСЂР°РІРёР»СЊРЅРёР№ С„РѕСЂРјР°С‚ email');
       return;
     }
 
@@ -169,17 +169,17 @@ const MyAccount = () => {
       const data = await response.json();
 
       if (response.ok) {
-        toast.success(data.message || 'Email успішно змінено');
-        // Оновлюємо дані користувача в контексті
+        toast.success(data.message || 'Email СѓСЃРїС–С€РЅРѕ Р·РјС–РЅРµРЅРѕ');
+        // РћРЅРѕРІР»СЋС”РјРѕ РґР°РЅС– РєРѕСЂРёСЃС‚СѓРІР°С‡Р° РІ РєРѕРЅС‚РµРєСЃС‚С–
         const updatedUser = { ...user, email: data.newEmail };
         login(token!, updatedUser);
         setEmailData({ newEmail: '' });
       } else {
-        toast.error(data.error || 'Помилка зміни email');
+        toast.error(data.error || 'РџРѕРјРёР»РєР° Р·РјС–РЅРё email');
       }
     } catch (error) {
-      console.error('Помилка зміни email:', error);
-      toast.error('Помилка зміни email');
+      console.error('РџРѕРјРёР»РєР° Р·РјС–РЅРё email:', error);
+      toast.error('РџРѕРјРёР»РєР° Р·РјС–РЅРё email');
     } finally {
       setEmailLoading(false);
     }
@@ -219,9 +219,9 @@ const MyAccount = () => {
                   <div className="flex flex-wrap xl:flex-nowrap xl:flex-col gap-4">
                     <button
                       onClick={() => setActiveTab("dashboard")}
-                      className={`flex items-center rounded-md gap-2.5 py-3 px-4.5 ease-out duration-200 hover:bg-blue hover:text-white ${
+                      className={`flex items-center rounded-md gap-2.5 py-3 px-4.5 ease-out duration-200 hover:bg-gold hover:text-white ${
                         activeTab === "dashboard"
-                          ? "text-white bg-blue"
+                          ? "text-white bg-gold"
                           : "text-dark-2 bg-gray-1"
                       }`}
                     >
@@ -262,9 +262,9 @@ const MyAccount = () => {
                     </button>
                     <button
                       onClick={() => setActiveTab("orders")}
-                      className={`flex items-center rounded-md gap-2.5 py-3 px-4.5 ease-out duration-200 hover:bg-blue hover:text-white ${
+                      className={`flex items-center rounded-md gap-2.5 py-3 px-4.5 ease-out duration-200 hover:bg-gold hover:text-white ${
                         activeTab === "orders"
-                          ? "text-white bg-blue"
+                          ? "text-white bg-gold"
                           : "text-dark-2 bg-gray-1"
                       }`}
                     >
@@ -300,9 +300,9 @@ const MyAccount = () => {
 
                     <button
                       onClick={() => setActiveTab("downloads")}
-                      className={`flex items-center rounded-md gap-2.5 py-3 px-4.5 ease-out duration-200 hover:bg-blue hover:text-white ${
+                      className={`flex items-center rounded-md gap-2.5 py-3 px-4.5 ease-out duration-200 hover:bg-gold hover:text-white ${
                         activeTab === "downloads"
-                          ? "text-white bg-blue"
+                          ? "text-white bg-gold"
                           : "text-dark-2 bg-gray-1"
                       }`}
                     >
@@ -328,9 +328,9 @@ const MyAccount = () => {
 
                     <button
                       onClick={() => setActiveTab("addresses")}
-                      className={`flex items-center rounded-md gap-2.5 py-3 px-4.5 ease-out duration-200 hover:bg-blue hover:text-white ${
+                      className={`flex items-center rounded-md gap-2.5 py-3 px-4.5 ease-out duration-200 hover:bg-gold hover:text-white ${
                         activeTab === "addresses"
-                          ? "text-white bg-blue"
+                          ? "text-white bg-gold"
                           : "text-dark-2 bg-gray-1"
                       }`}
                     >
@@ -358,9 +358,9 @@ const MyAccount = () => {
 
                     <button
                       onClick={() => setActiveTab("account-details")}
-                      className={`flex items-center rounded-md gap-2.5 py-3 px-4.5 ease-out duration-200 hover:bg-blue hover:text-white ${
+                      className={`flex items-center rounded-md gap-2.5 py-3 px-4.5 ease-out duration-200 hover:bg-gold hover:text-white ${
                         activeTab === "account-details"
-                          ? "text-white bg-blue"
+                          ? "text-white bg-gold"
                           : "text-dark-2 bg-gray-1"
                       }`}
                     >
@@ -390,7 +390,7 @@ const MyAccount = () => {
 
                     <button
                       onClick={handleLogout}
-                      className="flex items-center rounded-md gap-2.5 py-3 px-4.5 ease-out duration-200 hover:bg-blue hover:text-white text-dark-2 bg-gray-1"
+                      className="flex items-center rounded-md gap-2.5 py-3 px-4.5 ease-out duration-200 hover:bg-gold hover:text-white text-dark-2 bg-gray-1"
                     >
                       <svg
                         className="fill-current"
@@ -478,7 +478,7 @@ const MyAccount = () => {
                   </p>
 
                   <button
-                    className="text-dark ease-out duration-200 hover:text-blue"
+                    className="text-dark ease-out duration-200 hover:text-gold"
                     onClick={openAddressModal}
                   >
                     <svg
@@ -501,7 +501,7 @@ const MyAccount = () => {
 
                 <div className="p-4 sm:p-7.5">
                   {loading ? (
-                    <p className="text-center text-custom-sm">Завантаження...</p>
+                    <p className="text-center text-custom-sm">Р—Р°РІР°РЅС‚Р°Р¶РµРЅРЅСЏ...</p>
                   ) : addresses.length > 0 ? (
                     <div className="flex flex-col gap-4">
                       {addresses.map((address, index) => (
@@ -573,7 +573,7 @@ const MyAccount = () => {
                           fill=""
                         />
                       </svg>
-                      Ім'я: {user?.name || "Не вказано"}
+                      Р†Рј'СЏ: {user?.name || "РќРµ РІРєР°Р·Р°РЅРѕ"}
                     </p>
 
                     <p className="flex items-center gap-2.5 text-custom-sm">
@@ -592,7 +592,7 @@ const MyAccount = () => {
                           fill=""
                         />
                       </svg>
-                      Email: {user?.email || "Не вказано"}
+                      Email: {user?.email || "РќРµ РІРєР°Р·Р°РЅРѕ"}
                     </p>
                   </div>
                 </div>
@@ -609,7 +609,7 @@ const MyAccount = () => {
               {/* Email Change Form */}
               <div className="bg-white shadow-1 rounded-xl p-4 sm:p-8.5 mb-7">
                 <p className="font-medium text-xl sm:text-2xl text-dark mb-7">
-                  Зміна Email
+                  Р—РјС–РЅР° Email
                 </p>
                 <form onSubmit={handleChangeEmail}>
                   <div className="mb-5">
@@ -627,14 +627,14 @@ const MyAccount = () => {
 
                   <div className="mb-5">
                     <label htmlFor="newEmail" className="block mb-2.5">
-                      Новий Email <span className="text-red">*</span>
+                      РќРѕРІРёР№ Email <span className="text-red">*</span>
                     </label>
                     <input
                       type="email"
                       id="newEmail"
                       value={emailData.newEmail}
                       onChange={(e) => setEmailData({ newEmail: e.target.value })}
-                      placeholder="Введіть новий email"
+                      placeholder="Р’РІРµРґС–С‚СЊ РЅРѕРІРёР№ email"
                       className="rounded-md border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
                     />
                   </div>
@@ -642,9 +642,9 @@ const MyAccount = () => {
                   <button
                     type="submit"
                     disabled={emailLoading}
-                    className="inline-flex font-medium text-white bg-blue py-3 px-7 rounded-md ease-out duration-200 hover:bg-blue-dark disabled:opacity-50"
+                    className="inline-flex font-medium text-white bg-gold py-3 px-7 rounded-md ease-out duration-200 hover:bg-gold disabled:opacity-50"
                   >
-                    {emailLoading ? 'Збереження...' : 'Change Email'}
+                    {emailLoading ? 'Р—Р±РµСЂРµР¶РµРЅРЅСЏ...' : 'Change Email'}
                   </button>
                 </form>
               </div>
@@ -652,7 +652,7 @@ const MyAccount = () => {
               {/* Password Change Form */}
               <div className="bg-white shadow-1 rounded-xl p-4 sm:p-8.5">
                 <p className="font-medium text-xl sm:text-2xl text-dark mb-7">
-                  Зміна пароля
+                  Р—РјС–РЅР° РїР°СЂРѕР»СЏ
                 </p>
                 <form onSubmit={handleChangePassword}>
                   <div className="mb-5">
@@ -700,9 +700,9 @@ const MyAccount = () => {
                   <button
                     type="submit"
                     disabled={passwordLoading}
-                    className="inline-flex font-medium text-white bg-blue py-3 px-7 rounded-md ease-out duration-200 hover:bg-blue-dark disabled:opacity-50"
+                    className="inline-flex font-medium text-white bg-gold py-3 px-7 rounded-md ease-out duration-200 hover:bg-gold disabled:opacity-50"
                   >
-                    {passwordLoading ? 'Збереження...' : 'Change Password'}
+                    {passwordLoading ? 'Р—Р±РµСЂРµР¶РµРЅРЅСЏ...' : 'Change Password'}
                   </button>
                 </form>
               </div>
@@ -719,3 +719,5 @@ const MyAccount = () => {
 };
 
 export default MyAccount;
+
+

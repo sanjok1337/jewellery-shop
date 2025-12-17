@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+﻿import React, { useState } from "react";
 import OrderActions from "./OrderActions";
 import OrderModal from "./OrderModal";
 
@@ -40,7 +40,7 @@ const SingleOrder = ({ orderItem, smallView }: any) => {
                 orderItem.status === "delivered"
                   ? "text-green bg-green-light-6"
                   : orderItem.status === "shipped"
-                  ? "text-blue bg-blue-light-6"
+                  ? "text-gold bg-gold-light-6"
                   : orderItem.status === "pending"
                   ? "text-yellow bg-yellow-light-4"
                   : orderItem.status === "paid"
@@ -99,7 +99,7 @@ const SingleOrder = ({ orderItem, smallView }: any) => {
                     orderItem.status === "delivered"
                       ? "text-green bg-green-light-6"
                       : orderItem.status === "shipped"
-                      ? "text-blue bg-blue-light-6"
+                      ? "text-gold bg-gold-light-6"
                       : orderItem.status === "pending"
                       ? "text-yellow bg-yellow-light-4"
                       : orderItem.status === "paid"
@@ -151,3 +151,4 @@ const SingleOrder = ({ orderItem, smallView }: any) => {
 };
 
 export default SingleOrder;
+

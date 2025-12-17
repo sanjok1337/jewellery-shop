@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 import React, { useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import Breadcrumb from "../Common/Breadcrumb";
@@ -37,7 +37,7 @@ const ShopWithSidebar = () => {
   const [selectedPriceRange, setSelectedPriceRange] = useState({ min: 0, max: 1500 });
   const limit = 12;
 
-  // Читаємо параметри з URL при монтуванні
+  // Р§РёС‚Р°С”РјРѕ РїР°СЂР°РјРµС‚СЂРё Р· URL РїСЂРё РјРѕРЅС‚СѓРІР°РЅРЅС–
   useEffect(() => {
     const category = searchParams.get('category');
     const search = searchParams.get('search');
@@ -51,7 +51,7 @@ const ShopWithSidebar = () => {
   }, [searchParams]);
 
   useEffect(() => {
-    console.log('🔄 Fetching products with:', { currentPage, sortBy, selectedCategory, searchQuery, selectedPriceRange });
+    console.log('рџ”„ Fetching products with:', { currentPage, sortBy, selectedCategory, searchQuery, selectedPriceRange });
     fetchProducts();
   }, [currentPage, sortBy, selectedCategory, searchQuery, selectedPriceRange]);
 
@@ -62,47 +62,47 @@ const ShopWithSidebar = () => {
 
   const fetchCategories = async () => {
     try {
-      console.log('🔍 Fetching categories from API...');
+      console.log('рџ”Ќ Fetching categories from API...');
       const response = await fetch('http://localhost:5000/api/products/categories');
-      console.log('📡 Categories response:', response.status);
+      console.log('рџ“Ў Categories response:', response.status);
       if (response.ok) {
         const data = await response.json();
-        console.log('📋 Categories data:', data);
+        console.log('рџ“‹ Categories data:', data);
         const formattedCategories = data.map(cat => ({
           name: cat.name,
           products: cat.product_count,
           isRefined: false
         }));
-        console.log('✅ Formatted categories:', formattedCategories);
+        console.log('вњ… Formatted categories:', formattedCategories);
         setCategories(formattedCategories);
       } else {
-        console.error('❌ Categories response not OK:', response.status);
+        console.error('вќЊ Categories response not OK:', response.status);
       }
     } catch (error) {
-      console.error('❌ Fetch categories error:', error);
+      console.error('вќЊ Fetch categories error:', error);
     }
   };
 
   const fetchPriceRange = async () => {
     try {
-      console.log('💰 Fetching price range from API...');
+      console.log('рџ’° Fetching price range from API...');
       const response = await fetch('http://localhost:5000/api/products/price-range');
-      console.log('📡 Price range response:', response.status);
+      console.log('рџ“Ў Price range response:', response.status);
       if (response.ok) {
         const data = await response.json();
-        console.log('💵 Price range data:', data);
+        console.log('рџ’µ Price range data:', data);
         const range = { 
           minPrice: Math.floor(data.minPrice || 0), 
           maxPrice: Math.ceil(data.maxPrice || 1500) 
         };
-        console.log('✅ Price range set:', range);
+        console.log('вњ… Price range set:', range);
         setPriceRange(range);
         setSelectedPriceRange({ min: range.minPrice, max: range.maxPrice });
       } else {
-        console.error('❌ Price range response not OK:', response.status);
+        console.error('вќЊ Price range response not OK:', response.status);
       }
     } catch (error) {
-      console.error('❌ Fetch price range error:', error);
+      console.error('вќЊ Fetch price range error:', error);
     }
   };
 
@@ -120,11 +120,11 @@ const ShopWithSidebar = () => {
         url += `&minPrice=${selectedPriceRange.min}&maxPrice=${selectedPriceRange.max}`;
       }
       
-      console.log('📡 Fetching URL:', url);
+      console.log('рџ“Ў Fetching URL:', url);
       const response = await fetch(url);
       if (response.ok) {
         const data = await response.json();
-        console.log('📦 Got products:', data.products?.length, 'Total:', data.pagination?.total);
+        console.log('рџ“¦ Got products:', data.products?.length, 'Total:', data.pagination?.total);
         setProducts(data.products || []);
         setTotalProducts(data.pagination?.total || 0);
         setTotalPages(data.pagination?.pages || 1);
@@ -159,8 +159,8 @@ const ShopWithSidebar = () => {
             onClick={() => handlePageChange(i)}
             className={`flex py-1.5 px-3.5 duration-200 rounded-[3px] ${
               i === currentPage
-                ? 'bg-blue text-white'
-                : 'hover:text-white hover:bg-blue'
+                ? 'bg-gold text-white'
+                : 'hover:text-white hover:bg-gold'
             }`}
           >
             {i}
@@ -179,7 +179,7 @@ const ShopWithSidebar = () => {
         <li key={totalPages}>
           <button
             onClick={() => handlePageChange(totalPages)}
-            className="flex py-1.5 px-3.5 duration-200 rounded-[3px] hover:text-white hover:bg-blue"
+            className="flex py-1.5 px-3.5 duration-200 rounded-[3px] hover:text-white hover:bg-gold"
           >
             {totalPages}
           </button>
@@ -303,7 +303,7 @@ const ShopWithSidebar = () => {
                           setCurrentPage(1);
                         }}
                         placeholder="Search products..."
-                        className="w-full rounded-md border border-gray-3 bg-gray-1 py-2.5 pl-4 pr-10 outline-none focus:border-blue"
+                        className="w-full rounded-md border border-gray-3 bg-gray-1 py-2.5 pl-4 pr-10 outline-none focus:border-gold"
                       />
                       {searchQuery && (
                         <button
@@ -335,7 +335,7 @@ const ShopWithSidebar = () => {
                     <div className="flex items-center justify-between">
                       <p>Filters:</p>
                       <button 
-                        className="text-blue"
+                        className="text-gold"
                         onClick={() => {
                           setSelectedCategory('');
                           setSelectedPriceRange({ min: priceRange.minPrice, max: priceRange.maxPrice });
@@ -385,9 +385,9 @@ const ShopWithSidebar = () => {
                       aria-label="button for product grid tab"
                       className={`${
                         productStyle === "grid"
-                          ? "bg-blue border-blue text-white"
+                          ? "bg-gold border-gold text-white"
                           : "text-dark bg-gray-1 border-gray-3"
-                      } flex items-center justify-center w-10.5 h-9 rounded-[5px] border ease-out duration-200 hover:bg-blue hover:border-blue hover:text-white`}
+                      } flex items-center justify-center w-10.5 h-9 rounded-[5px] border ease-out duration-200 hover:bg-gold hover:border-gold hover:text-white`}
                     >
                       <svg
                         className="fill-current"
@@ -429,9 +429,9 @@ const ShopWithSidebar = () => {
                       aria-label="button for product list tab"
                       className={`${
                         productStyle === "list"
-                          ? "bg-blue border-blue text-white"
+                          ? "bg-gold border-gold text-white"
                           : "text-dark bg-gray-1 border-gray-3"
-                      } flex items-center justify-center w-10.5 h-9 rounded-[5px] border ease-out duration-200 hover:bg-blue hover:border-blue hover:text-white`}
+                      } flex items-center justify-center w-10.5 h-9 rounded-[5px] border ease-out duration-200 hover:bg-gold hover:border-gold hover:text-white`}
                     >
                       <svg
                         className="fill-current"
@@ -469,11 +469,11 @@ const ShopWithSidebar = () => {
               >
                 {loading ? (
                   <div className="col-span-full text-center py-8">
-                    <p>Завантаження товарів...</p>
+                    <p>Р—Р°РІР°РЅС‚Р°Р¶РµРЅРЅСЏ С‚РѕРІР°СЂС–РІ...</p>
                   </div>
                 ) : products.length > 0 ? (
                   products.map((product) => {
-                    // Адаптуємо дані з API до формату, який очікують компоненти
+                    // РђРґР°РїС‚СѓС”РјРѕ РґР°РЅС– Р· API РґРѕ С„РѕСЂРјР°С‚Сѓ, СЏРєРёР№ РѕС‡С–РєСѓСЋС‚СЊ РєРѕРјРїРѕРЅРµРЅС‚Рё
                     const adaptedProduct = {
                       id: product.id,
                       title: product.name,
@@ -498,7 +498,7 @@ const ShopWithSidebar = () => {
                   })
                 ) : (
                   <div className="col-span-full text-center py-8">
-                    <p>Товарів не знайдено</p>
+                    <p>РўРѕРІР°СЂС–РІ РЅРµ Р·РЅР°Р№РґРµРЅРѕ</p>
                   </div>
                 )}
               </div>
@@ -515,7 +515,7 @@ const ShopWithSidebar = () => {
                           disabled={currentPage === 1}
                           aria-label="button for pagination left"
                           type="button"
-                          className="flex items-center justify-center w-8 h-9 ease-out duration-200 rounded-[3px] disabled:text-gray-4 disabled:cursor-not-allowed hover:text-white hover:bg-blue disabled:hover:bg-transparent disabled:hover:text-gray-4"
+                          className="flex items-center justify-center w-8 h-9 ease-out duration-200 rounded-[3px] disabled:text-gray-4 disabled:cursor-not-allowed hover:text-white hover:bg-gold disabled:hover:bg-transparent disabled:hover:text-gray-4"
                         >
                           <svg
                             className="fill-current"
@@ -541,7 +541,7 @@ const ShopWithSidebar = () => {
                           disabled={currentPage === totalPages}
                           aria-label="button for pagination right"
                           type="button"
-                          className="flex items-center justify-center w-8 h-9 ease-out duration-200 rounded-[3px] disabled:text-gray-4 disabled:cursor-not-allowed hover:text-white hover:bg-blue disabled:hover:bg-transparent disabled:hover:text-gray-4"
+                          className="flex items-center justify-center w-8 h-9 ease-out duration-200 rounded-[3px] disabled:text-gray-4 disabled:cursor-not-allowed hover:text-white hover:bg-gold disabled:hover:bg-transparent disabled:hover:text-gray-4"
                         >
                           <svg
                             className="fill-current"
@@ -573,3 +573,5 @@ const ShopWithSidebar = () => {
 };
 
 export default ShopWithSidebar;
+
+

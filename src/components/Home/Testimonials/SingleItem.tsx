@@ -1,10 +1,10 @@
-import React from "react";
+﻿import React from "react";
 import { Testimonial } from "@/types/testimonial";
 import Image from "next/image";
 
 const SingleItem = ({ testimonial }: { testimonial: Testimonial }) => {
   return (
-    <div className="shadow-testimonial bg-white rounded-[10px] py-7.5 px-4 sm:px-8.5 m-1">
+    <div className="shadow-lg bg-gradient-to-br from-white to-champagne-light border border-gold-light-3 rounded-2xl py-7.5 px-4 sm:px-8.5 m-1">
       <div className="flex items-center gap-1 mb-5">
         <Image
           src="/images/icons/icon-star.svg"
@@ -61,3 +61,4 @@ const SingleItem = ({ testimonial }: { testimonial: Testimonial }) => {
 };
 
 export default SingleItem;
+

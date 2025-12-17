@@ -1,4 +1,4 @@
-import React from "react";
+﻿import React from "react";
 import Breadcrumb from "../Common/Breadcrumb";
 
 const Contact = () => {
@@ -164,7 +164,7 @@ const Contact = () => {
 
                 <button
                   type="submit"
-                  className="inline-flex font-medium text-white bg-blue py-3 px-7 rounded-md ease-out duration-200 hover:bg-blue-dark"
+                  className="inline-flex font-medium text-white bg-gradient-to-r from-gold to-gold-dark py-3 px-7 rounded-full shadow-md ease-out duration-200 hover:from-gold-dark hover:to-gold"
                 >
                   Send Message
                 </button>
@@ -178,3 +178,4 @@ const Contact = () => {
 };
 
 export default Contact;
+

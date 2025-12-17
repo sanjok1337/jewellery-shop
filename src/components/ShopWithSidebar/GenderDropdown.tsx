@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 import React, { useState } from "react";
 
 const GenderItem = ({ category }) => {
@@ -6,14 +6,14 @@ const GenderItem = ({ category }) => {
   return (
     <button
       className={`${
-        selected && "text-blue"
-      } group flex items-center justify-between ease-out duration-200 hover:text-blue `}
+        selected && "text-gold"
+      } group flex items-center justify-between ease-out duration-200 hover:text-gold `}
       onClick={() => setSelected(!selected)}
     >
       <div className="flex items-center gap-2">
         <div
           className={`cursor-pointer flex items-center justify-center rounded w-4 h-4 border ${
-            selected ? "border-blue bg-blue" : "bg-white border-gray-3"
+            selected ? "border-gold bg-gold" : "bg-white border-gray-3"
           }`}
         >
           <svg
@@ -39,8 +39,8 @@ const GenderItem = ({ category }) => {
 
       <span
         className={`${
-          selected ? "text-white bg-blue" : "bg-gray-2"
-        } inline-flex rounded-[30px] text-custom-xs px-2 ease-out duration-200 group-hover:text-white group-hover:bg-blue`}
+          selected ? "text-white bg-gold" : "bg-gray-2"
+        } inline-flex rounded-[30px] text-custom-xs px-2 ease-out duration-200 group-hover:text-white group-hover:bg-gold`}
       >
         {category.products}
       </span>
@@ -100,3 +100,5 @@ const GenderDropdown = ({ genders }) => {
 };
 
 export default GenderDropdown;
+
+

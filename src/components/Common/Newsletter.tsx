@@ -1,4 +1,4 @@
-import React from "react";
+﻿import React from "react";
 import Image from "next/image";
 
 const Newsletter = () => {
@@ -35,11 +35,11 @@ const Newsletter = () => {
                     name="email"
                     id="email"
                     placeholder="Enter your email"
-                    className="w-full bg-gray-1 border border-gray-3 outline-none rounded-md placeholder:text-dark-4 py-3 px-5"
+                    className="w-full bg-gray-1 border border-gold-light outline-none rounded-full placeholder:text-dark-4 py-3 px-5"
                   />
                   <button
                     type="submit"
-                    className="inline-flex justify-center py-3 px-7 text-white bg-blue font-medium rounded-md ease-out duration-200 hover:bg-blue-dark"
+                    className="inline-flex justify-center py-3 px-7 text-white bg-gradient-to-r from-gold to-gold-dark font-medium rounded-full shadow-md ease-out duration-200 hover:from-gold-dark hover:to-gold"
                   >
                     Subscribe
                   </button>
@@ -54,3 +54,5 @@ const Newsletter = () => {
 };
 
 export default Newsletter;
+
+

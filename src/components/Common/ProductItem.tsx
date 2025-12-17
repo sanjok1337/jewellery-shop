@@ -35,19 +35,19 @@ const ProductItem = ({ item }: { item: Product }) => {
 
   return (
     <div className={`group ${item.stock === 0 ? 'opacity-75' : ''}`}>
-      <div className="relative overflow-hidden flex items-center justify-center rounded-lg bg-[#F6F7FB] min-h-[270px] mb-4">
+      <div className="relative overflow-hidden flex items-center justify-center rounded-2xl bg-gradient-to-br from-champagne-light to-white min-h-[270px] mb-4 border border-gold-light-3 shadow-sm hover:shadow-lg transition-all duration-300">
         <Link href={`/products/${item.id}`}>
-          <Image src={item.imgs.previews[0]} alt="" width={250} height={250} className="cursor-pointer" />
+          <Image src={item.imgs.previews[0]} alt="" width={250} height={250} className="cursor-pointer transition-transform duration-500 group-hover:scale-105 rounded-xl" />
         </Link>
 
-        <div className="absolute left-0 bottom-0 translate-y-full w-full flex items-center justify-center gap-2.5 pb-5 ease-linear duration-200 group-hover:translate-y-0">
+        <div className="absolute left-0 bottom-0 translate-y-full w-full flex items-center justify-center gap-2.5 pb-5 ease-linear duration-200 group-hover:translate-y-0 bg-gradient-to-t from-white/90 to-transparent pt-8">
           <button
             onClick={() => {
               openModal(item.id);
             }}
             id="newOne"
             aria-label="button for quick view"
-            className="flex items-center justify-center w-9 h-9 rounded-[5px] shadow-1 ease-out duration-200 text-dark bg-white hover:text-blue"
+            className="flex items-center justify-center w-10 h-10 rounded-full shadow-lg ease-out duration-200 text-gold-dark bg-white hover:bg-gold hover:text-white border border-gold-light-2"
           >
             <svg
               className="fill-current"
@@ -74,7 +74,7 @@ const ProductItem = ({ item }: { item: Product }) => {
 
           <button
             onClick={() => handleAddToCart()}
-            className="inline-flex font-medium text-custom-sm py-[7px] px-5 rounded-[5px] bg-blue text-white ease-out duration-200 hover:bg-blue-dark"
+            className="inline-flex font-medium text-custom-sm py-2 px-5 rounded-full bg-gradient-to-r from-gold to-gold-dark text-white ease-out duration-200 hover:from-gold-dark hover:to-gold shadow-md"
           >
             Add to cart
           </button>
@@ -85,64 +85,41 @@ const ProductItem = ({ item }: { item: Product }) => {
 
       <div className="flex items-center gap-2.5 mb-2">
         <div className="flex items-center gap-1">
-          <Image
-            src="/images/icons/icon-star.svg"
-            alt="star icon"
-            width={14}
-            height={14}
-          />
-          <Image
-            src="/images/icons/icon-star.svg"
-            alt="star icon"
-            width={14}
-            height={14}
-          />
-          <Image
-            src="/images/icons/icon-star.svg"
-            alt="star icon"
-            width={14}
-            height={14}
-          />
-          <Image
-            src="/images/icons/icon-star.svg"
-            alt="star icon"
-            width={14}
-            height={14}
-          />
-          <Image
-            src="/images/icons/icon-star.svg"
-            alt="star icon"
-            width={14}
-            height={14}
-          />
+          {[...Array(5)].map((_, i) => (
+            <svg key={i} className="w-4 h-4 text-gold" fill="currentColor" viewBox="0 0 20 20">
+              <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+            </svg>
+          ))}
         </div>
 
-        <p className="text-custom-sm">({item.reviews})</p>
+        <p className="text-custom-sm text-gray-500">({item.reviews} reviews)</p>
       </div>
 
       <h3
-        className="font-medium text-dark ease-out duration-200 hover:text-blue mb-1.5"
+        className="font-semibold text-dark ease-out duration-200 hover:text-gold mb-1.5 cursor-pointer"
         onClick={() => handleProductDetails()}
       >
         <Link href={`/products/${item.id}`}> {item.title} </Link>
       </h3>
 
       <span className="flex items-center gap-2 font-medium text-lg">
-        <span className="text-dark">${item.discountedPrice}</span>
-        <span className="text-dark-4 line-through">${item.price}</span>
+        <span className="text-gold-dark font-bold">${item.discountedPrice}</span>
+        <span className="text-gray-400 line-through text-sm">${item.price}</span>
       </span>
       
       {/* Stock Status */}
       {item.stock !== undefined && (
         <div className="mt-2">
           {item.stock === 0 ? (
-            <span className="inline-flex items-center px-2 py-1 text-xs font-medium bg-red-100 text-red-800 rounded-full">
-              <span className="w-2 h-2 bg-red-500 rounded-full mr-1"></span>
+            <span className="inline-flex items-center px-3 py-1 text-xs font-medium bg-rose-light text-rose-dark rounded-full">
+              <span className="w-2 h-2 bg-rose rounded-full mr-1.5"></span>
               Out of Stock
             </span>
           ) : (
-            <span className="inline-flex items-center px-2 py-1 text-xs font-medium bg-green-100 text-green-800 rounded-full">
-              <span className="w-2 h-2 bg-green-500 rounded-full mr-1"></span>
+            <span className="inline-flex items-center px-3 py-1 text-xs font-medium bg-green-50 text-green-700 rounded-full">
+              <svg className="w-3 h-3 mr-1.5 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/>
+              </svg>
               In Stock
             </span>
           )}

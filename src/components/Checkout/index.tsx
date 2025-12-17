@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Breadcrumb from "../Common/Breadcrumb";
@@ -7,6 +7,7 @@ import ShippingMethod from "./ShippingMethod";
 import PaymentMethod from "./PaymentMethod";
 import Coupon from "./Coupon";
 import Billing from "./Billing";
+import CryptoPaymentModal from "./CryptoPaymentModal";
 import { useAuth } from "@/app/context/AuthContext";
 import { useCart } from "@/app/context/CartContext";
 import toast from "react-hot-toast";
@@ -43,13 +44,21 @@ const Checkout = () => {
   const [notes, setNotes] = useState('');
   const [shippingMethod, setShippingMethod] = useState('standard');
   const [paymentMethod, setPaymentMethod] = useState('bank');
+  
+  // Crypto payment modal state
+  const [showCryptoModal, setShowCryptoModal] = useState(false);
+  const [cryptoOrderId, setCryptoOrderId] = useState<number | null>(null);
+  const [cryptoOrderTotal, setCryptoOrderTotal] = useState<number>(0);
+
+  // Check if selected payment method is crypto
+  const isCryptoPayment = ['bitcoin', 'ethereum', 'usdt'].includes(paymentMethod);
 
   useEffect(() => {
     console.log('Checkout - isAuthenticated:', isAuthenticated);
     console.log('Checkout - token:', token);
     
     if (!isAuthenticated) {
-      toast.error('Увійдіть в аккаунт для оформлення замовлення');
+      toast.error('РЈРІС–Р№РґС–С‚СЊ РІ Р°РєРєР°СѓРЅС‚ РґР»СЏ РѕС„РѕСЂРјР»РµРЅРЅСЏ Р·Р°РјРѕРІР»РµРЅРЅСЏ');
       router.push('/signin');
       return;
     }
@@ -70,7 +79,7 @@ const Checkout = () => {
         const data = await response.json();
         setAddresses(data.addresses || []);
         
-        // Вибираємо адресу за замовчуванням
+        // Р’РёР±РёСЂР°С”РјРѕ Р°РґСЂРµСЃСѓ Р·Р° Р·Р°РјРѕРІС‡СѓРІР°РЅРЅСЏРј
         const defaultAddress = data.addresses?.find((addr: Address) => addr.is_default);
         if (defaultAddress) {
           setSelectedAddress(defaultAddress);
@@ -106,7 +115,7 @@ const Checkout = () => {
     }
 
     if (cartItems.length === 0) {
-      toast.error('Ваш кошик порожній');
+      toast.error('Р’Р°С€ РєРѕС€РёРє РїРѕСЂРѕР¶РЅС–Р№');
       return;
     }
 
@@ -146,9 +155,9 @@ const Checkout = () => {
         try {
           const data = JSON.parse(text);
           console.log('Order created successfully:', data);
-          toast.success('Замовлення успішно створено!');
+          toast.success('Р—Р°РјРѕРІР»РµРЅРЅСЏ СѓСЃРїС–С€РЅРѕ СЃС‚РІРѕСЂРµРЅРѕ!');
           
-          // Очищаємо кошик після успішного замовлення
+          // РћС‡РёС‰Р°С”РјРѕ РєРѕС€РёРє РїС–СЃР»СЏ СѓСЃРїС–С€РЅРѕРіРѕ Р·Р°РјРѕРІР»РµРЅРЅСЏ
           await fetch('http://localhost:5000/api/cart', {
             method: 'DELETE',
             headers: {
@@ -160,7 +169,7 @@ const Checkout = () => {
         } catch (parseError) {
           console.error('Parse success response error:', parseError);
           console.error('Response was:', text);
-          toast.error('Помилка обробки відповіді сервера');
+          toast.error('РџРѕРјРёР»РєР° РѕР±СЂРѕР±РєРё РІС–РґРїРѕРІС–РґС– СЃРµСЂРІРµСЂР°');
         }
       } else {
         console.error('Order failed with status:', response.status);
@@ -168,22 +177,22 @@ const Checkout = () => {
         try {
           const error = JSON.parse(text);
           console.error('Parsed error:', error);
-          toast.error(error.message || error.error || 'Помилка створення замовлення');
+          toast.error(error.message || error.error || 'РџРѕРјРёР»РєР° СЃС‚РІРѕСЂРµРЅРЅСЏ Р·Р°РјРѕРІР»РµРЅРЅСЏ');
         } catch (parseError) {
           console.error('Could not parse error response:', parseError);
-          toast.error('Помилка сервера: ' + text.substring(0, 100));
+          toast.error('РџРѕРјРёР»РєР° СЃРµСЂРІРµСЂР°: ' + text.substring(0, 100));
         }
       }
     } catch (error) {
       console.error('Checkout error:', error);
-      toast.error('Помилка оформлення замовлення');
+      toast.error('РџРѕРјРёР»РєР° РѕС„РѕСЂРјР»РµРЅРЅСЏ Р·Р°РјРѕРІР»РµРЅРЅСЏ');
     }
   };
 
   if (loading) {
     return (
       <div className="flex justify-center items-center min-h-screen">
-        <p className="text-lg">Завантаження...</p>
+        <p className="text-lg">Р—Р°РІР°РЅС‚Р°Р¶РµРЅРЅСЏ...</p>
       </div>
     );
   }
@@ -221,7 +230,7 @@ const Checkout = () => {
                       value={notes}
                       onChange={(e) => setNotes(e.target.value)}
                       placeholder="Notes about your order, e.g. special notes for delivery."
-                      className="rounded-md border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full p-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
+                      className="rounded-md border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full p-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-gold/30"
                     ></textarea>
                   </div>
                 </div>
@@ -253,7 +262,7 @@ const Checkout = () => {
                     {/* <!-- product items --> */}
                     {cartItems.length === 0 ? (
                       <div className="py-5 text-center text-dark-5">
-                        Ваш кошик порожній
+                        Р’Р°С€ РєРѕС€РёРє РїРѕСЂРѕР¶РЅС–Р№
                       </div>
                     ) : (
                       cartItems.map((item) => (
@@ -316,7 +325,7 @@ const Checkout = () => {
                 {/* <!-- checkout button --> */}
                 <button
                   type="submit"
-                  className="w-full flex justify-center font-medium text-white bg-blue py-3 px-6 rounded-md ease-out duration-200 hover:bg-blue-dark mt-7.5"
+                  className="w-full flex justify-center font-medium text-white bg-gradient-to-r from-gold to-gold-dark py-3 px-6 rounded-full shadow-md ease-out duration-200 hover:from-gold-dark hover:to-gold mt-7.5"
                 >
                   Process to Checkout
                 </button>
@@ -330,3 +339,4 @@ const Checkout = () => {
 };
 
 export default Checkout;
+
