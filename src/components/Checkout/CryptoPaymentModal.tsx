@@ -41,7 +41,7 @@ const CryptoPaymentModal = ({
     usdt: "Tether (USDT)",
   };
 
-  const cryptoIcons: Record<string, JSX.Element> = {
+  const cryptoIcons: Record<string, React.ReactNode> = {
     bitcoin: (
       <svg className="w-8 h-8" viewBox="0 0 24 24" fill="none">
         <circle cx="12" cy="12" r="10" fill="#F7931A" />
