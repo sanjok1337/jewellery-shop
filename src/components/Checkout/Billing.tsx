@@ -29,7 +29,7 @@ const Billing = ({ addresses = [], selectedAddress, onSelectAddress }: BillingPr
       <div className="bg-white shadow-1 rounded-[10px] p-4 sm:p-8.5">
         {addresses.length === 0 ? (
           <div className="text-center py-8">
-            <p className="text-dark-5 mb-4">У вас немає збережених адрес</p>
+            <p className="text-dark-5 mb-4">You don't have any saved addresses</p>
             <a href="/my-account" className="text-blue hover:underline">
               Додати адресу в особистому кабінеті
             </a>

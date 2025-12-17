@@ -17,7 +17,7 @@ const getUserOrders = async (req, res) => {
           a.postal_code,
           a.phone,
           GROUP_CONCAT(
-            CONCAT(p.name, ' x', oi.quantity, ' (', oi.price, ' грн)')
+            CONCAT(p.name, ' x', oi.quantity, ' ($', oi.price, ')')
             SEPARATOR '; '
           ) as items
         FROM orders o
@@ -38,7 +38,7 @@ const getUserOrders = async (req, res) => {
         date: order.created_at,
         status: order.status,
         totalAmount: order.total_amount,
-        items: order.items || 'Немає товарів',
+        items: order.items || 'No items',
         shippingAddress: order.city && order.street ? 
           `${order.city}, ${order.street}${order.postal_code ? ` (${order.postal_code})` : ''}` : 
           'Адреса не вказана',

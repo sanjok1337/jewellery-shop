@@ -93,7 +93,7 @@ const Orders = () => {
                 ))
               ) : (
                 <p className="py-9.5 px-4 sm:px-7.5 xl:px-10">
-                  У вас поки немає замовлень!
+                  You don't have any orders yet!
                 </p>
               )}
             </>

@@ -536,7 +536,7 @@ const MyAccount = () => {
                     </div>
                   ) : (
                     <p className="text-custom-sm text-dark-4">
-                      Немає збережених адрес. Додайте нову адресу.
+                      No saved addresses. Add a new address.
                     </p>
                   )}
                 </div>
