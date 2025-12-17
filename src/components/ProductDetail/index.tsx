@@ -122,7 +122,6 @@ const ProductDetail = ({ productId }: ProductDetailProps) => {
       <Breadcrumb 
         title={product.name}
         pages={[
-          { name: "Home", href: "/" },
           { name: "Shop", href: "/shop-without-sidebar" },
           { name: product.name }
         ]}
@@ -281,7 +280,7 @@ const ProductDetail = ({ productId }: ProductDetailProps) => {
         </div>
       </section>
 
-      {/* Секція відгуків */}
+      {/* Reviews section */}
       <section className="pb-20">
         <div className="mx-auto max-w-[1170px] px-4 sm:px-8 xl:px-0">
           <Reviews productId={productId} />

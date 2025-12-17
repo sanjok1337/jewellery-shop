@@ -228,7 +228,7 @@ const ShopWithoutSidebar = () => {
               >
                 {loading ? (
                   <div className="col-span-full text-center py-8">
-                    <p>Завантаження товарів...</p>
+                    <p>Loading products...</p>
                   </div>
                 ) : products.length > 0 ? (
                   products.map((product) => {
@@ -257,7 +257,7 @@ const ShopWithoutSidebar = () => {
                   })
                 ) : (
                   <div className="col-span-full text-center py-8">
-                    <p>Товарів не знайдено</p>
+                    <p>No products found</p>
                   </div>
                 )}
               </div>

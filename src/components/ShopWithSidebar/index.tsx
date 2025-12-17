@@ -292,7 +292,7 @@ const ShopWithSidebar = () => {
                   {/* <!-- Search box --> */}
                   <div className="bg-white shadow-1 rounded-lg py-4 px-5">
                     <h3 className="font-semibold text-dark mb-4">
-                      Пошук
+                      Search
                     </h3>
                     <div className="relative">
                       <input
@@ -302,7 +302,7 @@ const ShopWithSidebar = () => {
                           setSearchQuery(e.target.value);
                           setCurrentPage(1);
                         }}
-                        placeholder="Пошук товарів..."
+                        placeholder="Search products..."
                         className="w-full rounded-md border border-gray-3 bg-gray-1 py-2.5 pl-4 pr-10 outline-none focus:border-blue"
                       />
                       {searchQuery && (

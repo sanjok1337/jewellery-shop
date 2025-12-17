@@ -124,7 +124,7 @@ const NewArrival = () => {
             })
           ) : (
             <div className="col-span-full text-center py-8">
-              <p>Товарів не знайдено</p>
+              <p>No products found</p>
             </div>
           )}
         </div>
