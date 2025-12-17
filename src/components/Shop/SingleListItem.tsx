@@ -37,8 +37,7 @@ const SingleListItem = ({ item }: { item: Product }) => {
           <div className="absolute left-0 bottom-0 translate-y-full w-full flex items-center justify-center gap-2.5 pb-5 ease-linear duration-200 group-hover:translate-y-0">
             <button
               onClick={() => {
-                openModal();
-                handleQuickViewUpdate();
+                openModal(item.id);
               }}
               aria-label="button for quick view"
               className="flex items-center justify-center w-9 h-9 rounded-[5px] shadow-1 ease-out duration-200 text-dark bg-white hover:text-blue"

@@ -3,7 +3,8 @@ import React, { createContext, useContext, useState } from "react";
 
 interface ModalContextType {
   isModalOpen: boolean;
-  openModal: () => void;
+  productId: number | null;
+  openModal: (id: number) => void;
   closeModal: () => void;
 }
 
@@ -19,17 +20,20 @@ export const useModalContext = () => {
 
 export const ModalProvider = ({ children }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [productId, setProductId] = useState<number | null>(null);
 
-  const openModal = () => {
+  const openModal = (id: number) => {
+    setProductId(id);
     setIsModalOpen(true);
   };
 
   const closeModal = () => {
     setIsModalOpen(false);
+    setProductId(null);
   };
 
   return (
-    <ModalContext.Provider value={{ isModalOpen, openModal, closeModal }}>
+    <ModalContext.Provider value={{ isModalOpen, productId, openModal, closeModal }}>
       {children}
     </ModalContext.Provider>
   );

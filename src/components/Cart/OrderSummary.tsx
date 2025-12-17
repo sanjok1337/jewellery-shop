@@ -37,7 +37,7 @@ const OrderSummary = () => {
               </div>
               <div>
                 <p className="text-dark text-right">
-                  {item.price * item.quantity} грн
+                  ${item.price * item.quantity}
                 </p>
               </div>
             </div>
@@ -50,7 +50,7 @@ const OrderSummary = () => {
             </div>
             <div>
               <p className="font-medium text-lg text-dark text-right">
-                {totalPrice.toFixed(2)} грн
+                ${totalPrice.toFixed(2)}
               </p>
             </div>
           </div>

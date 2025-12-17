@@ -29,13 +29,13 @@ const Categories = () => {
       if (response.ok) {
         const apiCategories = await response.json();
         const categoryImages = [
-          "/images/products/png-transparent-wedding-ring-carat-diamond-gold-jewelry-love-gemstone-ring-thumbnail.png",
-          "/images/products/pngtree-green-emerald-necklace-png-image_16563776.png",
-          "/images/products/braclet.svg",
-          "/images/products/gold-earrings-with-diamonds-isolated-transparent-background_191095-13254.avif",
-          "/images/products/png-clipart-watch-strap-metal-titan-company-platinum-watch-watch-accessory-fashion.png",
-          "/images/products/saphire ring.jpg",
-          "/images/products/pngtree-green-emerald-necklace-png-image_16563776.png",
+          "/images/products/ring.webp",
+          "/images/products/neckless.webp",
+          "/images/products/braccletgold.webp",
+          "/images/products/earings.webp",
+          "/images/products/pendant.webp",
+          "/images/products/brouche.webp",
+          "/images/products/sribna-broshka-z-fianitamy-th00150-foto-1.webp",
         ];
         const formattedCategories = apiCategories.map((cat, index) => ({
           title: cat.name,

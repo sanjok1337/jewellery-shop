@@ -89,7 +89,7 @@ const NewArrival = () => {
           {/* <!-- New Arrivals item --> */}
           {loading ? (
             <div className="col-span-full text-center py-8">
-              <p>Завантаження товарів...</p>
+              <p>Loading products...</p>
             </div>
           ) : products.length > 0 ? (
             products.map((product) => {
@@ -101,7 +101,7 @@ const NewArrival = () => {
                 discountedPrice: product.price, // поки що без знижки
                 reviews: 0, // поки що 0 відгуків
                 stock: product.stock || 0,
-                stockStatus: product.stock > 0 ? 'В наявності' : 'Немає в наявності',
+                stockStatus: product.stock > 0 ? 'In Stock' : 'Out of Stock',
                 imgs: {
                   thumbnails: [
                     product.image_url || '/images/products/product-1-sm-1.png'
@@ -116,7 +116,7 @@ const NewArrival = () => {
                   <ProductItem item={adaptedProduct} />
                   {product.stock === 0 && (
                     <div className="absolute top-2 left-2 bg-red-500 text-white px-2 py-1 text-xs rounded-md">
-                      Немає в наявності
+                      Out of Stock
                     </div>
                   )}
                 </div>

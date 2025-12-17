@@ -17,12 +17,12 @@ export default function TestProductsPage() {
         </div>
         
         <div className="border rounded-lg p-4">
-          <h2 className="text-xl font-semibold mb-4">Товар без стоку</h2>
+          <h2 className="text-xl font-semibold mb-4">Product Without Stock</h2>
           <Link 
             href="/products/1" 
             className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 inline-block"
           >
-            Переглянути товар #1 (немає в наявності)
+            View Product #1 (Out of Stock)
           </Link>
         </div>
       </div>

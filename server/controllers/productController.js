@@ -22,8 +22,8 @@ const getProducts = async (req, res) => {
       pi.image_url,
       pi.is_main,
       CASE 
-        WHEN p.stock > 0 THEN 'В наявності'
-        ELSE 'Немає в наявності'
+        WHEN p.stock > 0 THEN 'In Stock'
+        ELSE 'Немає In Stock'
       END as stock_status
     FROM products p
     LEFT JOIN categories c ON p.category_id = c.id

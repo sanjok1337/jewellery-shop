@@ -69,7 +69,7 @@ const BestSeller = () => {
           {/* <!-- Best Sellers item --> */}
           {loading ? (
             <div className="col-span-full text-center py-8">
-              <p>Завантаження товарів...</p>
+              <p>Loading products...</p>
             </div>
           ) : products.length > 0 ? (
             products.map((product) => {
@@ -81,7 +81,7 @@ const BestSeller = () => {
                 discountedPrice: product.price,
                 reviews: 0,
                 stock: product.stock || 0,
-                stockStatus: product.stock > 0 ? 'В наявності' : 'Немає в наявності',
+                stockStatus: product.stock > 0 ? 'In Stock' : 'Out of Stock',
                 imgs: {
                   thumbnails: [
                     product.image_url || '/images/products/product-1-sm-1.png'
@@ -96,7 +96,7 @@ const BestSeller = () => {
                   <SingleItem item={adaptedProduct} />
                   {product.stock === 0 && (
                     <div className="absolute top-2 left-2 bg-red-500 text-white px-2 py-1 text-xs rounded-md">
-                      Немає в наявності
+                      Out of Stock
                     </div>
                   )}
                 </div>
@@ -104,7 +104,7 @@ const BestSeller = () => {
             })
           ) : (
             <div className="col-span-full text-center py-8">
-              <p>Товарів не знайдено</p>
+              <p>No products found</p>
             </div>
           )}
         </div>

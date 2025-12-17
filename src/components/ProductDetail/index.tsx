@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Breadcrumb from "../Common/Breadcrumb";
@@ -47,12 +47,12 @@ const ProductDetail = ({ productId }: ProductDetailProps) => {
         const data = await response.json();
         setProduct(data);
       } else {
-        toast.error('Товар не знайдено');
+        toast.error('Product not found');
         router.push('/shop-without-sidebar');
       }
     } catch (error) {
       console.error('Fetch product error:', error);
-      toast.error('Помилка завантаження товару');
+      toast.error('Error loading product');
     } finally {
       setLoading(false);
     }
@@ -60,7 +60,7 @@ const ProductDetail = ({ productId }: ProductDetailProps) => {
 
   const addToCart = async () => {
     if (!token) {
-      toast.error('Увійдіть в аккаунт для додавання в кошик');
+      toast.error('Please sign in to add items to cart');
       router.push('/signin');
       return;
     }
@@ -79,13 +79,13 @@ const ProductDetail = ({ productId }: ProductDetailProps) => {
       });
 
       if (response.ok) {
-        toast.success('Товар додано в кошик!');
+        toast.success('Product added to cart!');
       } else {
-        toast.error('Помилка додавання в кошик');
+        toast.error('Error adding to cart');
       }
     } catch (error) {
       console.error('Add to cart error:', error);
-      toast.error('Помилка додавання в кошик');
+      toast.error('Error adding to cart');
     }
   };
 
@@ -97,7 +97,7 @@ const ProductDetail = ({ productId }: ProductDetailProps) => {
   if (loading) {
     return (
       <div className="flex justify-center items-center min-h-screen">
-        <p className="text-lg">Завантаження товару...</p>
+        <p className="text-lg">Loading product...</p>
       </div>
     );
   }
@@ -105,7 +105,7 @@ const ProductDetail = ({ productId }: ProductDetailProps) => {
   if (!product) {
     return (
       <div className="flex justify-center items-center min-h-screen">
-        <p className="text-lg">Товар не знайдено</p>
+        <p className="text-lg">Product not found</p>
       </div>
     );
   }
@@ -122,8 +122,8 @@ const ProductDetail = ({ productId }: ProductDetailProps) => {
       <Breadcrumb 
         title={product.name}
         pages={[
-          { name: "Головна", href: "/" },
-          { name: "Магазин", href: "/shop-without-sidebar" },
+          { name: "Home", href: "/" },
+          { name: "Shop", href: "/shop-without-sidebar" },
           { name: product.name }
         ]}
       />
@@ -135,12 +135,12 @@ const ProductDetail = ({ productId }: ProductDetailProps) => {
             {/* Images Section */}
             <div className="w-full">
               <div className="mb-4">
-                <div className="relative aspect-square w-full overflow-hidden rounded-xl bg-gray-2">
+                <div className="relative aspect-square w-full overflow-hidden rounded-xl bg-gray-2 flex items-center justify-center p-4">
                   <Image
                     src={productImages[activeImage]}
                     alt={product.name}
                     fill
-                    className="object-cover"
+                    className="object-contain"
                   />
                 </div>
               </div>
@@ -174,19 +174,19 @@ const ProductDetail = ({ productId }: ProductDetailProps) => {
 
               {product.category && (
                 <p className="mb-3 text-sm text-gray-6">
-                  Категорія: <span className="text-dark">{product.category}</span>
+                  Category: <span className="text-dark">{product.category}</span>
                 </p>
               )}
 
               <div className="mb-6">
                 <p className="text-3xl font-bold text-red">
-                  {product.price} грн
+                  {product.price} $
                 </p>
               </div>
 
               {product.description && (
                 <div className="mb-6">
-                  <h3 className="mb-2 text-lg font-semibold text-dark">Опис</h3>
+                  <h3 className="mb-2 text-lg font-semibold text-dark">Description</h3>
                   <p className="text-body leading-relaxed">
                     {product.description}
                   </p>
@@ -198,7 +198,7 @@ const ProductDetail = ({ productId }: ProductDetailProps) => {
                 <div className="flex items-center gap-4">
                   <div className="flex items-center">
                     <label className="mr-3 text-sm font-medium text-dark">
-                      Кількість:
+                      Quantity:
                     </label>
                     <div className="flex items-center">
                       <button
@@ -226,7 +226,7 @@ const ProductDetail = ({ productId }: ProductDetailProps) => {
                   
                   {product.stock_quantity && (
                     <p className="text-sm text-gray-6">
-                      В наявності: {product.stock_quantity} шт.
+                      In Stock: {product.stock_quantity} pcs.
                     </p>
                   )}
                 </div>
@@ -239,7 +239,7 @@ const ProductDetail = ({ productId }: ProductDetailProps) => {
                   className="flex-1 bg-red py-3 px-6 text-white font-semibold hover:bg-red/90 transition-colors"
                   disabled={product.stock_quantity === 0}
                 >
-                  {product.stock_quantity === 0 ? 'Немає в наявності' : 'Додати в кошик'}
+                  {product.stock_quantity === 0 ? 'Out of Stock' : 'Add to Cart'}
                 </button>
                 
                 <button
@@ -264,7 +264,7 @@ const ProductDetail = ({ productId }: ProductDetailProps) => {
                       d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
                     />
                   </svg>
-                  {product?.id && isInWishlist(product.id) ? 'Видалити з віш-ліста' : 'Додати в віш-ліст'}
+                  {product?.id && isInWishlist(product.id) ? 'Remove from Wishlist' : 'Add to Wishlist'}
                 </button>
               </div>
 
@@ -272,7 +272,7 @@ const ProductDetail = ({ productId }: ProductDetailProps) => {
               {product.created_at && (
                 <div className="border-t border-gray-3 pt-6">
                   <p className="text-sm text-gray-6">
-                    Додано: {new Date(product.created_at).toLocaleDateString('uk-UA')}
+                    Added: {new Date(product.created_at).toLocaleDateString('en-US')}
                   </p>
                 </div>
               )}

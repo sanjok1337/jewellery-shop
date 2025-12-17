@@ -30,7 +30,7 @@ const SingleItem = ({ item }: { item: Product }) => {
   return (
     <div className={`group ${item.stock === 0 ? 'opacity-75' : ''}`}>
       <div className="relative overflow-hidden rounded-lg bg-[#F6F7FB] min-h-[403px]">
-        <div className="text-center px-4 py-7.5">
+        <div className="text-center px-4 py-4">
           <div className="flex items-center justify-center gap-2.5 mb-2">
             <div className="flex items-center gap-1">
               <Image
@@ -83,19 +83,19 @@ const SingleItem = ({ item }: { item: Product }) => {
               {item.stock === 0 ? (
                 <span className="inline-flex items-center px-2 py-1 text-xs font-medium bg-red-100 text-red-800 rounded-full">
                   <span className="w-2 h-2 bg-red-500 rounded-full mr-1"></span>
-                  Немає в наявності
+                  Out of Stock
                 </span>
               ) : (
                 <span className="inline-flex items-center px-2 py-1 text-xs font-medium bg-green-100 text-green-800 rounded-full">
                   <span className="w-2 h-2 bg-green-500 rounded-full mr-1"></span>
-                  В наявності
+                  In Stock
                 </span>
               )}
             </div>
           )}
         </div>
 
-        <div className="flex justify-center items-center">
+        <div className="flex justify-center items-center mt-2">
           <Link href={`/products/${item.id}`}>
             <Image src={item.imgs.previews[0]} alt="" width={280} height={280} className="cursor-pointer" />
           </Link>
@@ -104,8 +104,7 @@ const SingleItem = ({ item }: { item: Product }) => {
         <div className="absolute right-0 bottom-0 translate-x-full u-w-full flex flex-col gap-2 p-5.5 ease-linear duration-300 group-hover:translate-x-0">
           <button
             onClick={() => {
-              handleQuickViewUpdate();
-              openModal();
+              openModal(item.id);
             }}
             aria-label="button for quick view"
             id="bestOne"

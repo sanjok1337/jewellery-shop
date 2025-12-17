@@ -91,7 +91,7 @@ export const Wishlist = () => {
       if (response.ok) {
         setWishlistItems(prev => prev.filter(item => item.id !== itemId));
         await contextRefresh();
-        toast.success('Товар видалено з віш-ліста');
+        toast.success('Product видалено з віш-ліста');
       } else {
         toast.error('Помилка видалення з віш-ліста');
       }
@@ -108,14 +108,14 @@ export const Wishlist = () => {
         <div className="max-w-[1170px] w-full mx-auto px-4 sm:px-8 xl:px-0">
           <div className="flex flex-wrap items-center justify-between gap-5 mb-7.5">
             <h2 className="font-medium text-dark text-2xl">
-              Ваш віш-ліст {wishlistItems.length > 0 && `(${wishlistItems.length})`}
+              Your Wishlist {wishlistItems.length > 0 && `(${wishlistItems.length})`}
             </h2>
             {wishlistItems.length > 0 && (
               <button 
                 onClick={clearWishlist}
                 className="text-blue hover:text-red transition-colors"
               >
-                Очистити віш-ліст
+                Clear Wishlist
               </button>
             )}
           </div>
@@ -127,7 +127,7 @@ export const Wishlist = () => {
               </div>
             ) : wishlistItems.length === 0 ? (
               <div className="py-20 text-center">
-                <p className="text-gray-600 mb-4">Ваш віш-ліст порожній</p>
+                <p className="text-gray-600 mb-4">Your Wishlist порожній</p>
                 <button 
                   onClick={() => router.push('/shop-without-sidebar')}
                   className="bg-red text-white px-6 py-3 rounded hover:bg-red/90 transition-colors"
@@ -142,19 +142,19 @@ export const Wishlist = () => {
                   <div className="flex items-center py-5.5 px-10">
                     <div className="min-w-[83px]"></div>
                     <div className="min-w-[387px]">
-                      <p className="text-dark">Товар</p>
+                      <p className="text-dark">Product</p>
                     </div>
 
                     <div className="min-w-[205px]">
-                      <p className="text-dark">Ціна</p>
+                      <p className="text-dark">Price</p>
                     </div>
 
                     <div className="min-w-[265px]">
-                      <p className="text-dark">Категорія</p>
+                      <p className="text-dark">Category</p>
                     </div>
 
                     <div className="min-w-[150px]">
-                      <p className="text-dark text-right">Дії</p>
+                      <p className="text-dark text-right">Actions</p>
                     </div>
                   </div>
 

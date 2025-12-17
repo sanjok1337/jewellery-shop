@@ -26,7 +26,7 @@ const Hero = () => {
 
           <div className="xl:max-w-[393px] w-full">
             <div className="flex flex-col sm:flex-row xl:flex-col gap-5">
-              <Link href="/products/3" className="w-full relative rounded-[10px] bg-white p-4 sm:p-7.5 block hover:shadow-lg transition-shadow">
+              <Link href="/products/5" className="w-full relative rounded-[10px] bg-white p-4 sm:p-7.5 block hover:shadow-lg transition-shadow">
                 <div className="flex items-center gap-14">
                   <div>
                     <h2 className="max-w-[153px] font-semibold text-dark text-xl mb-20 hover:text-blue transition-colors">
@@ -50,7 +50,7 @@ const Hero = () => {
 
                   <div>
                     <Image
-                      src="/images/products/gold-earrings-with-diamonds-isolated-transparent-background_191095-13254.avif"
+                      src="/images/products/earings.webp"
                       alt="gold earrings"
                       width={123}
                       height={161}
@@ -58,7 +58,7 @@ const Hero = () => {
                   </div>
                 </div>
               </Link>
-              <Link href="/products/1" className="w-full relative rounded-[10px] bg-white p-4 sm:p-7.5 block hover:shadow-lg transition-shadow">
+              <Link href="/products/3" className="w-full relative rounded-[10px] bg-white p-4 sm:p-7.5 block hover:shadow-lg transition-shadow">
                 <div className="flex items-center gap-14">
                   <div>
                     <h2 className="max-w-[153px] font-semibold text-dark text-xl mb-20 hover:text-blue transition-colors">
@@ -82,7 +82,7 @@ const Hero = () => {
 
                   <div>
                     <Image
-                      src="/images/products/braclet.svg"
+                      src="/images/products/braccletgold.webp"
                       alt="silver bracelet"
                       width={123}
                       height={161}

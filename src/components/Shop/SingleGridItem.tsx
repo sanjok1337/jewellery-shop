@@ -35,8 +35,7 @@ const SingleGridItem = ({ item }: { item: Product }) => {
         <div className="absolute left-0 bottom-0 translate-y-full w-full flex items-center justify-center gap-2.5 pb-5 ease-linear duration-200 group-hover:translate-y-0">
           <button
             onClick={() => {
-              openModal();
-              handleQuickViewUpdate();
+              openModal(item.id);
             }}
             id="newOne"
             aria-label="button for quick view"

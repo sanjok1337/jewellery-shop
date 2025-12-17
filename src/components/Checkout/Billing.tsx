@@ -36,7 +36,7 @@ const Billing = ({ addresses = [], selectedAddress, onSelectAddress }: BillingPr
           </div>
         ) : (
           <div className="space-y-4">
-            <p className="text-dark font-medium mb-4">Оберіть адресу доставки:</p>
+            <p className="text-dark font-medium mb-4">Select delivery address:</p>
             {addresses.map((address) => (
               <div
                 key={address.id}

@@ -43,8 +43,7 @@ const ProductItem = ({ item }: { item: Product }) => {
         <div className="absolute left-0 bottom-0 translate-y-full w-full flex items-center justify-center gap-2.5 pb-5 ease-linear duration-200 group-hover:translate-y-0">
           <button
             onClick={() => {
-              openModal();
-              handleQuickViewUpdate();
+              openModal(item.id);
             }}
             id="newOne"
             aria-label="button for quick view"
@@ -139,12 +138,12 @@ const ProductItem = ({ item }: { item: Product }) => {
           {item.stock === 0 ? (
             <span className="inline-flex items-center px-2 py-1 text-xs font-medium bg-red-100 text-red-800 rounded-full">
               <span className="w-2 h-2 bg-red-500 rounded-full mr-1"></span>
-              Немає в наявності
+              Out of Stock
             </span>
           ) : (
             <span className="inline-flex items-center px-2 py-1 text-xs font-medium bg-green-100 text-green-800 rounded-full">
               <span className="w-2 h-2 bg-green-500 rounded-full mr-1"></span>
-              В наявності
+              In Stock
             </span>
           )}
         </div>

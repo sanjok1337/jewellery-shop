@@ -32,7 +32,7 @@ const Reviews = ({ productId }: ReviewsProps) => {
   const [totalReviews, setTotalReviews] = useState(0);
   const [loading, setLoading] = useState(true);
   
-  // Форма для нового відгуку
+  // Форма для нового review
   const [newRating, setNewRating] = useState(5);
   const [newText, setNewText] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -91,13 +91,13 @@ const Reviews = ({ productId }: ReviewsProps) => {
     e.preventDefault();
     
     if (!token) {
-      toast.error('Увійдіть в аккаунт для додавання відгуку');
+      toast.error('Please sign in to add review');
       router.push('/signin');
       return;
     }
     
     if (!newText.trim()) {
-      toast.error('Введіть текст відгуку');
+      toast.error('Enter text review');
       return;
     }
     
@@ -124,11 +124,11 @@ const Reviews = ({ productId }: ReviewsProps) => {
         await fetchReviews();
       } else {
         const data = await response.json();
-        toast.error(data.message || 'Помилка додавання відгуку');
+        toast.error(data.message || 'Помилка додавання review');
       }
     } catch (error) {
       console.error('Submit review error:', error);
-      toast.error('Помилка додавання відгуку');
+      toast.error('Помилка додавання review');
     } finally {
       setSubmitting(false);
     }
@@ -136,13 +136,13 @@ const Reviews = ({ productId }: ReviewsProps) => {
 
   const handleSubmitReply = async (parentId: number) => {
     if (!token) {
-      toast.error('Увійдіть в аккаунт для додавання коментарів');
+      toast.error('Please sign in to add коментарів');
       router.push('/signin');
       return;
     }
     
     if (!replyText.trim()) {
-      toast.error('Введіть текст коментаря');
+      toast.error('Enter text коментаря');
       return;
     }
     
@@ -200,7 +200,7 @@ const Reviews = ({ productId }: ReviewsProps) => {
       });
       
       if (response.ok) {
-        toast.success('Відгук оновлено!');
+        toast.success('Відгук updated!');
         setEditingId(null);
         setEditText("");
         await fetchReviews();
@@ -217,7 +217,7 @@ const Reviews = ({ productId }: ReviewsProps) => {
   const handleDeleteReview = async (reviewId: number) => {
     if (!token) return;
     
-    if (!confirm('Ви впевнені, що хочете видалити цей відгук?')) {
+    if (!confirm('Ви впевнені, що хочете Delete цей відгук?')) {
       return;
     }
     
@@ -279,7 +279,7 @@ const Reviews = ({ productId }: ReviewsProps) => {
       {/* Загальна статистика */}
       <div className="mb-10">
         <h2 className="text-3xl font-bold text-dark mb-6 pb-4 border-b-2 border-gray-3">
-          Відгуки та оцінки покупців
+          Customer Reviews and Ratings
         </h2>
         
         {totalReviews > 0 && (
@@ -290,27 +290,27 @@ const Reviews = ({ productId }: ReviewsProps) => {
                 {renderStars(Math.round(avgRating))}
               </div>
               <p className="text-base text-dark font-medium">
-                Середня оцінка
+                Average Rating
               </p>
               <p className="text-sm text-gray-6">
-                На основі {totalReviews} {totalReviews === 1 ? 'відгуку' : 'відгуків'}
+                Based on {totalReviews} {totalReviews === 1 ? 'review' : 'reviews'}
               </p>
             </div>
           </div>
         )}
       </div>
 
-      {/* Форма для нового відгуку */}
+      {/* Форма для нового review */}
       <div className="mb-10 p-6 sm:p-8 bg-white border-2 border-blue rounded-lg shadow-lg">
         <h3 className="text-2xl font-bold text-dark mb-6">
-          Залишити відгук
+          Leave a Review
         </h3>
         
         {user ? (
           <form onSubmit={handleSubmitReview}>
             <div className="mb-6">
               <label className="block text-base font-semibold text-dark mb-3">
-                Ваша оцінка *
+                Your Rating *
               </label>
               <div className="flex gap-1">
                 {renderStars(newRating, true, setNewRating)}
@@ -319,13 +319,13 @@ const Reviews = ({ productId }: ReviewsProps) => {
             
             <div className="mb-6">
               <label className="block text-base font-semibold text-dark mb-3">
-                Ваш відгук *
+                Your Review *
               </label>
               <textarea
                 value={newText}
                 onChange={(e) => setNewText(e.target.value)}
                 className="w-full p-4 border-2 border-gray-3 rounded-lg min-h-[150px] focus:outline-none focus:border-blue transition-colors"
-                placeholder="Поділіться своїми враженнями про товар..."
+                placeholder="Share your impressions about the product..."
                 required
               />
             </div>
@@ -335,32 +335,32 @@ const Reviews = ({ productId }: ReviewsProps) => {
               disabled={submitting}
               className="bg-blue text-white font-medium px-8 py-3 rounded-lg hover:bg-blue-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {submitting ? 'Надсилання...' : 'Відправити відгук'}
+              {submitting ? 'Sending...' : 'Submit Review'}
             </button>
           </form>
         ) : (
           <div className="text-center py-8">
             <p className="text-lg text-gray-6 mb-6">
-              Увійдіть в аккаунт, щоб залишити відгук
+              Увійдіть в аккаунт, щоб Leave a Review
             </p>
             <button
               onClick={() => router.push('/signin')}
               className="bg-blue text-white font-medium px-8 py-3 rounded-lg hover:bg-blue-dark transition-colors"
             >
-              Увійти
+              Sign In
             </button>
           </div>
         )}
       </div>
 
-      {/* Список відгуків */}
+      {/* Список reviews */}
       {loading ? (
         <div className="text-center py-8">
-          <p className="text-gray-6">Завантаження відгуків...</p>
+          <p className="text-gray-6">Завантаження reviews...</p>
         </div>
       ) : mainReviews.length === 0 ? (
         <div className="text-center py-8">
-          <p className="text-gray-6">Поки що немає відгуків. Будьте першим!</p>
+          <p className="text-gray-6">Поки що no reviews. Будьте першим!</p>
         </div>
       ) : (
         <div className="space-y-6">
@@ -387,7 +387,7 @@ const Reviews = ({ productId }: ReviewsProps) => {
                   )}
                 </div>
 
-                {/* Контент відгуку */}
+                {/* Контент review */}
                 <div className="flex-1">
                   <div className="flex items-center justify-between mb-2">
                     <div>
@@ -410,13 +410,13 @@ const Reviews = ({ productId }: ReviewsProps) => {
                           onClick={() => startEdit(review)}
                           className="text-sm text-blue-600 hover:underline"
                         >
-                          Редагувати
+                          Edit
                         </button>
                         <button
                           onClick={() => handleDeleteReview(review.id)}
                           className="text-sm text-red hover:underline"
                         >
-                          Видалити
+                          Delete
                         </button>
                       </div>
                     )}
@@ -448,7 +448,7 @@ const Reviews = ({ productId }: ReviewsProps) => {
                           onClick={() => handleUpdateReview(review.id)}
                           className="bg-red text-white px-4 py-2 rounded text-sm hover:bg-red/90"
                         >
-                          Зберегти
+                          Save
                         </button>
                         <button
                           onClick={() => {
@@ -457,7 +457,7 @@ const Reviews = ({ productId }: ReviewsProps) => {
                           }}
                           className="bg-gray-3 text-dark px-4 py-2 rounded text-sm hover:bg-gray-4"
                         >
-                          Скасувати
+                          Cancel
                         </button>
                       </div>
                     </div>
@@ -465,13 +465,13 @@ const Reviews = ({ productId }: ReviewsProps) => {
                     <p className="text-body leading-relaxed">{review.text}</p>
                   )}
 
-                  {/* Кнопка відповісти */}
+                  {/* Кнопка Reply */}
                   {user && editingId !== review.id && (
                     <button
                       onClick={() => setReplyTo(replyTo === review.id ? null : review.id)}
                       className="mt-3 text-sm text-red hover:underline"
                     >
-                      {replyTo === review.id ? 'Скасувати' : 'Відповісти'}
+                      {replyTo === review.id ? 'Cancel' : 'Reply'}
                     </button>
                   )}
 
@@ -482,13 +482,13 @@ const Reviews = ({ productId }: ReviewsProps) => {
                         value={replyText}
                         onChange={(e) => setReplyText(e.target.value)}
                         className="w-full p-3 border border-gray-3 rounded-lg min-h-[80px] mb-2"
-                        placeholder="Ваш коментар..."
+                        placeholder="Your comment..."
                       />
                       <button
                         onClick={() => handleSubmitReply(review.id)}
                         className="bg-red text-white px-4 py-2 rounded text-sm hover:bg-red/90"
                       >
-                        Відправити коментар
+                        Submit Comment
                       </button>
                     </div>
                   )}
@@ -531,13 +531,13 @@ const Reviews = ({ productId }: ReviewsProps) => {
                                     onClick={() => startEdit(reply)}
                                     className="text-xs text-blue-600 hover:underline"
                                   >
-                                    Редагувати
+                                    Edit
                                   </button>
                                   <button
                                     onClick={() => handleDeleteReview(reply.id)}
                                     className="text-xs text-red hover:underline"
                                   >
-                                    Видалити
+                                    Delete
                                   </button>
                                 </div>
                               )}
@@ -555,7 +555,7 @@ const Reviews = ({ productId }: ReviewsProps) => {
                                     onClick={() => handleUpdateReview(reply.id)}
                                     className="bg-red text-white px-3 py-1 rounded text-xs hover:bg-red/90"
                                   >
-                                    Зберегти
+                                    Save
                                   </button>
                                   <button
                                     onClick={() => {
@@ -564,7 +564,7 @@ const Reviews = ({ productId }: ReviewsProps) => {
                                     }}
                                     className="bg-gray-3 text-dark px-3 py-1 rounded text-xs hover:bg-gray-4"
                                   >
-                                    Скасувати
+                                    Cancel
                                   </button>
                                 </div>
                               </div>

@@ -39,7 +39,7 @@ const HeroCarousal = () => {
             </div>
 
             <h1 className="font-semibold text-dark text-xl sm:text-3xl mb-3">
-              <Link href="/products/3" className="hover:text-blue transition-colors">Exquisite Diamond Jewelry</Link>
+              <Link href="/products/5" className="hover:text-blue transition-colors">Exquisite Diamond Jewelry</Link>
             </h1>
 
             <p>
@@ -47,7 +47,7 @@ const HeroCarousal = () => {
             </p>
 
             <Link
-              href="/products/3"
+              href="/products/5"
               className="inline-flex font-medium text-white text-custom-sm rounded-md bg-dark py-3 px-9 ease-out duration-200 hover:bg-blue mt-10"
             >
               Shop Now
@@ -56,7 +56,7 @@ const HeroCarousal = () => {
 
           <div>
             <Image
-              src="/images/products/gold-earrings-with-diamonds-isolated-transparent-background_191095-13254.avif"
+              src="/images/products/earings.webp"
               alt="gold diamond earrings"
               width={351}
               height={358}
@@ -97,7 +97,7 @@ const HeroCarousal = () => {
 
           <div>
             <Image
-              src="/images/products/pngtree-green-emerald-necklace-png-image_16563776.png"
+              src="/images/products/neckless.webp"
               alt="emerald necklace"
               width={351}
               height={358}

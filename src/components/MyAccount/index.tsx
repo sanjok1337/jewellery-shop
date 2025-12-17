@@ -98,7 +98,7 @@ const MyAccount = () => {
     }
 
     if (passwordData.newPassword.length < 6) {
-      toast.error('Новий пароль повинен містити мінімум 6 символів');
+      toast.error('New Password повинен містити мінімум 6 символів');
       return;
     }
 
@@ -474,7 +474,7 @@ const MyAccount = () => {
               <div className="xl:max-w-[370px] w-full bg-white shadow-1 rounded-xl">
                 <div className="flex items-center justify-between py-5 px-4 sm:pl-7.5 sm:pr-6 border-b border-gray-3">
                   <p className="font-medium text-xl text-dark">
-                    Адреси доставки
+                    Delivery Addresses
                   </p>
 
                   <button
@@ -525,10 +525,10 @@ const MyAccount = () => {
                               </g>
                             </svg>
                             <span>
-                              <strong>Місто:</strong> {address.city}<br />
-                              <strong>Вулиця:</strong> {address.street}
-                              {address.postal_code && <><br /><strong>Індекс:</strong> {address.postal_code}</>}
-                              {address.phone && <><br /><strong>Телефон:</strong> {address.phone}</>}
+                              <strong>City:</strong> {address.city}<br />
+                              <strong>Street:</strong> {address.street}
+                              {address.postal_code && <><br /><strong>Postal Code:</strong> {address.postal_code}</>}
+                              {address.phone && <><br /><strong>Phone:</strong> {address.phone}</>}
                             </span>
                           </p>
                         </div>
@@ -545,7 +545,7 @@ const MyAccount = () => {
               <div className="xl:max-w-[370px] w-full bg-white shadow-1 rounded-xl">
                 <div className="flex items-center justify-between py-5 px-4 sm:pl-7.5 sm:pr-6 border-b border-gray-3">
                   <p className="font-medium text-xl text-dark">
-                    Контактна інформація
+                    Contact Information
                   </p>
                 </div>
 
@@ -614,7 +614,7 @@ const MyAccount = () => {
                 <form onSubmit={handleChangeEmail}>
                   <div className="mb-5">
                     <label htmlFor="currentEmail" className="block mb-2.5">
-                      Поточний Email
+                      Current Email
                     </label>
                     <input
                       type="email"
@@ -644,7 +644,7 @@ const MyAccount = () => {
                     disabled={emailLoading}
                     className="inline-flex font-medium text-white bg-blue py-3 px-7 rounded-md ease-out duration-200 hover:bg-blue-dark disabled:opacity-50"
                   >
-                    {emailLoading ? 'Збереження...' : 'Змінити Email'}
+                    {emailLoading ? 'Збереження...' : 'Change Email'}
                   </button>
                 </form>
               </div>
@@ -657,42 +657,42 @@ const MyAccount = () => {
                 <form onSubmit={handleChangePassword}>
                   <div className="mb-5">
                     <label htmlFor="oldPassword" className="block mb-2.5">
-                      Старий пароль <span className="text-red">*</span>
+                      Old Password <span className="text-red">*</span>
                     </label>
                     <input
                       type="password"
                       id="oldPassword"
                       value={passwordData.oldPassword}
                       onChange={(e) => setPasswordData({...passwordData, oldPassword: e.target.value})}
-                      placeholder="Введіть старий пароль"
+                      placeholder="Enter old password"
                       className="rounded-md border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
                     />
                   </div>
 
                   <div className="mb-5">
                     <label htmlFor="newPassword" className="block mb-2.5">
-                      Новий пароль <span className="text-red">*</span>
+                      New Password <span className="text-red">*</span>
                     </label>
                     <input
                       type="password"
                       id="newPassword"
                       value={passwordData.newPassword}
                       onChange={(e) => setPasswordData({...passwordData, newPassword: e.target.value})}
-                      placeholder="Введіть новий пароль"
+                      placeholder="Enter new password"
                       className="rounded-md border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
                     />
                   </div>
 
                   <div className="mb-5">
                     <label htmlFor="confirmNewPassword" className="block mb-2.5">
-                      Підтвердити новий пароль <span className="text-red">*</span>
+                      Confirm New Password <span className="text-red">*</span>
                     </label>
                     <input
                       type="password"
                       id="confirmNewPassword"
                       value={passwordData.confirmNewPassword}
                       onChange={(e) => setPasswordData({...passwordData, confirmNewPassword: e.target.value})}
-                      placeholder="Підтвердіть новий пароль"
+                      placeholder="Confirm new password"
                       className="rounded-md border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
                     />
                   </div>
@@ -702,7 +702,7 @@ const MyAccount = () => {
                     disabled={passwordLoading}
                     className="inline-flex font-medium text-white bg-blue py-3 px-7 rounded-md ease-out duration-200 hover:bg-blue-dark disabled:opacity-50"
                   >
-                    {passwordLoading ? 'Збереження...' : 'Змінити пароль'}
+                    {passwordLoading ? 'Збереження...' : 'Change Password'}
                   </button>
                 </form>
               </div>

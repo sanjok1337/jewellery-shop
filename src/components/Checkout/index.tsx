@@ -101,7 +101,7 @@ const Checkout = () => {
     e.preventDefault();
 
     if (!selectedAddress) {
-      toast.error('Оберіть адресу доставки');
+      toast.error('Select delivery address');
       return;
     }
 

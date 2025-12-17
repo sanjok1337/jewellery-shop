@@ -91,7 +91,7 @@ const SingleItem = ({ item, onRemove }: SingleItemProps) => {
       </div>
 
       <div className="min-w-[205px]">
-        <p className="text-dark">{item.price} грн</p>
+        <p className="text-dark">${item.price}</p>
       </div>
 
       <div className="min-w-[265px]">
@@ -119,7 +119,7 @@ const SingleItem = ({ item, onRemove }: SingleItemProps) => {
             />
           </svg>
 
-          <span className="text-green">{item.category || 'В наявності'}</span>
+          <span className="text-green">{item.category || 'In Stock'}</span>
         </div>
       </div>
 

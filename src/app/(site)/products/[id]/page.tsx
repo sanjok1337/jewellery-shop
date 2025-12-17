@@ -86,7 +86,7 @@ export default function ProductPage() {
     }
 
     if (!product || product.stock === 0) {
-      toast.error('Товар недоступний');
+      toast.error('Товар not available');
       return;
     }
 
@@ -151,14 +151,14 @@ export default function ProductPage() {
           <ol className="inline-flex items-center space-x-1 md:space-x-3">
             <li className="inline-flex items-center">
               <Link href="/" className="text-gray-500 hover:text-primary">
-                Головна
+                Home
               </Link>
             </li>
             <li>
               <div className="flex items-center">
                 <span className="mx-2 text-gray-400">/</span>
                 <Link href="/shop" className="text-gray-500 hover:text-primary">
-                  Магазин
+                  Shop
                 </Link>
               </div>
             </li>
@@ -259,13 +259,13 @@ export default function ProductPage() {
                 {isOutOfStock ? (
                   <div className="flex items-center space-x-2">
                     <span className="inline-block w-3 h-3 bg-red-500 rounded-full"></span>
-                    <span className="text-red-600 font-medium">Немає в наявності</span>
+                    <span className="text-red-600 font-medium">Немає In Stock</span>
                   </div>
                 ) : (
                   <div className="flex items-center space-x-2">
                     <span className="inline-block w-3 h-3 bg-green-500 rounded-full"></span>
                     <span className="text-green-600 font-medium">
-                      В наявності ({product.stock} шт.)
+                      In Stock ({product.stock} pcs.)
                     </span>
                   </div>
                 )}
@@ -274,9 +274,9 @@ export default function ProductPage() {
 
             {/* Description */}
             <div>
-              <h3 className="text-lg font-semibold mb-3">Опис товару</h3>
+              <h3 className="text-lg font-semibold mb-3">Product Description</h3>
               <p className="text-gray-600 leading-relaxed">
-                {product.description || 'Опис товару недоступний'}
+                {product.description || 'Product Description not available'}
               </p>
             </div>
 
@@ -304,7 +304,7 @@ export default function ProductPage() {
                   onClick={addToCart}
                   className="flex-1 bg-primary text-white px-6 py-3 rounded-md hover:bg-primary-dark transition duration-200 font-medium"
                 >
-                  Додати в кошик
+                  Add to Cart
                 </button>
                 <WishlistButton productId={product.id} size="lg" />
               </div>
@@ -316,7 +316,7 @@ export default function ProductPage() {
                   disabled
                   className="w-full bg-gray-300 text-gray-500 px-6 py-3 rounded-md cursor-not-allowed font-medium"
                 >
-                  Товар недоступний
+                  Товар not available
                 </button>
               </div>
             )}
