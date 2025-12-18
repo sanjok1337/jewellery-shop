@@ -48,11 +48,11 @@ export const Wishlist = () => {
         const data = await response.json();
         setWishlistItems(data.items);
       } else {
-        toast.error('РџРѕРјРёР»РєР° Р·Р°РІР°РЅС‚Р°Р¶РµРЅРЅСЏ РІС–С€-Р»С–СЃС‚Р°');
+        toast.error('Error loading wishlist');
       }
     } catch (error) {
       console.error('Fetch wishlist error:', error);
-      toast.error('РџРѕРјРёР»РєР° Р·Р°РІР°РЅС‚Р°Р¶РµРЅРЅСЏ РІС–С€-Р»С–СЃС‚Р°');
+      toast.error('Error loading wishlist');
     } finally {
       setLoading(false);
     }
@@ -69,13 +69,13 @@ export const Wishlist = () => {
 
       if (response.ok) {
         setWishlistItems([]);
-        toast.success('Р’С–С€-Р»С–СЃС‚ РѕС‡РёС‰РµРЅРѕ');
+        toast.success('Wishlist cleared');
       } else {
-        toast.error('РџРѕРјРёР»РєР° РѕС‡РёС‰РµРЅРЅСЏ РІС–С€-Р»С–СЃС‚Р°');
+        toast.error('Error clearing wishlist');
       }
     } catch (error) {
       console.error('Clear wishlist error:', error);
-      toast.error('РџРѕРјРёР»РєР° РѕС‡РёС‰РµРЅРЅСЏ РІС–С€-Р»С–СЃС‚Р°');
+      toast.error('Error clearing wishlist');
     }
   };
 
@@ -91,13 +91,13 @@ export const Wishlist = () => {
       if (response.ok) {
         setWishlistItems(prev => prev.filter(item => item.id !== itemId));
         await contextRefresh();
-        toast.success('Product РІРёРґР°Р»РµРЅРѕ Р· РІС–С€-Р»С–СЃС‚Р°');
+        toast.success('Product removed from wishlist');
       } else {
-        toast.error('РџРѕРјРёР»РєР° РІРёРґР°Р»РµРЅРЅСЏ Р· РІС–С€-Р»С–СЃС‚Р°');
+        toast.error('Error removing from wishlist');
       }
     } catch (error) {
       console.error('Remove from wishlist error:', error);
-      toast.error('РџРѕРјРёР»РєР° РІРёРґР°Р»РµРЅРЅСЏ Р· РІС–С€-Р»С–СЃС‚Р°');
+      toast.error('Error removing from wishlist');
     }
   };
 
@@ -123,16 +123,16 @@ export const Wishlist = () => {
           <div className="bg-white rounded-[10px] shadow-1">
             {loading ? (
               <div className="py-20 text-center">
-                <p>Р—Р°РІР°РЅС‚Р°Р¶РµРЅРЅСЏ РІС–С€-Р»С–СЃС‚Р°...</p>
+                <p>Loading wishlist...</p>
               </div>
             ) : wishlistItems.length === 0 ? (
               <div className="py-20 text-center">
-                <p className="text-gray-600 mb-4">Your Wishlist РїРѕСЂРѕР¶РЅС–Р№</p>
+                <p className="text-gray-600 mb-4">Your Wishlist is empty</p>
                 <button 
                   onClick={() => router.push('/shop-without-sidebar')}
                   className="bg-red text-white px-6 py-3 rounded hover:bg-red/90 transition-colors"
                 >
-                  РџРµСЂРµР№С‚Рё РґРѕ РїРѕРєСѓРїРѕРє
+                  Go to Shop
                 </button>
               </div>
             ) : (

@@ -31,7 +31,7 @@ const Billing = ({ addresses = [], selectedAddress, onSelectAddress }: BillingPr
           <div className="text-center py-8">
             <p className="text-dark-5 mb-4">You don't have any saved addresses</p>
             <a href="/my-account" className="text-gold hover:underline">
-              Р”РѕРґР°С‚Рё Р°РґСЂРµСЃСѓ РІ РѕСЃРѕР±РёСЃС‚РѕРјСѓ РєР°Р±С–РЅРµС‚С–
+              Add address in My Account
             </a>
           </div>
         ) : (
@@ -68,7 +68,7 @@ const Billing = ({ addresses = [], selectedAddress, onSelectAddress }: BillingPr
                     <p className="text-dark">{address.country}</p>
                     {address.is_default && (
                       <span className="inline-block mt-2 px-2 py-1 bg-gold/10 text-gold text-xs rounded">
-                        Р—Р° Р·Р°РјРѕРІС‡СѓРІР°РЅРЅСЏРј
+                        Default
                       </span>
                     )}
                   </div>

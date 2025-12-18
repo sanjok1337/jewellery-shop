@@ -111,7 +111,7 @@ const ShopWithoutSidebar = () => {
 
   const handleSortChange = (value: string) => {
     setSortBy(value);
-    setCurrentPage(1); // РЎРєРёРґР°С”РјРѕ РЅР° РїРµСЂС€Сѓ СЃС‚РѕСЂС–РЅРєСѓ РїСЂРё Р·РјС–РЅС– СЃРѕСЂС‚СѓРІР°РЅРЅСЏ
+    setCurrentPage(1); // Reset to first page when sorting changes
   };
 
   return (
@@ -232,7 +232,7 @@ const ShopWithoutSidebar = () => {
                   </div>
                 ) : products.length > 0 ? (
                   products.map((product) => {
-                    // РђРґР°РїС‚СѓС”РјРѕ РґР°РЅС– Р· API РґРѕ С„РѕСЂРјР°С‚Сѓ, СЏРєРёР№ РѕС‡С–РєСѓСЋС‚СЊ РєРѕРјРїРѕРЅРµРЅС‚Рё
+                    // Adapt API data to the format expected by components
                     const adaptedProduct = {
                       id: product.id,
                       title: product.name,

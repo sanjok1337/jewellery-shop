@@ -27,9 +27,9 @@ const Signin = () => {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    // Р’Р°Р»С–РґР°С†С–СЏ
+    // Validation
     if (!formData.email.trim() || !formData.password) {
-      toast.error("Email С‚Р° РїР°СЂРѕР»СЊ РѕР±РѕРІ'СЏР·РєРѕРІС–");
+      toast.error("Email and password are required");
       return;
     }
 
@@ -47,17 +47,17 @@ const Signin = () => {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message || "РџРѕРјРёР»РєР° РІС…РѕРґСѓ");
+        throw new Error(data.message || "Login error");
       }
 
-      // Р—Р±РµСЂС–РіР°С”РјРѕ С‚РѕРєРµРЅ С‡РµСЂРµР· AuthContext
+      // Save token via AuthContext
       login(data.token, data.user);
-      toast.success("Р’С…С–Рґ СѓСЃРїС–С€РЅРёР№!");
+      toast.success("Login successful!");
       
-      // РџРµСЂРµРЅР°РїСЂР°РІР»СЏС”РјРѕ РЅР° РіРѕР»РѕРІРЅСѓ СЃС‚РѕСЂС–РЅРєСѓ
+      // Redirect to home page
       router.push("/");
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "РџРѕРјРёР»РєР° РІС…РѕРґСѓ");
+      toast.error(error instanceof Error ? error.message : "Login error");
     } finally {
       setLoading(false);
     }

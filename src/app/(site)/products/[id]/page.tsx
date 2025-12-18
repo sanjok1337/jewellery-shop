@@ -4,6 +4,7 @@ import { useState, useEffect, useContext } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useAuth } from '@/app/context/AuthContext';
+import { useCart } from '@/app/context/CartContext';
 import { useWishlist } from '@/app/context/WishlistContext';
 import WishlistButton from '@/components/Common/WishlistButton';
 import Reviews from '@/components/ProductDetail/Reviews';
@@ -19,6 +20,7 @@ interface Product {
   image_url?: string;
   images?: Array<{image_url: string; is_main: boolean}>;
   average_rating: number;
+  characteristics?: Record<string, string>;
 }
 
 export default function ProductPage() {
@@ -29,6 +31,7 @@ export default function ProductPage() {
   const [selectedImage, setSelectedImage] = useState<string>('');
   const [quantity, setQuantity] = useState(1);
   const { user } = useAuth();
+  const { addToCart: addToCartContext, loading: cartLoading } = useCart();
 
   useEffect(() => {
     if (productId) {
@@ -50,15 +53,15 @@ export default function ProductPage() {
         console.log('🔍 typeof data:', typeof data);
         console.log('🔍 data keys:', Object.keys(data));
         
-        // Гнучка обробка відповіді API
+        // Flexible API response handling
         if (data.product) {
           setProduct(data.product);
         } else if (data && data.id) {
-          // Якщо дані прийшли без обгортки product
+          // If data comes without product wrapper
           setProduct(data);
         } else {
           console.error('❌ Unexpected API response format:', data);
-          toast.error('Неочікуваний формат відповіді від сервера');
+          toast.error('Unexpected server response format');
         }
         
         // Встановлюємо головне зображення
@@ -69,50 +72,23 @@ export default function ProductPage() {
           setSelectedImage(data.product.image_url);
         }
       } else {
-        toast.error('Товар не знайдено');
+        toast.error('Product not found');
       }
     } catch (error) {
-      console.error('Помилка завантаження товару:', error);
-      toast.error('Помилка завантаження товару');
+      console.error('Error loading product:', error);
+      toast.error('Error loading product');
     } finally {
       setLoading(false);
     }
   };
 
-  const addToCart = async () => {
-    if (!user) {
-      toast.error('Увійдіть в систему для додавання в кошик');
-      return;
-    }
-
+  const handleAddToCart = async () => {
     if (!product || product.stock === 0) {
-      toast.error('Товар not available');
+      toast.error('Product not available');
       return;
     }
 
-    try {
-      const response = await fetch('http://localhost:5000/api/cart/add', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        },
-        body: JSON.stringify({
-          productId: product.id,
-          quantity: quantity
-        })
-      });
-
-      if (response.ok) {
-        toast.success('Товар додано в кошик');
-      } else {
-        const errorData = await response.json();
-        toast.error(errorData.message || 'Помилка додавання в кошик');
-      }
-    } catch (error) {
-      console.error('Помилка додавання в кошик:', error);
-      toast.error('Помилка додавання в кошик');
-    }
+    await addToCartContext(product.id, quantity);
   };
 
 
@@ -122,7 +98,7 @@ export default function ProductPage() {
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-          <p>Завантаження товару...</p>
+          <p>Loading product...</p>
         </div>
       </div>
     );
@@ -132,9 +108,9 @@ export default function ProductPage() {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <h1 className="text-2xl font-bold mb-4">Товар не знайдено</h1>
+          <h1 className="text-2xl font-bold mb-4">Product not found</h1>
           <Link href="/" className="bg-primary text-white px-6 py-2 rounded-md hover:bg-primary-dark">
-            На головну
+            Go to Home
           </Link>
         </div>
       </div>
@@ -302,31 +278,63 @@ export default function ProductPage() {
               </p>
             </div>
 
+            {/* Characteristics */}
+            {product.characteristics && Object.keys(product.characteristics).length > 0 && (
+              <div className="border-t pt-6">
+                <h3 className="text-lg font-semibold mb-4">Specifications</h3>
+                <div className="bg-gray-50 rounded-lg overflow-hidden">
+                  {Object.entries(product.characteristics).map(([key, value], index) => (
+                    <div 
+                      key={key} 
+                      className={`flex py-3 px-4 ${index % 2 === 0 ? 'bg-gray-50' : 'bg-white'}`}
+                    >
+                      <div className="w-1/2 text-gray-600 font-medium">{key}</div>
+                      <div className="w-1/2 text-gray-900">{value}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {/* Add to Cart Section */}
             {!isOutOfStock && (
               <div className="flex items-center space-x-4 border-t pt-6">
-                <div className="flex items-center border rounded-md">
+                <div className="flex items-center border border-gray-300 rounded-md">
                   <button
                     onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                    className="px-3 py-2 text-gray-600 hover:bg-gray-100"
+                    className="px-4 py-3 text-gray-600 hover:bg-gray-100 transition"
                     disabled={quantity <= 1}
                   >
                     -
                   </button>
-                  <span className="px-4 py-2 border-x">{quantity}</span>
+                  <span className="px-5 py-3 border-x border-gray-300 min-w-[60px] text-center">{quantity}</span>
                   <button
                     onClick={() => setQuantity(Math.min(product.stock, quantity + 1))}
-                    className="px-3 py-2 text-gray-600 hover:bg-gray-100"
+                    className="px-4 py-3 text-gray-600 hover:bg-gray-100 transition"
                     disabled={quantity >= product.stock}
                   >
                     +
                   </button>
                 </div>
                 <button
-                  onClick={addToCart}
-                  className="flex-1 bg-primary text-white px-6 py-3 rounded-md hover:bg-primary-dark transition duration-200 font-medium"
+                  onClick={handleAddToCart}
+                  disabled={cartLoading}
+                  className="flex-1 inline-flex items-center justify-center gap-2 bg-gradient-to-r from-gold to-gold-dark text-white px-6 py-3 rounded-md hover:from-gold-dark hover:to-gold transition duration-200 font-medium shadow-md disabled:opacity-50"
                 >
-                  Add to Cart
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"
+                    />
+                  </svg>
+                  {cartLoading ? "Adding..." : "Add to Cart"}
                 </button>
                 <WishlistButton productId={product.id} size="lg" />
               </div>
@@ -338,14 +346,14 @@ export default function ProductPage() {
                   disabled
                   className="w-full bg-gray-300 text-gray-500 px-6 py-3 rounded-md cursor-not-allowed font-medium"
                 >
-                  Товар not available
+                  Product not available
                 </button>
               </div>
             )}
           </div>
         </div>
 
-        {/* Секція відгуків */}
+        {/* Reviews Section */}
         <div className="mt-16 border-t pt-16">
           <Reviews productId={productId} />
         </div>

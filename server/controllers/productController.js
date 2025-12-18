@@ -86,6 +86,10 @@ const getProducts = async (req, res) => {
         case 'name':
           query += ' ORDER BY p.name ASC';
           break;
+        case 'popularity':
+          // Сортування за популярністю (за рейтингом, потім за датою)
+          query += ' ORDER BY IFNULL(p.average_rating, 0) DESC, p.created_at DESC';
+          break;
         case 'newest':
         default:
           query += ' ORDER BY p.created_at DESC';
@@ -276,4 +280,42 @@ const getSearchSuggestions = async (req, res) => {
   }
 };
 
-module.exports = { getProducts, getProduct, getCategories, getPriceRange, getSearchSuggestions };
+// Featured products for carousel (top rated)
+const getFeaturedProducts = async (req, res) => {
+  try {
+    console.log('🔍 Getting featured products for carousel');
+    
+    const connection = await pool.getConnection();
+    
+    const [products] = await connection.query(`
+      SELECT 
+        p.id,
+        p.name,
+        p.description,
+        p.price,
+        p.average_rating,
+        p.stock,
+        c.name as category_name,
+        pi.image_url,
+        (SELECT COUNT(*) FROM order_items oi 
+         JOIN orders o ON oi.order_id = o.id 
+         WHERE oi.product_id = p.id AND o.status != 'cancelled') as total_sales
+      FROM products p
+      LEFT JOIN categories c ON p.category_id = c.id
+      LEFT JOIN product_images pi ON p.id = pi.product_id AND pi.is_main = 1
+      WHERE p.stock > 0
+      ORDER BY p.average_rating DESC, total_sales DESC
+      LIMIT 5
+    `);
+    
+    connection.release();
+    
+    console.log('✅ Found featured products:', products.length);
+    res.json(products);
+  } catch (error) {
+    console.error('❌ Error getting featured products:', error);
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};
+
+module.exports = { getProducts, getProduct, getCategories, getPriceRange, getSearchSuggestions, getFeaturedProducts };

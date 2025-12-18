@@ -26,7 +26,7 @@ const SingleItem = ({ item, onRemove }: SingleItemProps) => {
 
   const handleAddToCart = async () => {
     if (!token) {
-      toast.error('РЈРІС–Р№РґС–С‚СЊ РІ Р°РєРєР°СѓРЅС‚ РґР»СЏ РґРѕРґР°РІР°РЅРЅСЏ РІ РєРѕС€РёРє');
+      toast.error('Please sign in to add to cart');
       router.push('/signin');
       return;
     }
@@ -128,7 +128,7 @@ const SingleItem = ({ item, onRemove }: SingleItemProps) => {
           onClick={handleAddToCart}
           className="inline-flex text-dark hover:text-white bg-gray-1 border border-gray-3 py-2.5 px-6 rounded-md ease-out duration-200 hover:bg-gold hover:border-gray-3"
         >
-          Р”РѕРґР°С‚Рё РІ РєРѕС€РёРє
+          Add to Cart
         </button>
       </div>
     </div>

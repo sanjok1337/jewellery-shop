@@ -25,15 +25,15 @@ const NewArrival = () => {
 
   const fetchProducts = async () => {
     try {
-      console.log('рџ”„ Fetching products from API...');
+      console.log('Fetching products from API...');
       const response = await fetch('http://localhost:5000/api/products?limit=4&sortBy=newest');
-      console.log('рџ“Ў Response status:', response.status, response.ok);
+      console.log('Response status:', response.status, response.ok);
       
       if (response.ok) {
         const data = await response.json();
-        console.log('рџ“¦ API Response:', data);
+        console.log('API Response:', data);
         console.log('рџЏ·пёЏ Products array:', data.products);
-        console.log('рџ“Љ Products count:', data.products?.length || 0);
+        console.log('Products count:', data.products?.length || 0);
         setProducts(data.products || []);
       } else {
         console.error('вќЊ API request failed:', response.status, response.statusText);
@@ -93,13 +93,13 @@ const NewArrival = () => {
             </div>
           ) : products.length > 0 ? (
             products.map((product) => {
-              // РђРґР°РїС‚СѓС”РјРѕ РґР°РЅС– Р· API РґРѕ С„РѕСЂРјР°С‚Сѓ, СЏРєРёР№ РѕС‡С–РєСѓС” ProductItem
+              // Adapt API data to the format expected by ProductItem
               const adaptedProduct = {
                 id: product.id,
                 title: product.name,
                 price: product.price,
-                discountedPrice: product.price, // РїРѕРєРё С‰Рѕ Р±РµР· Р·РЅРёР¶РєРё
-                reviews: 0, // РїРѕРєРё С‰Рѕ 0 РІС–РґРіСѓРєС–РІ
+                discountedPrice: product.price, // no discount yet
+                reviews: 0, // 0 reviews yet
                 stock: product.stock || 0,
                 stockStatus: product.stock > 0 ? 'In Stock' : 'Out of Stock',
                 imgs: {

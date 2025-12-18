@@ -53,7 +53,7 @@ const CategoryDropdown = ({ categories, onCategoryChange, selectedCategory }) =>
 
   const handleCategoryToggle = (categoryName) => {
     if (selectedCategory === categoryName) {
-      onCategoryChange(''); // Р—РЅСЏС‚Рё РІРёР±С–СЂ
+      onCategoryChange(''); // Clear selection
     } else {
       onCategoryChange(categoryName);
     }

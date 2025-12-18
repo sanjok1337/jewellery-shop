@@ -73,7 +73,7 @@ const BestSeller = () => {
             </div>
           ) : products.length > 0 ? (
             products.map((product) => {
-              // РђРґР°РїС‚СѓС”РјРѕ РґР°РЅС– Р· API РґРѕ С„РѕСЂРјР°С‚Сѓ, СЏРєРёР№ РѕС‡С–РєСѓС” SingleItem
+              // Adapt API data to the format expected by SingleItem
               const adaptedProduct = {
                 id: product.id,
                 title: product.name,

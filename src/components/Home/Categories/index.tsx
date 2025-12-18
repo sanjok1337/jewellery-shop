@@ -40,13 +40,13 @@ const Categories = () => {
         const formattedCategories = apiCategories.map((cat, index) => ({
           title: cat.name,
           id: cat.id,
-          img: categoryImages[index % categoryImages.length], // Р’РёРєРѕСЂРёСЃС‚РѕРІСѓС”РјРѕ РЅРѕРІС– СЋРІРµР»С–СЂРЅС– Р·РѕР±СЂР°Р¶РµРЅРЅСЏ С†РёРєР»С–С‡РЅРѕ
+          img: categoryImages[index % categoryImages.length], // Use jewelry images cyclically
         }));
         setCategories(formattedCategories);
       }
     } catch (error) {
       console.error('Error fetching categories:', error);
-      // РЇРєС‰Рѕ РїРѕРјРёР»РєР°, РІРёРєРѕСЂРёСЃС‚РѕРІСѓС”РјРѕ СЃС‚Р°С‚РёС‡РЅС– РґР°РЅС–
+      // If error, use static data
       setCategories(data);
     }
   };

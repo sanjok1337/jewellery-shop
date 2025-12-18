@@ -23,7 +23,7 @@ const MyAccount = () => {
   const [addresses, setAddresses] = useState<Address[]>([]);
   const [loading, setLoading] = useState(false);
   
-  // РЎС‚Р°РЅ РґР»СЏ Р·РјС–РЅРё РїР°СЂРѕР»СЏ
+  // State for password change
   const [passwordData, setPasswordData] = useState({
     oldPassword: '',
     newPassword: '',
@@ -31,7 +31,7 @@ const MyAccount = () => {
   });
   const [passwordLoading, setPasswordLoading] = useState(false);
 
-  // РЎС‚Р°РЅ РґР»СЏ Р·РјС–РЅРё email
+  // State for email change
   const [emailData, setEmailData] = useState({
     newEmail: ''
   });
@@ -39,7 +39,7 @@ const MyAccount = () => {
 
   const { user, token, logout, login } = useAuth();
 
-  // Р—Р°РІР°РЅС‚Р°Р¶РµРЅРЅСЏ Р°РґСЂРµСЃ
+  // Loading addresses
   useEffect(() => {
     if (token && activeTab === "addresses") {
       fetchAddresses();
@@ -60,10 +60,10 @@ const MyAccount = () => {
       if (response.ok) {
         setAddresses(data.addresses);
       } else {
-        toast.error(data.message || "РџРѕРјРёР»РєР° Р·Р°РІР°РЅС‚Р°Р¶РµРЅРЅСЏ Р°РґСЂРµСЃ");
+        toast.error(data.message || "Error loading addresses");
       }
     } catch (error) {
-      toast.error("РџРѕРјРёР»РєР° Р·'С”РґРЅР°РЅРЅСЏ Р· СЃРµСЂРІРµСЂРѕРј");
+      toast.error("Server connection error");
     } finally {
       setLoading(false);
     }
@@ -79,26 +79,26 @@ const MyAccount = () => {
 
   const handleLogout = () => {
     logout();
-    toast.success("Р’Рё РІРёР№С€Р»Рё Р· РѕР±Р»С–РєРѕРІРѕРіРѕ Р·Р°РїРёСЃСѓ");
+    toast.success("You have been logged out");
     router.push("/");
   };
 
-  // Р¤СѓРЅРєС†С–СЏ РґР»СЏ Р·РјС–РЅРё РїР°СЂРѕР»СЏ
+  // Function for password change
   const handleChangePassword = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!passwordData.oldPassword || !passwordData.newPassword || !passwordData.confirmNewPassword) {
-      toast.error('Р—Р°РїРѕРІРЅС–С‚СЊ РІСЃС– РїРѕР»СЏ');
+      toast.error('Please fill all fields');
       return;
     }
 
     if (passwordData.newPassword !== passwordData.confirmNewPassword) {
-      toast.error('РќРѕРІС– РїР°СЂРѕР»С– РЅРµ СЃРїС–РІРїР°РґР°СЋС‚СЊ');
+      toast.error('New passwords do not match');
       return;
     }
 
     if (passwordData.newPassword.length < 6) {
-      toast.error('New Password РїРѕРІРёРЅРµРЅ РјС–СЃС‚РёС‚Рё РјС–РЅС–РјСѓРј 6 СЃРёРјРІРѕР»С–РІ');
+      toast.error('New password must be at least 6 characters');
       return;
     }
 
@@ -120,35 +120,35 @@ const MyAccount = () => {
       const data = await response.json();
 
       if (response.ok) {
-        toast.success(data.message || 'РџР°СЂРѕР»СЊ СѓСЃРїС–С€РЅРѕ Р·РјС–РЅРµРЅРѕ');
+        toast.success(data.message || 'Password changed successfully');
         setPasswordData({
           oldPassword: '',
           newPassword: '',
           confirmNewPassword: ''
         });
       } else {
-        toast.error(data.error || 'РџРѕРјРёР»РєР° Р·РјС–РЅРё РїР°СЂРѕР»СЏ');
+        toast.error(data.error || 'Error changing password');
       }
     } catch (error) {
-      console.error('РџРѕРјРёР»РєР° Р·РјС–РЅРё РїР°СЂРѕР»СЏ:', error);
-      toast.error('РџРѕРјРёР»РєР° Р·РјС–РЅРё РїР°СЂРѕР»СЏ');
+      console.error('Error changing password:', error);
+      toast.error('Error changing password');
     } finally {
       setPasswordLoading(false);
     }
   };
 
-  // Р¤СѓРЅРєС†С–СЏ РґР»СЏ Р·РјС–РЅРё email
+  // Function for email change
   const handleChangeEmail = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!emailData.newEmail) {
-      toast.error('Р’РІРµРґС–С‚СЊ РЅРѕРІРёР№ email');
+      toast.error('Please enter new email');
       return;
     }
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(emailData.newEmail)) {
-      toast.error('РќРµРїСЂР°РІРёР»СЊРЅРёР№ С„РѕСЂРјР°С‚ email');
+      toast.error('Invalid email format');
       return;
     }
 
@@ -169,17 +169,17 @@ const MyAccount = () => {
       const data = await response.json();
 
       if (response.ok) {
-        toast.success(data.message || 'Email СѓСЃРїС–С€РЅРѕ Р·РјС–РЅРµРЅРѕ');
-        // РћРЅРѕРІР»СЋС”РјРѕ РґР°РЅС– РєРѕСЂРёСЃС‚СѓРІР°С‡Р° РІ РєРѕРЅС‚РµРєСЃС‚С–
+        toast.success(data.message || 'Email changed successfully');
+        // Update user data in context
         const updatedUser = { ...user, email: data.newEmail };
         login(token!, updatedUser);
         setEmailData({ newEmail: '' });
       } else {
-        toast.error(data.error || 'РџРѕРјРёР»РєР° Р·РјС–РЅРё email');
+        toast.error(data.error || 'Error changing email');
       }
     } catch (error) {
-      console.error('РџРѕРјРёР»РєР° Р·РјС–РЅРё email:', error);
-      toast.error('РџРѕРјРёР»РєР° Р·РјС–РЅРё email');
+      console.error('Error changing email:', error);
+      toast.error('Error changing email');
     } finally {
       setEmailLoading(false);
     }
@@ -471,7 +471,7 @@ const MyAccount = () => {
                 activeTab === "addresses" ? "flex" : "hidden"
               }`}
             >
-              <div className="xl:max-w-[370px] w-full bg-white shadow-1 rounded-xl">
+              <div className="xl:max-w-[470px] w-full bg-white shadow-1 rounded-xl">
                 <div className="flex items-center justify-between py-5 px-4 sm:pl-7.5 sm:pr-6 border-b border-gray-3">
                   <p className="font-medium text-xl text-dark">
                     Delivery Addresses
@@ -501,7 +501,7 @@ const MyAccount = () => {
 
                 <div className="p-4 sm:p-7.5">
                   {loading ? (
-                    <p className="text-center text-custom-sm">Р—Р°РІР°РЅС‚Р°Р¶РµРЅРЅСЏ...</p>
+                    <p className="text-center text-custom-sm">Loading...</p>
                   ) : addresses.length > 0 ? (
                     <div className="flex flex-col gap-4">
                       {addresses.map((address, index) => (
@@ -542,7 +542,7 @@ const MyAccount = () => {
                 </div>
               </div>
 
-              <div className="xl:max-w-[370px] w-full bg-white shadow-1 rounded-xl">
+              <div className="xl:max-w-[470px] w-full bg-white shadow-1 rounded-xl">
                 <div className="flex items-center justify-between py-5 px-4 sm:pl-7.5 sm:pr-6 border-b border-gray-3">
                   <p className="font-medium text-xl text-dark">
                     Contact Information
@@ -573,7 +573,7 @@ const MyAccount = () => {
                           fill=""
                         />
                       </svg>
-                      Р†Рј'СЏ: {user?.name || "РќРµ РІРєР°Р·Р°РЅРѕ"}
+                      Name: {user?.name || "Not specified"}
                     </p>
 
                     <p className="flex items-center gap-2.5 text-custom-sm">
@@ -592,7 +592,7 @@ const MyAccount = () => {
                           fill=""
                         />
                       </svg>
-                      Email: {user?.email || "РќРµ РІРєР°Р·Р°РЅРѕ"}
+                      Email: {user?.email || "Not specified"}
                     </p>
                   </div>
                 </div>
@@ -609,7 +609,7 @@ const MyAccount = () => {
               {/* Email Change Form */}
               <div className="bg-white shadow-1 rounded-xl p-4 sm:p-8.5 mb-7">
                 <p className="font-medium text-xl sm:text-2xl text-dark mb-7">
-                  Р—РјС–РЅР° Email
+                  Change Email
                 </p>
                 <form onSubmit={handleChangeEmail}>
                   <div className="mb-5">
@@ -627,14 +627,14 @@ const MyAccount = () => {
 
                   <div className="mb-5">
                     <label htmlFor="newEmail" className="block mb-2.5">
-                      РќРѕРІРёР№ Email <span className="text-red">*</span>
+                      New Email <span className="text-red">*</span>
                     </label>
                     <input
                       type="email"
                       id="newEmail"
                       value={emailData.newEmail}
                       onChange={(e) => setEmailData({ newEmail: e.target.value })}
-                      placeholder="Р’РІРµРґС–С‚СЊ РЅРѕРІРёР№ email"
+                      placeholder="Enter new email"
                       className="rounded-md border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
                     />
                   </div>
@@ -644,7 +644,7 @@ const MyAccount = () => {
                     disabled={emailLoading}
                     className="inline-flex font-medium text-white bg-gold py-3 px-7 rounded-md ease-out duration-200 hover:bg-gold disabled:opacity-50"
                   >
-                    {emailLoading ? 'Р—Р±РµСЂРµР¶РµРЅРЅСЏ...' : 'Change Email'}
+                    {emailLoading ? 'Saving...' : 'Change Email'}
                   </button>
                 </form>
               </div>
@@ -652,7 +652,7 @@ const MyAccount = () => {
               {/* Password Change Form */}
               <div className="bg-white shadow-1 rounded-xl p-4 sm:p-8.5">
                 <p className="font-medium text-xl sm:text-2xl text-dark mb-7">
-                  Р—РјС–РЅР° РїР°СЂРѕР»СЏ
+                  Change Password
                 </p>
                 <form onSubmit={handleChangePassword}>
                   <div className="mb-5">
@@ -702,7 +702,7 @@ const MyAccount = () => {
                     disabled={passwordLoading}
                     className="inline-flex font-medium text-white bg-gold py-3 px-7 rounded-md ease-out duration-200 hover:bg-gold disabled:opacity-50"
                   >
-                    {passwordLoading ? 'Р—Р±РµСЂРµР¶РµРЅРЅСЏ...' : 'Change Password'}
+                    {passwordLoading ? 'Saving...' : 'Change Password'}
                   </button>
                 </form>
               </div>

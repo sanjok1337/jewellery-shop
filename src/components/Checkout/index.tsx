@@ -58,7 +58,7 @@ const Checkout = () => {
     console.log('Checkout - token:', token);
     
     if (!isAuthenticated) {
-      toast.error('РЈРІС–Р№РґС–С‚СЊ РІ Р°РєРєР°СѓРЅС‚ РґР»СЏ РѕС„РѕСЂРјР»РµРЅРЅСЏ Р·Р°РјРѕРІР»РµРЅРЅСЏ');
+      toast.error('Please sign in to checkout');
       router.push('/signin');
       return;
     }
@@ -79,7 +79,7 @@ const Checkout = () => {
         const data = await response.json();
         setAddresses(data.addresses || []);
         
-        // Р’РёР±РёСЂР°С”РјРѕ Р°РґСЂРµСЃСѓ Р·Р° Р·Р°РјРѕРІС‡СѓРІР°РЅРЅСЏРј
+        // Select default address
         const defaultAddress = data.addresses?.find((addr: Address) => addr.is_default);
         if (defaultAddress) {
           setSelectedAddress(defaultAddress);
@@ -115,7 +115,7 @@ const Checkout = () => {
     }
 
     if (cartItems.length === 0) {
-      toast.error('Р’Р°С€ РєРѕС€РёРє РїРѕСЂРѕР¶РЅС–Р№');
+      toast.error('Your cart is empty');
       return;
     }
 
@@ -155,21 +155,30 @@ const Checkout = () => {
         try {
           const data = JSON.parse(text);
           console.log('Order created successfully:', data);
-          toast.success('Р—Р°РјРѕРІР»РµРЅРЅСЏ СѓСЃРїС–С€РЅРѕ СЃС‚РІРѕСЂРµРЅРѕ!');
           
-          // РћС‡РёС‰Р°С”РјРѕ РєРѕС€РёРє РїС–СЃР»СЏ СѓСЃРїС–С€РЅРѕРіРѕ Р·Р°РјРѕРІР»РµРЅРЅСЏ
-          await fetch('http://localhost:5000/api/cart', {
-            method: 'DELETE',
-            headers: {
-              'Authorization': `Bearer ${token}`
-            }
-          });
-          
-          router.push(`/my-account`);
+          // If crypto payment, show the crypto modal
+          if (isCryptoPayment) {
+            setCryptoOrderId(data.orderId);
+            setCryptoOrderTotal(calculateTotal());
+            setShowCryptoModal(true);
+            toast.success('Order created! Please complete payment.');
+          } else {
+            toast.success('Order created successfully!');
+            
+            // Clear cart after successful order
+            await fetch('http://localhost:5000/api/cart', {
+              method: 'DELETE',
+              headers: {
+                'Authorization': `Bearer ${token}`
+              }
+            });
+            
+            router.push(`/my-account`);
+          }
         } catch (parseError) {
           console.error('Parse success response error:', parseError);
           console.error('Response was:', text);
-          toast.error('РџРѕРјРёР»РєР° РѕР±СЂРѕР±РєРё РІС–РґРїРѕРІС–РґС– СЃРµСЂРІРµСЂР°');
+          toast.error('Error processing server response');
         }
       } else {
         console.error('Order failed with status:', response.status);
@@ -177,22 +186,37 @@ const Checkout = () => {
         try {
           const error = JSON.parse(text);
           console.error('Parsed error:', error);
-          toast.error(error.message || error.error || 'РџРѕРјРёР»РєР° СЃС‚РІРѕСЂРµРЅРЅСЏ Р·Р°РјРѕРІР»РµРЅРЅСЏ');
+          toast.error(error.message || error.error || 'Error creating order');
         } catch (parseError) {
           console.error('Could not parse error response:', parseError);
-          toast.error('РџРѕРјРёР»РєР° СЃРµСЂРІРµСЂР°: ' + text.substring(0, 100));
+          toast.error('Server error: ' + text.substring(0, 100));
         }
       }
     } catch (error) {
       console.error('Checkout error:', error);
-      toast.error('РџРѕРјРёР»РєР° РѕС„РѕСЂРјР»РµРЅРЅСЏ Р·Р°РјРѕРІР»РµРЅРЅСЏ');
+      toast.error('Error processing order');
     }
+  };
+
+  const handleCryptoPaymentSuccess = async () => {
+    setShowCryptoModal(false);
+    
+    // Clear cart after successful payment
+    await fetch('http://localhost:5000/api/cart', {
+      method: 'DELETE',
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
+    
+    toast.success('Payment successful!');
+    router.push(`/my-account`);
   };
 
   if (loading) {
     return (
       <div className="flex justify-center items-center min-h-screen">
-        <p className="text-lg">Р—Р°РІР°РЅС‚Р°Р¶РµРЅРЅСЏ...</p>
+        <p className="text-lg">Loading...</p>
       </div>
     );
   }
@@ -262,7 +286,7 @@ const Checkout = () => {
                     {/* <!-- product items --> */}
                     {cartItems.length === 0 ? (
                       <div className="py-5 text-center text-dark-5">
-                        Р’Р°С€ РєРѕС€РёРє РїРѕСЂРѕР¶РЅС–Р№
+                        Your cart is empty
                       </div>
                     ) : (
                       cartItems.map((item) => (
@@ -334,6 +358,18 @@ const Checkout = () => {
           </form>
         </div>
       </section>
+
+      {/* Crypto Payment Modal */}
+      {showCryptoModal && (
+        <CryptoPaymentModal
+          isOpen={showCryptoModal}
+          onClose={() => setShowCryptoModal(false)}
+          orderId={cryptoOrderId}
+          totalAmount={cryptoOrderTotal}
+          cryptoType={paymentMethod}
+          onPaymentSuccess={handleCryptoPaymentSuccess}
+        />
+      )}
     </>
   );
 };

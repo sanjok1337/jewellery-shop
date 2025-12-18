@@ -2,6 +2,10 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "@/app/context/AuthContext";
 import toast from "react-hot-toast";
+import { BrowserProvider, parseEther, formatEther } from "ethers";
+
+// Sepolia testnet chain ID
+const SEPOLIA_CHAIN_ID = "0xaa36a7"; // 11155111 in hex
 
 interface CryptoPaymentModalProps {
   isOpen: boolean;
@@ -20,6 +24,13 @@ interface PaymentDetails {
   qr_data: string;
 }
 
+interface WalletState {
+  isConnected: boolean;
+  address: string | null;
+  balance: string | null;
+  isCorrectNetwork: boolean;
+}
+
 const CryptoPaymentModal = ({
   isOpen,
   onClose,
@@ -34,6 +45,14 @@ const CryptoPaymentModal = ({
   const [timeLeft, setTimeLeft] = useState(30 * 60); // 30 minutes in seconds
   const [verifying, setVerifying] = useState(false);
   const [copied, setCopied] = useState<string | null>(null);
+  const [wallet, setWallet] = useState<WalletState>({
+    isConnected: false,
+    address: null,
+    balance: null,
+    isCorrectNetwork: false,
+  });
+  const [txHash, setTxHash] = useState<string | null>(null);
+  const [sendingTx, setSendingTx] = useState(false);
 
   const cryptoNames: Record<string, string> = {
     bitcoin: "Bitcoin (BTC)",
@@ -74,6 +93,7 @@ const CryptoPaymentModal = ({
   useEffect(() => {
     if (isOpen && orderId && cryptoType) {
       generatePayment();
+      checkWalletConnection();
     }
   }, [isOpen, orderId, cryptoType]);
 
@@ -94,6 +114,176 @@ const CryptoPaymentModal = ({
 
     return () => clearInterval(timer);
   }, [isOpen, timeLeft]);
+
+  // Check if MetaMask is installed and connected
+  const checkWalletConnection = async () => {
+    if (typeof window !== "undefined" && window.ethereum) {
+      try {
+        const accounts = await window.ethereum.request({ method: "eth_accounts" });
+        if (accounts.length > 0) {
+          await updateWalletState(accounts[0]);
+        }
+      } catch (error) {
+        console.error("Error checking wallet connection:", error);
+      }
+    }
+  };
+
+  // Update wallet state with balance and network
+  const updateWalletState = async (address: string) => {
+    try {
+      const provider = new BrowserProvider(window.ethereum);
+      const balance = await provider.getBalance(address);
+      const network = await provider.getNetwork();
+      
+      setWallet({
+        isConnected: true,
+        address,
+        balance: formatEther(balance),
+        isCorrectNetwork: network.chainId === BigInt(11155111), // Sepolia
+      });
+    } catch (error) {
+      console.error("Error updating wallet state:", error);
+    }
+  };
+
+  // Connect MetaMask wallet
+  const connectWallet = async () => {
+    if (typeof window === "undefined" || !window.ethereum) {
+      toast.error("MetaMask not installed! Please install MetaMask extension.");
+      window.open("https://metamask.io/download/", "_blank");
+      return;
+    }
+
+    try {
+      const accounts = await window.ethereum.request({
+        method: "eth_requestAccounts",
+      });
+      
+      if (accounts.length > 0) {
+        await updateWalletState(accounts[0]);
+        toast.success("Wallet connected!");
+      }
+    } catch (error: any) {
+      if (error.code === 4001) {
+        toast.error("Connection rejected by user");
+      } else {
+        toast.error("Failed to connect wallet");
+      }
+    }
+  };
+
+  // Switch to Sepolia network
+  const switchToSepolia = async () => {
+    try {
+      await window.ethereum.request({
+        method: "wallet_switchEthereumChain",
+        params: [{ chainId: SEPOLIA_CHAIN_ID }],
+      });
+      await checkWalletConnection();
+      toast.success("Switched to Sepolia testnet!");
+    } catch (error: any) {
+      // If Sepolia is not added, add it
+      if (error.code === 4902) {
+        try {
+          await window.ethereum.request({
+            method: "wallet_addEthereumChain",
+            params: [
+              {
+                chainId: SEPOLIA_CHAIN_ID,
+                chainName: "Sepolia Testnet",
+                nativeCurrency: {
+                  name: "SepoliaETH",
+                  symbol: "ETH",
+                  decimals: 18,
+                },
+                rpcUrls: ["https://sepolia.infura.io/v3/"],
+                blockExplorerUrls: ["https://sepolia.etherscan.io"],
+              },
+            ],
+          });
+          toast.success("Sepolia network added!");
+        } catch (addError) {
+          toast.error("Failed to add Sepolia network");
+        }
+      } else {
+        toast.error("Failed to switch network");
+      }
+    }
+  };
+
+  // Send ETH transaction via MetaMask
+  const sendTransaction = async () => {
+    if (!paymentDetails || !wallet.isConnected) return;
+
+    setSendingTx(true);
+    try {
+      const provider = new BrowserProvider(window.ethereum);
+      const signer = await provider.getSigner();
+      
+      const tx = await signer.sendTransaction({
+        to: paymentDetails.wallet_address,
+        value: parseEther(paymentDetails.crypto_amount),
+      });
+
+      setTxHash(tx.hash);
+      toast.success("Transaction sent! Waiting for confirmation...");
+
+      // Wait for transaction confirmation
+      const receipt = await tx.wait();
+      
+      if (receipt && receipt.status === 1) {
+        toast.success("Transaction confirmed!");
+        
+        // Verify payment on backend with tx hash
+        await verifyWithTxHash(tx.hash);
+      } else {
+        toast.error("Transaction failed!");
+      }
+    } catch (error: any) {
+      console.error("Transaction error:", error);
+      if (error.code === 4001) {
+        toast.error("Transaction rejected by user");
+      } else if (error.code === "INSUFFICIENT_FUNDS") {
+        toast.error("Insufficient funds for transaction");
+      } else {
+        toast.error(error.message || "Transaction failed");
+      }
+    } finally {
+      setSendingTx(false);
+    }
+  };
+
+  // Verify payment with transaction hash
+  const verifyWithTxHash = async (hash: string) => {
+    setVerifying(true);
+    try {
+      const response = await fetch("http://localhost:5000/api/crypto-payments/verify-tx", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          order_id: orderId,
+          tx_hash: hash,
+        }),
+      });
+
+      if (response.ok) {
+        toast.success("Payment verified successfully!");
+        onPaymentSuccess();
+      } else {
+        const error = await response.json();
+        toast.error(error.message || "Payment verification failed");
+      }
+    } catch (error) {
+      console.error("Verify payment error:", error);
+      toast.error("Failed to verify payment");
+    } finally {
+      setVerifying(false);
+    }
+  };
 
   const generatePayment = async () => {
     setLoading(true);
@@ -329,6 +519,106 @@ const CryptoPaymentModal = ({
 
               {/* Action Buttons */}
               <div className="space-y-3">
+                {/* MetaMask Payment Section for Ethereum */}
+                {cryptoType === "ethereum" && (
+                  <div className="bg-gradient-to-r from-orange-50 to-orange-100 rounded-xl p-4 mb-4 border border-orange-200">
+                    <div className="flex items-center gap-2 mb-3">
+                      <svg className="w-6 h-6" viewBox="0 0 40 40" fill="none">
+                        <path d="M37.5 20c0 9.665-7.835 17.5-17.5 17.5S2.5 29.665 2.5 20 10.335 2.5 20 2.5 37.5 10.335 37.5 20z" fill="#F6851B"/>
+                        <path d="M33.2 10.5l-12 8.9 2.2-5.3 9.8-3.6z" fill="#E2761B" stroke="#E2761B" strokeLinecap="round" strokeLinejoin="round"/>
+                        <path d="M6.8 10.5l11.9 9-2.1-5.4-9.8-3.6zm22.1 18.1l-3.2 4.9 6.8 1.9 2-6.7-5.6-.1zm-23.8.1l1.9 6.7 6.8-1.9-3.2-4.9-5.5.1z" fill="#E4761B" stroke="#E4761B" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                      <span className="font-semibold text-orange-800">Pay with MetaMask (Sepolia Testnet)</span>
+                    </div>
+
+                    {!wallet.isConnected ? (
+                      <button
+                        onClick={connectWallet}
+                        className="w-full py-2.5 px-4 bg-orange-500 hover:bg-orange-600 text-white font-medium rounded-lg transition-all flex items-center justify-center gap-2"
+                      >
+                        <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                          <path d="M21 18v1a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h14a2 2 0 012 2v1"/>
+                          <polyline points="15,8 21,8 21,16 15,16"/>
+                          <line x1="21" y1="12" x2="9" y2="12"/>
+                        </svg>
+                        Connect MetaMask
+                      </button>
+                    ) : !wallet.isCorrectNetwork ? (
+                      <button
+                        onClick={switchToSepolia}
+                        className="w-full py-2.5 px-4 bg-yellow-500 hover:bg-yellow-600 text-white font-medium rounded-lg transition-all flex items-center justify-center gap-2"
+                      >
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                        </svg>
+                        Switch to Sepolia Network
+                      </button>
+                    ) : (
+                      <div className="space-y-3">
+                        <div className="flex items-center justify-between text-sm">
+                          <span className="text-gray-600">Connected:</span>
+                          <span className="font-mono text-xs text-gray-800">
+                            {wallet.address?.slice(0, 6)}...{wallet.address?.slice(-4)}
+                          </span>
+                        </div>
+                        <div className="flex items-center justify-between text-sm">
+                          <span className="text-gray-600">Balance:</span>
+                          <span className="font-semibold text-gray-800">
+                            {parseFloat(wallet.balance || "0").toFixed(4)} ETH
+                          </span>
+                        </div>
+                        
+                        {txHash ? (
+                          <div className="bg-green-100 rounded-lg p-3 text-center">
+                            <p className="text-sm text-green-800 mb-1">Transaction sent!</p>
+                            <a
+                              href={`https://sepolia.etherscan.io/tx/${txHash}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-xs text-green-600 hover:underline font-mono"
+                            >
+                              View on Etherscan
+                            </a>
+                          </div>
+                        ) : (
+                          <button
+                            onClick={sendTransaction}
+                            disabled={sendingTx || parseFloat(wallet.balance || "0") < parseFloat(paymentDetails.crypto_amount)}
+                            className="w-full py-2.5 px-4 bg-orange-500 hover:bg-orange-600 text-white font-medium rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                          >
+                            {sendingTx ? (
+                              <>
+                                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                                Sending...
+                              </>
+                            ) : (
+                              <>
+                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/>
+                                </svg>
+                                Pay {paymentDetails.crypto_amount} ETH
+                              </>
+                            )}
+                          </button>
+                        )}
+                      </div>
+                    )}
+                    
+                    <p className="text-xs text-orange-700 mt-2 text-center">
+                      Get free test ETH from{" "}
+                      <a href="https://sepoliafaucet.com" target="_blank" rel="noopener noreferrer" className="underline">
+                        sepoliafaucet.com
+                      </a>
+                    </p>
+                  </div>
+                )}
+
+                <div className="relative flex items-center my-4">
+                  <div className="flex-grow border-t border-gray-200"></div>
+                  <span className="flex-shrink mx-4 text-gray-400 text-sm">or pay manually</span>
+                  <div className="flex-grow border-t border-gray-200"></div>
+                </div>
+
                 <button
                   onClick={handleVerifyPayment}
                   disabled={verifying}

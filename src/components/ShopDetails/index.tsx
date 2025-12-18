@@ -6,11 +6,14 @@ import Newsletter from "../Common/Newsletter";
 import RecentlyViewdItems from "./RecentlyViewd";
 import { usePreviewSlider } from "@/app/context/PreviewSliderContext";
 import { useAppSelector } from "@/redux/store";
+import { useCart } from "@/app/context/CartContext";
+import toast from "react-hot-toast";
 
 const ShopDetails = () => {
   const [activeColor, setActiveColor] = useState("blue");
   const { openPreviewModal } = usePreviewSlider();
   const [previewImg, setPreviewImg] = useState(0);
+  const { addToCart, loading: cartLoading } = useCart();
 
   const [storage, setStorage] = useState("gb128");
   const [type, setType] = useState("active");
@@ -89,6 +92,13 @@ const ShopDetails = () => {
   // pass the product here when you get the real data.
   const handlePreviewSlider = () => {
     openPreviewModal();
+  };
+
+  const handleAddToCart = async () => {
+    if (product && product.id) {
+      await addToCart(product.id, quantity);
+      toast.success(`${product.title} added to cart!`);
+    }
   };
 
   console.log(product);
@@ -669,12 +679,50 @@ const ShopDetails = () => {
                         </button>
                       </div>
 
-                      <a
-                        href="#"
-                        className="inline-flex font-medium text-white bg-blue py-3 px-7 rounded-md ease-out duration-200 hover:bg-blue-dark"
+                      <button
+                        onClick={handleAddToCart}
+                        disabled={cartLoading}
+                        className="inline-flex items-center gap-2 font-medium text-white bg-gold py-3 px-7 rounded-md ease-out duration-200 hover:bg-gold-dark disabled:opacity-50"
                       >
-                        Purchase Now
-                      </a>
+                        <svg
+                          className="fill-current"
+                          width="20"
+                          height="20"
+                          viewBox="0 0 20 20"
+                          fill="none"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path
+                            d="M1.66699 1.66675H2.75033C3.45699 1.66675 4.05033 2.16675 4.16699 2.86675L4.28366 3.63341"
+                            stroke="white"
+                            strokeWidth="1.5"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          />
+                          <path
+                            d="M5.83301 12.5001H14.7497C16.1663 12.5001 17.3913 11.4584 17.5413 10.0501L18.0913 4.95008C18.2163 3.75008 17.2913 2.70841 16.083 2.70841H4.41634"
+                            stroke="white"
+                            strokeWidth="1.5"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          />
+                          <path
+                            d="M13.333 17.5C13.9773 17.5 14.4997 16.9777 14.4997 16.3334C14.4997 15.6891 13.9773 15.1667 13.333 15.1667C12.6887 15.1667 12.1663 15.6891 12.1663 16.3334C12.1663 16.9777 12.6887 17.5 13.333 17.5Z"
+                            stroke="white"
+                            strokeWidth="1.5"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          />
+                          <path
+                            d="M6.66634 17.5C7.31067 17.5 7.83301 16.9777 7.83301 16.3334C7.83301 15.6891 7.31067 15.1667 6.66634 15.1667C6.02201 15.1667 5.49967 15.6891 5.49967 16.3334C5.49967 16.9777 6.02201 17.5 6.66634 17.5Z"
+                            stroke="white"
+                            strokeWidth="1.5"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          />
+                        </svg>
+                        {cartLoading ? "Adding..." : "Add to Cart"}
+                      </button>
 
                       <a
                         href="#"
@@ -784,136 +832,66 @@ const ShopDetails = () => {
                     activeTab === "tabTwo" ? "block" : "hidden"
                   }`}
                 >
-                  {/* <!-- info item --> */}
-                  <div className="rounded-md even:bg-gray-1 flex py-4 px-4 sm:px-5">
-                    <div className="max-w-[450px] min-w-[140px] w-full">
-                      <p className="text-sm sm:text-base text-dark">Brand</p>
-                    </div>
-                    <div className="w-full">
-                      <p className="text-sm sm:text-base text-dark">Luxury Jewels</p>
-                    </div>
-                  </div>
+                  {product.characteristics && typeof product.characteristics === 'object' ? (
+                    // Dynamic characteristics from database
+                    Object.entries(product.characteristics).map(([key, value], index) => (
+                      <div key={key} className={`rounded-md ${index % 2 === 1 ? 'bg-gray-1' : ''} flex py-4 px-4 sm:px-5`}>
+                        <div className="max-w-[450px] min-w-[140px] w-full">
+                          <p className="text-sm sm:text-base text-dark font-medium">{key}</p>
+                        </div>
+                        <div className="w-full">
+                          <p className="text-sm sm:text-base text-dark">{String(value)}</p>
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    // Default characteristics if not in database
+                    <>
+                      <div className="rounded-md flex py-4 px-4 sm:px-5">
+                        <div className="max-w-[450px] min-w-[140px] w-full">
+                          <p className="text-sm sm:text-base text-dark font-medium">Категорія</p>
+                        </div>
+                        <div className="w-full">
+                          <p className="text-sm sm:text-base text-dark">{product.category || 'Ювелірні вироби'}</p>
+                        </div>
+                      </div>
 
-                  {/* <!-- info item --> */}
-                  <div className="rounded-md even:bg-gray-1 flex py-4 px-4 sm:px-5">
-                    <div className="max-w-[450px] min-w-[140px] w-full">
-                      <p className="text-sm sm:text-base text-dark">Collection</p>
-                    </div>
-                    <div className="w-full">
-                      <p className="text-sm sm:text-base text-dark">
-                        Luxury
-                      </p>
-                    </div>
-                  </div>
+                      <div className="rounded-md bg-gray-1 flex py-4 px-4 sm:px-5">
+                        <div className="max-w-[450px] min-w-[140px] w-full">
+                          <p className="text-sm sm:text-base text-dark font-medium">Наявність</p>
+                        </div>
+                        <div className="w-full">
+                          <p className="text-sm sm:text-base text-dark">
+                            {product.stock > 0 ? `В наявності (${product.stock} шт.)` : 'Немає в наявності'}
+                          </p>
+                        </div>
+                      </div>
 
-                  {/* <!-- info item --> */}
-                  <div className="rounded-md even:bg-gray-1 flex py-4 px-4 sm:px-5">
-                    <div className="max-w-[450px] min-w-[140px] w-full">
-                      <p className="text-sm sm:text-base text-dark">
-                        Material
-                      </p>
-                    </div>
-                    <div className="w-full">
-                      <p className="text-sm sm:text-base text-dark">
-                        14K Gold
-                      </p>
-                    </div>
-                  </div>
+                      <div className="rounded-md flex py-4 px-4 sm:px-5">
+                        <div className="max-w-[450px] min-w-[140px] w-full">
+                          <p className="text-sm sm:text-base text-dark font-medium">Артикул</p>
+                        </div>
+                        <div className="w-full">
+                          <p className="text-sm sm:text-base text-dark">SKU-{product.id || '000'}</p>
+                        </div>
+                      </div>
 
-                  {/* <!-- info item --> */}
-                  <div className="rounded-md even:bg-gray-1 flex py-4 px-4 sm:px-5">
-                    <div className="max-w-[450px] min-w-[140px] w-full">
-                      <p className="text-sm sm:text-base text-dark">
-                        Weight
-                      </p>
-                    </div>
-                    <div className="w-full">
-                      <p className="text-sm sm:text-base text-dark">
-                        3.2 grams
-                      </p>
-                    </div>
-                  </div>
+                      <div className="rounded-md bg-gray-1 flex py-4 px-4 sm:px-5">
+                        <div className="max-w-[450px] min-w-[140px] w-full">
+                          <p className="text-sm sm:text-base text-dark font-medium">Рейтинг</p>
+                        </div>
+                        <div className="w-full">
+                          <p className="text-sm sm:text-base text-dark">
+                            {product.average_rating ? `${product.average_rating} / 5` : 'Немає оцінок'}
+                          </p>
+                        </div>
+                      </div>
 
-                  {/* <!-- info item --> */}
-                  <div className="rounded-md even:bg-gray-1 flex py-4 px-4 sm:px-5">
-                    <div className="max-w-[450px] min-w-[140px] w-full">
-                      <p className="text-sm sm:text-base text-dark">
-                        Gemstones
-                      </p>
-                    </div>
-                    <div className="w-full">
-                      <p className="text-sm sm:text-base text-dark">
-                        Diamonds 0.25 carat
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* <!-- info item --> */}
-                  <div className="rounded-md even:bg-gray-1 flex py-4 px-4 sm:px-5">
-                    <div className="max-w-[450px] min-w-[140px] w-full">
-                      <p className="text-sm sm:text-base text-dark">Diamond Clarity</p>
-                    </div>
-                    <div className="w-full">
-                      <p className="text-sm sm:text-base text-dark">
-                        VS1
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* <!-- info item --> */}
-                  <div className="rounded-md even:bg-gray-1 flex py-4 px-4 sm:px-5">
-                    <div className="max-w-[450px] min-w-[140px] w-full">
-                      <p className="text-sm sm:text-base text-dark">Diamond Color</p>
-                    </div>
-                    <div className="w-full">
-                      <p className="text-sm sm:text-base text-dark">
-                        G (near colorless)
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* <!-- info item --> */}
-                  <div className="rounded-md even:bg-gray-1 flex py-4 px-4 sm:px-5">
-                    <div className="max-w-[450px] min-w-[140px] w-full">
-                      <p className="text-sm sm:text-base text-dark">
-                        Cut
-                      </p>
-                    </div>
-                    <div className="w-full">
-                      <p className="text-sm sm:text-base text-dark">
-                        Round Brilliant
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* <!-- info item --> */}
-                  <div className="rounded-md even:bg-gray-1 flex py-4 px-4 sm:px-5">
-                    <div className="max-w-[450px] min-w-[140px] w-full">
-                      <p className="text-sm sm:text-base text-dark">
-                        Size
-                      </p>
-                    </div>
-                    <div className="w-full">
-                      <p className="text-sm sm:text-base text-dark">
-                        16.5 | 17 | 17.5 | 18
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* <!-- info item --> */}
-                  <div className="rounded-md even:bg-gray-1 flex py-4 px-4 sm:px-5">
-                    <div className="max-w-[450px] min-w-[140px] w-full">
-                      <p className="text-sm sm:text-base text-dark">
-                        Battery Info
-                      </p>
-                    </div>
-                    <div className="w-full">
-                      <p className="text-sm sm:text-base text-dark">
-                        Li-Ion 4323 mAh, non-removable | 15W wireless (MagSafe),
-                        7.5W wireless (Qi)
-                      </p>
-                    </div>
-                  </div>
+                      <div className="text-center py-6 text-gray-500">
+                        <p>Детальні характеристики для цього товару ще не додано.</p>
+                      </div>
+                    </>
+                  )}
                 </div>
               </div>
               {/* <!-- tab content two end --> */}

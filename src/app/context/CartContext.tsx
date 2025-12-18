@@ -76,11 +76,11 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
 
   const addToCart = async (productId: number, quantity: number = 1) => {
     if (!token || !isAuthenticated) {
-      toast.error("Будь ласка, увійдіть в аккаунт, щоб додати товар в кошик", {
+      toast.error("Please log in to add items to cart", {
         duration: 4000,
         icon: "🔒",
       });
-      // Редирект на сторінку входу через 1 секунду
+      // Redirect to login page after 1 second
       setTimeout(() => {
         window.location.href = '/signin';
       }, 1500);
@@ -107,24 +107,24 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
         try {
           const data = JSON.parse(text);
           console.log("Added to cart:", data);
-          toast.success("Товар додано в кошик");
+          toast.success("Product added to cart");
           await refreshCart();
         } catch (parseError) {
           console.error("Failed to parse add response:", parseError);
           console.error("Response text:", text);
-          toast.error("Помилка обробки відповіді");
+          toast.error("Error processing response");
         }
       } else {
         try {
           const error = JSON.parse(text);
-          toast.error(error.message || "Помилка додавання в кошик");
+          toast.error(error.message || "Error adding to cart");
         } catch {
-          toast.error("Помилка додавання в кошик: " + text.substring(0, 100));
+          toast.error("Error adding to cart: " + text.substring(0, 100));
         }
       }
     } catch (error) {
       console.error("Error adding to cart:", error);
-      toast.error("Помилка додавання в кошик");
+      toast.error("Error adding to cart");
     } finally {
       setLoading(false);
     }
@@ -144,14 +144,14 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
       });
 
       if (response.ok) {
-        toast.success("Товар видалено з кошика");
+        toast.success("Product removed from cart");
         await refreshCart();
       } else {
-        toast.error("Помилка видалення з кошика");
+        toast.error("Error removing from cart");
       }
     } catch (error) {
       console.error("Error removing from cart:", error);
-      toast.error("Помилка видалення з кошика");
+      toast.error("Error removing from cart");
     } finally {
       setLoading(false);
     }
@@ -175,11 +175,11 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
       if (response.ok) {
         await refreshCart();
       } else {
-        toast.error("Помилка оновлення кількості");
+        toast.error("Error updating quantity");
       }
     } catch (error) {
       console.error("Error updating quantity:", error);
-      toast.error("Помилка оновлення кількості");
+      toast.error("Error updating quantity");
     } finally {
       setLoading(false);
     }

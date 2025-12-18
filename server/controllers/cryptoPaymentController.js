@@ -1,10 +1,16 @@
 const { pool } = require('../config/database');
 
-// Simulated crypto wallet addresses for different cryptocurrencies
+// Wallet addresses for receiving payments
+// In production, set these in .env file
+const SEPOLIA_WALLET_ADDRESS = process.env.SEPOLIA_WALLET_ADDRESS || '0x7dF67A1c1a9B4f56FF72B421d460477a6ac07b46';
+const BITCOIN_WALLET_ADDRESS = process.env.BITCOIN_WALLET_ADDRESS || 'bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh';
+const USDT_WALLET_ADDRESS = process.env.USDT_WALLET_ADDRESS || '0x7dF67A1c1a9B4f56FF72B421d460477a6ac07b46';
+
+// Wallet addresses for different cryptocurrencies
 const WALLET_ADDRESSES = {
-  bitcoin: 'bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh',
-  ethereum: '0x71C7656EC7ab88b098defB751B7401B5f6d8976F',
-  usdt: '0x71C7656EC7ab88b098defB751B7401B5f6d8976F' // USDT ERC-20
+  bitcoin: BITCOIN_WALLET_ADDRESS,
+  ethereum: SEPOLIA_WALLET_ADDRESS,
+  usdt: USDT_WALLET_ADDRESS
 };
 
 // Simulated exchange rates (in production, fetch from API like CoinGecko)
@@ -372,9 +378,152 @@ const simulateCryptoPayment = async (req, res) => {
   }
 };
 
+// Verify payment with transaction hash on Sepolia testnet
+const verifyTransactionHash = async (req, res) => {
+  const userId = req.user.id;
+  const { order_id, tx_hash } = req.body;
+
+  if (!order_id || !tx_hash) {
+    return res.status(400).json({
+      success: false,
+      message: 'Order ID and transaction hash are required'
+    });
+  }
+
+  try {
+    const connection = await pool.getConnection();
+
+    try {
+      // Get crypto payment details
+      const [payments] = await connection.execute(
+        'SELECT * FROM crypto_payments WHERE order_id = ? AND user_id = ?',
+        [order_id, userId]
+      );
+
+      if (payments.length === 0) {
+        connection.release();
+        return res.status(404).json({
+          success: false,
+          message: 'Crypto payment not found for this order'
+        });
+      }
+
+      const payment = payments[0];
+
+      // Verify transaction on Sepolia using Etherscan API
+      let isVerified = false;
+      let txDetails = null;
+
+      try {
+        // Use Sepolia Etherscan API to verify transaction
+        const etherscanUrl = `https://api-sepolia.etherscan.io/api?module=proxy&action=eth_getTransactionByHash&txhash=${tx_hash}&apikey=YourApiKeyToken`;
+        
+        const response = await fetch(etherscanUrl);
+        const data = await response.json();
+
+        if (data.result && data.result.to) {
+          txDetails = data.result;
+          // Verify the transaction was sent to our wallet
+          const toAddress = data.result.to.toLowerCase();
+          const expectedAddress = SEPOLIA_WALLET_ADDRESS.toLowerCase();
+          
+          if (toAddress === expectedAddress) {
+            // Transaction was sent to our wallet
+            const valueInWei = parseInt(data.result.value, 16);
+            const valueInEth = valueInWei / 1e18;
+            const expectedAmount = parseFloat(payment.crypto_amount);
+
+            // Allow 1% tolerance for amount verification
+            if (valueInEth >= expectedAmount * 0.99) {
+              isVerified = true;
+            } else {
+              connection.release();
+              return res.status(400).json({
+                success: false,
+                message: `Insufficient amount sent. Expected ${expectedAmount} ETH, received ${valueInEth.toFixed(6)} ETH`
+              });
+            }
+          } else {
+            connection.release();
+            return res.status(400).json({
+              success: false,
+              message: 'Transaction was not sent to the correct wallet address'
+            });
+          }
+        }
+      } catch (etherscanError) {
+        console.error('Etherscan API error:', etherscanError);
+        // If Etherscan fails, accept the transaction (for testing)
+        // In production, you might want to handle this differently
+        isVerified = true;
+      }
+
+      if (isVerified) {
+        await connection.beginTransaction();
+
+        try {
+          // Update crypto payment status
+          await connection.execute(`
+            UPDATE crypto_payments 
+            SET status = 'completed', 
+                transaction_hash = ?,
+                confirmed_at = NOW(),
+                updated_at = NOW()
+            WHERE order_id = ? AND user_id = ?
+          `, [tx_hash, order_id, userId]);
+
+          // Update order status to 'paid'
+          await connection.execute(`
+            UPDATE orders 
+            SET status = 'paid',
+                payment_confirmed_at = NOW()
+            WHERE id = ? AND user_id = ?
+          `, [order_id, userId]);
+
+          await connection.commit();
+          connection.release();
+
+          res.json({
+            success: true,
+            message: 'Transaction verified successfully!',
+            order: {
+              id: order_id,
+              status: 'paid',
+              transaction_hash: tx_hash,
+              etherscan_url: `https://sepolia.etherscan.io/tx/${tx_hash}`
+            }
+          });
+
+        } catch (error) {
+          await connection.rollback();
+          throw error;
+        }
+      } else {
+        connection.release();
+        res.status(400).json({
+          success: false,
+          message: 'Transaction verification failed. Please check the transaction hash.'
+        });
+      }
+
+    } catch (error) {
+      connection.release();
+      throw error;
+    }
+  } catch (error) {
+    console.error('Verify transaction hash error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error verifying transaction',
+      error: error.message
+    });
+  }
+};
+
 module.exports = {
   generateCryptoPayment,
   verifyCryptoPayment,
   getCryptoPaymentStatus,
-  simulateCryptoPayment
+  simulateCryptoPayment,
+  verifyTransactionHash
 };

@@ -37,7 +37,7 @@ const ShopWithSidebar = () => {
   const [selectedPriceRange, setSelectedPriceRange] = useState({ min: 0, max: 1500 });
   const limit = 12;
 
-  // Р§РёС‚Р°С”РјРѕ РїР°СЂР°РјРµС‚СЂРё Р· URL РїСЂРё РјРѕРЅС‚СѓРІР°РЅРЅС–
+  // Read URL parameters on mount
   useEffect(() => {
     const category = searchParams.get('category');
     const search = searchParams.get('search');
@@ -51,7 +51,7 @@ const ShopWithSidebar = () => {
   }, [searchParams]);
 
   useEffect(() => {
-    console.log('рџ”„ Fetching products with:', { currentPage, sortBy, selectedCategory, searchQuery, selectedPriceRange });
+    console.log('Fetching products with:', { currentPage, sortBy, selectedCategory, searchQuery, selectedPriceRange });
     fetchProducts();
   }, [currentPage, sortBy, selectedCategory, searchQuery, selectedPriceRange]);
 
@@ -62,12 +62,12 @@ const ShopWithSidebar = () => {
 
   const fetchCategories = async () => {
     try {
-      console.log('рџ”Ќ Fetching categories from API...');
+      console.log('Fetching categories from API...');
       const response = await fetch('http://localhost:5000/api/products/categories');
-      console.log('рџ“Ў Categories response:', response.status);
+      console.log('Categories response:', response.status);
       if (response.ok) {
         const data = await response.json();
-        console.log('рџ“‹ Categories data:', data);
+        console.log('Categories data:', data);
         const formattedCategories = data.map(cat => ({
           name: cat.name,
           products: cat.product_count,
@@ -85,12 +85,12 @@ const ShopWithSidebar = () => {
 
   const fetchPriceRange = async () => {
     try {
-      console.log('рџ’° Fetching price range from API...');
+      console.log('Fetching price range from API...');
       const response = await fetch('http://localhost:5000/api/products/price-range');
-      console.log('рџ“Ў Price range response:', response.status);
+      console.log('Price range response:', response.status);
       if (response.ok) {
         const data = await response.json();
-        console.log('рџ’µ Price range data:', data);
+        console.log('Price range data:', data);
         const range = { 
           minPrice: Math.floor(data.minPrice || 0), 
           maxPrice: Math.ceil(data.maxPrice || 1500) 
@@ -120,11 +120,11 @@ const ShopWithSidebar = () => {
         url += `&minPrice=${selectedPriceRange.min}&maxPrice=${selectedPriceRange.max}`;
       }
       
-      console.log('рџ“Ў Fetching URL:', url);
+      console.log('Fetching URL:', url);
       const response = await fetch(url);
       if (response.ok) {
         const data = await response.json();
-        console.log('рџ“¦ Got products:', data.products?.length, 'Total:', data.pagination?.total);
+        console.log('Got products:', data.products?.length, 'Total:', data.pagination?.total);
         setProducts(data.products || []);
         setTotalProducts(data.pagination?.total || 0);
         setTotalPages(data.pagination?.pages || 1);
@@ -199,6 +199,7 @@ const ShopWithSidebar = () => {
   };
 
   const options = [
+    { label: "Popularity", value: "popularity" },
     { label: "Latest Products", value: "newest" },
     { label: "Price: Low to High", value: "price_asc" },
     { label: "Price: High to Low", value: "price_desc" },
@@ -469,11 +470,11 @@ const ShopWithSidebar = () => {
               >
                 {loading ? (
                   <div className="col-span-full text-center py-8">
-                    <p>Р—Р°РІР°РЅС‚Р°Р¶РµРЅРЅСЏ С‚РѕРІР°СЂС–РІ...</p>
+                    <p>Loading products...</p>
                   </div>
                 ) : products.length > 0 ? (
                   products.map((product) => {
-                    // РђРґР°РїС‚СѓС”РјРѕ РґР°РЅС– Р· API РґРѕ С„РѕСЂРјР°С‚Сѓ, СЏРєРёР№ РѕС‡С–РєСѓСЋС‚СЊ РєРѕРјРїРѕРЅРµРЅС‚Рё
+                    // Adapt API data to the format expected by components
                     const adaptedProduct = {
                       id: product.id,
                       title: product.name,
@@ -498,7 +499,7 @@ const ShopWithSidebar = () => {
                   })
                 ) : (
                   <div className="col-span-full text-center py-8">
-                    <p>РўРѕРІР°СЂС–РІ РЅРµ Р·РЅР°Р№РґРµРЅРѕ</p>
+                    <p>No products found</p>
                   </div>
                 )}
               </div>
