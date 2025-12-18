@@ -17,9 +17,9 @@ const WALLET_ADDRESSES = {
 const getExchangeRates = async () => {
   // Simulated rates - in production use real API
   return {
-    bitcoin: 0.000024,   // 1 USD = 0.000024 BTC (~$41,666 per BTC)
-    ethereum: 0.00045,   // 1 USD = 0.00045 ETH (~$2,222 per ETH)
-    usdt: 1.0            // 1 USD = 1 USDT (stablecoin)
+    bitcoin: 0.000024,      // 1 USD = 0.000024 BTC (~$41,666 per BTC)
+    ethereum: 0.00033333,   // 1 USD = 0.00033333 ETH (3,000 per ETH)
+    usdt: 1.0               // 1 USD = 1 USDT (stablecoin)
   };
 };
 
@@ -191,8 +191,7 @@ const verifyCryptoPayment = async (req, res) => {
           // Update order status to 'paid'
           await connection.execute(`
             UPDATE orders 
-            SET status = 'paid',
-                payment_confirmed_at = NOW()
+            SET status = 'paid'
             WHERE id = ? AND user_id = ?
           `, [order_id, userId]);
 
@@ -341,8 +340,7 @@ const simulateCryptoPayment = async (req, res) => {
         // Update order status to 'paid'
         await connection.execute(`
           UPDATE orders 
-          SET status = 'paid',
-              payment_confirmed_at = NOW()
+          SET status = 'paid'
           WHERE id = ? AND user_id = ?
         `, [order_id, userId]);
 
@@ -414,28 +412,86 @@ const verifyTransactionHash = async (req, res) => {
       let isVerified = false;
       let txDetails = null;
 
-      try {
-        // Use Sepolia Etherscan API to verify transaction
-        const etherscanUrl = `https://api-sepolia.etherscan.io/api?module=proxy&action=eth_getTransactionByHash&txhash=${tx_hash}&apikey=YourApiKeyToken`;
-        
-        const response = await fetch(etherscanUrl);
-        const data = await response.json();
+      console.log('🔍 Verifying transaction:', {
+        tx_hash,
+        order_id,
+        expected_wallet: SEPOLIA_WALLET_ADDRESS,
+        expected_amount: payment.crypto_amount
+      });
 
-        if (data.result && data.result.to) {
-          txDetails = data.result;
+      try {
+        // Get transaction details directly from Sepolia RPC (more reliable than Etherscan API)
+        console.log('🔍 Fetching transaction from Sepolia blockchain...');
+
+        // Get transaction details using eth_getTransactionByHash via JSON-RPC
+        // Using publicnode.com - more reliable public RPC for Sepolia
+        const rpcUrl = 'https://ethereum-sepolia-rpc.publicnode.com';
+        console.log('📡 Calling Sepolia RPC:', rpcUrl);
+        const rpcResponse = await fetch(rpcUrl, {
+          method: 'POST',
+          headers: { 
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          },
+          body: JSON.stringify({
+            jsonrpc: '2.0',
+            method: 'eth_getTransactionByHash',
+            params: [tx_hash],
+            id: 1
+          })
+        });
+        
+        const rpcText = await rpcResponse.text();
+        console.log('📥 RPC raw response:', rpcText.substring(0, 500));
+        
+        let rpcData;
+        try {
+          rpcData = JSON.parse(rpcText);
+        } catch (parseError) {
+          console.error('❌ Failed to parse RPC response as JSON');
+          throw new Error('RPC returned invalid JSON');
+        }
+        console.log('📥 RPC response:', JSON.stringify(rpcData, null, 2));
+
+        const txData = rpcData.result;
+        
+        if (txData && txData.to) {
+          txDetails = txData;
+          console.log('✅ Transaction found on blockchain');
+          
           // Verify the transaction was sent to our wallet
-          const toAddress = data.result.to.toLowerCase();
+          const toAddress = txData.to.toLowerCase();
           const expectedAddress = SEPOLIA_WALLET_ADDRESS.toLowerCase();
+          
+          console.log('🔍 Address verification:', {
+            toAddress,
+            expectedAddress,
+            matches: toAddress === expectedAddress
+          });
           
           if (toAddress === expectedAddress) {
             // Transaction was sent to our wallet
-            const valueInWei = parseInt(data.result.value, 16);
+            // V2 might return value as string (hex) or number
+            let valueInWei;
+            if (typeof txData.value === 'string' && txData.value.startsWith('0x')) {
+              valueInWei = parseInt(txData.value, 16);
+            } else {
+              valueInWei = parseInt(txData.value);
+            }
             const valueInEth = valueInWei / 1e18;
             const expectedAmount = parseFloat(payment.crypto_amount);
+
+            console.log('💰 Amount verification:', {
+              received: valueInEth,
+              expected: expectedAmount,
+              minimum: expectedAmount * 0.99,
+              sufficient: valueInEth >= expectedAmount * 0.99
+            });
 
             // Allow 1% tolerance for amount verification
             if (valueInEth >= expectedAmount * 0.99) {
               isVerified = true;
+              console.log('✅ Transaction verified successfully!');
             } else {
               connection.release();
               return res.status(400).json({
@@ -450,11 +506,26 @@ const verifyTransactionHash = async (req, res) => {
               message: 'Transaction was not sent to the correct wallet address'
             });
           }
+        } else if (!txData || txData === null) {
+          console.log('⏳ Transaction not found yet - might still be pending');
+          connection.release();
+          return res.status(400).json({
+            success: false,
+            message: 'Transaction not found on blockchain yet. Please wait for confirmation (usually 15-30 seconds) and try again.'
+          });
+        } else {
+          console.log('❌ Invalid Etherscan V2 response:', data);
+          connection.release();
+          return res.status(400).json({
+            success: false,
+            message: 'Unable to verify transaction on blockchain'
+          });
         }
       } catch (etherscanError) {
-        console.error('Etherscan API error:', etherscanError);
+        console.error('💥 Etherscan API error:', etherscanError);
         // If Etherscan fails, accept the transaction (for testing)
         // In production, you might want to handle this differently
+        console.log('⚠️ Accepting transaction due to Etherscan API failure (testing mode)');
         isVerified = true;
       }
 
@@ -475,8 +546,7 @@ const verifyTransactionHash = async (req, res) => {
           // Update order status to 'paid'
           await connection.execute(`
             UPDATE orders 
-            SET status = 'paid',
-                payment_confirmed_at = NOW()
+            SET status = 'paid'
             WHERE id = ? AND user_id = ?
           `, [order_id, userId]);
 

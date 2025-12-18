@@ -5,6 +5,13 @@ interface AddressModalProps {
   closeModal: () => void;
 }
 
+interface FormErrors {
+  name?: string;
+  email?: string;
+  phone?: string;
+  address?: string;
+}
+
 const AddressModal = ({ isOpen, closeModal }: AddressModalProps) => {
   const [formData, setFormData] = useState({
     name: "",
@@ -12,16 +19,64 @@ const AddressModal = ({ isOpen, closeModal }: AddressModalProps) => {
     phone: "",
     address: "",
   });
+  const [errors, setErrors] = useState<FormErrors>({});
+  const [loading, setLoading] = useState(false);
+
+  const nameRegex = /^[a-zA-Zа-яА-ЯіїєґІЇЄҐ\s'-]{2,50}$/;
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const phoneRegex = /^\+?[\d\s()-]{10,20}$/;
+
+  const validateForm = (): boolean => {
+    const newErrors: FormErrors = {};
+
+    if (!formData.name.trim()) {
+      newErrors.name = "Ім'я обов'язкове";
+    } else if (!nameRegex.test(formData.name)) {
+      newErrors.name = "Введіть коректне ім'я";
+    }
+
+    if (!formData.email.trim()) {
+      newErrors.email = "Email обов'язковий";
+    } else if (!emailRegex.test(formData.email)) {
+      newErrors.email = "Невірний формат email";
+    }
+
+    if (!formData.phone.trim()) {
+      newErrors.phone = "Телефон обов'язковий";
+    } else if (!phoneRegex.test(formData.phone)) {
+      newErrors.phone = "Невірний формат телефону";
+    }
+
+    if (!formData.address.trim()) {
+      newErrors.address = "Адреса обов'язкова";
+    } else if (formData.address.trim().length < 10) {
+      newErrors.address = "Введіть повну адресу (мінімум 10 символів)";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+    // Clear error when user starts typing
+    if (errors[name as keyof FormErrors]) {
+      setErrors((prev) => ({ ...prev, [name]: undefined }));
+    }
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!validateForm()) {
+      return;
+    }
+
+    setLoading(true);
     // Handle form submission
     console.log("Form data:", formData);
+    setLoading(false);
     closeModal();
   };
 
@@ -80,7 +135,7 @@ const AddressModal = ({ isOpen, closeModal }: AddressModalProps) => {
               <div className="flex flex-col lg:flex-row gap-5 sm:gap-8 mb-5">
                 <div className="w-full">
                   <label htmlFor="name" className="block mb-2.5">
-                    Name
+                    Ім'я <span className="text-red">*</span>
                   </label>
 
                   <input
@@ -88,14 +143,19 @@ const AddressModal = ({ isOpen, closeModal }: AddressModalProps) => {
                     name="name"
                     value={formData.name}
                     onChange={handleChange}
-                    placeholder="Enter your name"
-                    className="rounded-md border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
+                    placeholder="Введіть ваше ім'я"
+                    className={`rounded-md border bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-gold/20 ${
+                      errors.name ? 'border-red' : 'border-gray-3'
+                    }`}
                   />
+                  {errors.name && (
+                    <p className="text-red text-sm mt-1">{errors.name}</p>
+                  )}
                 </div>
 
                 <div className="w-full">
                   <label htmlFor="email" className="block mb-2.5">
-                    Email
+                    Email <span className="text-red">*</span>
                   </label>
 
                   <input
@@ -103,16 +163,21 @@ const AddressModal = ({ isOpen, closeModal }: AddressModalProps) => {
                     name="email"
                     value={formData.email}
                     onChange={handleChange}
-                    placeholder="Enter your email"
-                    className="rounded-md border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
+                    placeholder="Введіть email"
+                    className={`rounded-md border bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-gold/20 ${
+                      errors.email ? 'border-red' : 'border-gray-3'
+                    }`}
                   />
+                  {errors.email && (
+                    <p className="text-red text-sm mt-1">{errors.email}</p>
+                  )}
                 </div>
               </div>
 
               <div className="flex flex-col lg:flex-row gap-5 sm:gap-8 mb-5">
                 <div className="w-full">
                   <label htmlFor="phone" className="block mb-2.5">
-                    Phone
+                    Телефон <span className="text-red">*</span>
                   </label>
 
                   <input
@@ -120,14 +185,19 @@ const AddressModal = ({ isOpen, closeModal }: AddressModalProps) => {
                     name="phone"
                     value={formData.phone}
                     onChange={handleChange}
-                    placeholder="Enter your phone"
-                    className="rounded-md border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
+                    placeholder="+380..."
+                    className={`rounded-md border bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-gold/20 ${
+                      errors.phone ? 'border-red' : 'border-gray-3'
+                    }`}
                   />
+                  {errors.phone && (
+                    <p className="text-red text-sm mt-1">{errors.phone}</p>
+                  )}
                 </div>
 
                 <div className="w-full">
                   <label htmlFor="address" className="block mb-2.5">
-                    Address
+                    Адреса <span className="text-red">*</span>
                   </label>
 
                   <input
@@ -135,17 +205,23 @@ const AddressModal = ({ isOpen, closeModal }: AddressModalProps) => {
                     name="address"
                     value={formData.address}
                     onChange={handleChange}
-                    placeholder="Enter your address"
-                    className="rounded-md border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
+                    placeholder="Введіть повну адресу"
+                    className={`rounded-md border bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-gold/20 ${
+                      errors.address ? 'border-red' : 'border-gray-3'
+                    }`}
                   />
+                  {errors.address && (
+                    <p className="text-red text-sm mt-1">{errors.address}</p>
+                  )}
                 </div>
               </div>
 
               <button
                 type="submit"
-                className="inline-flex font-medium text-white bg-blue py-3 px-7 rounded-md ease-out duration-200 hover:bg-blue-dark"
+                disabled={loading}
+                className="inline-flex font-medium text-white bg-gradient-to-r from-gold to-gold-dark py-3 px-7 rounded-md ease-out duration-200 hover:from-gold-dark hover:to-gold disabled:opacity-50"
               >
-                Save Changes
+                {loading ? "Збереження..." : "Зберегти"}
               </button>
             </form>
           </div>

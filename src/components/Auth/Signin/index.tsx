@@ -7,6 +7,11 @@ import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/app/context/AuthContext";
 
+interface FormErrors {
+  email?: string;
+  password?: string;
+}
+
 const Signin = () => {
   const router = useRouter();
   const { login } = useAuth();
@@ -14,7 +19,32 @@ const Signin = () => {
     email: "",
     password: "",
   });
+  const [errors, setErrors] = useState<FormErrors>({});
   const [loading, setLoading] = useState(false);
+
+  // Email validation regex
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+  const validateForm = (): boolean => {
+    const newErrors: FormErrors = {};
+
+    // Email validation
+    if (!formData.email.trim()) {
+      newErrors.email = "Введіть email адресу";
+    } else if (!emailRegex.test(formData.email)) {
+      newErrors.email = "Невалідний формат email";
+    }
+
+    // Password validation
+    if (!formData.password) {
+      newErrors.password = "Введіть пароль";
+    } else if (formData.password.length < 6) {
+      newErrors.password = "Пароль має бути мінімум 6 символів";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -22,14 +52,18 @@ const Signin = () => {
       ...prev,
       [name]: value,
     }));
+    // Clear error when user starts typing
+    if (errors[name as keyof FormErrors]) {
+      setErrors((prev) => ({ ...prev, [name]: undefined }));
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     // Validation
-    if (!formData.email.trim() || !formData.password) {
-      toast.error("Email and password are required");
+    if (!validateForm()) {
+      toast.error("Будь ласка, виправте помилки у формі");
       return;
     }
 
@@ -80,35 +114,45 @@ const Signin = () => {
               <form onSubmit={handleSubmit}>
                 <div className="mb-5">
                   <label htmlFor="email" className="block mb-2.5">
-                    Email
+                    Email <span className="text-red">*</span>
                   </label>
 
                   <input
                     type="email"
                     name="email"
                     id="email"
-                    placeholder="Enter your email"
+                    placeholder="Введіть ваш email"
                     value={formData.email}
                     onChange={handleChange}
-                    className="rounded-lg border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-3 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-gold/30"
+                    className={`rounded-lg border bg-gray-1 placeholder:text-dark-5 w-full py-3 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-gold/30 ${
+                      errors.email ? 'border-red' : 'border-gray-3'
+                    }`}
                   />
+                  {errors.email && (
+                    <p className="text-red text-sm mt-1">{errors.email}</p>
+                  )}
                 </div>
 
                 <div className="mb-5">
                   <label htmlFor="password" className="block mb-2.5">
-                    Password
+                    Пароль <span className="text-red">*</span>
                   </label>
 
                   <input
                     type="password"
                     name="password"
                     id="password"
-                    placeholder="Enter your password"
+                    placeholder="Введіть ваш пароль"
                     value={formData.password}
                     onChange={handleChange}
                     autoComplete="on"
-                    className="rounded-lg border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-3 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-gold/30"
+                    className={`rounded-lg border bg-gray-1 placeholder:text-dark-5 w-full py-3 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-gold/30 ${
+                      errors.password ? 'border-red' : 'border-gray-3'
+                    }`}
                   />
+                  {errors.password && (
+                    <p className="text-red text-sm mt-1">{errors.password}</p>
+                  )}
                 </div>
 
                 <button

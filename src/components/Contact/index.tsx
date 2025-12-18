@@ -1,10 +1,86 @@
-﻿import React from "react";
+﻿"use client";
+import React, { useState } from "react";
 import Breadcrumb from "../Common/Breadcrumb";
+import toast from "react-hot-toast";
+
+interface FormErrors {
+  firstName?: string;
+  lastName?: string;
+  email?: string;
+  phone?: string;
+  message?: string;
+}
 
 const Contact = () => {
+  const [formData, setFormData] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    subject: "",
+    phone: "",
+    message: "",
+  });
+  const [errors, setErrors] = useState<FormErrors>({});  const [loading, setLoading] = useState(false);  const [loading, setLoading] = useState(false);
+
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const phoneRegex = /^[\+]?[0-9]{10,15}$/;
+
+  const validateForm = (): boolean => {
+    const newErrors: FormErrors = {};
+
+    if (!formData.firstName.trim()) {
+      newErrors.firstName = "Введіть ім'я";
+    }
+
+    if (!formData.lastName.trim()) {
+      newErrors.lastName = "Введіть прізвище";
+    }
+
+    if (formData.email && !emailRegex.test(formData.email)) {
+      newErrors.email = "Невалідний email";
+    }
+
+    if (formData.phone && !phoneRegex.test(formData.phone.replace(/[\s-]/g, ''))) {
+      newErrors.phone = "Невалідний номер телефону";
+    }
+
+    if (!formData.message.trim()) {
+      newErrors.message = "Введіть повідомлення";
+    } else if (formData.message.trim().length < 10) {
+      newErrors.message = "Повідомлення має бути мінімум 10 символів";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+    if (errors[name as keyof FormErrors]) {
+      setErrors((prev) => ({ ...prev, [name]: undefined }));
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!validateForm()) {
+      toast.error("Будь ласка, виправте помилки у формі");
+      return;
+    }
+
+    setLoading(true);
+    // Simulate sending
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    toast.success("Повідомлення надіслано!");
+    setFormData({ firstName: "", lastName: "", email: "", subject: "", phone: "", message: "" });
+    setLoading(false);
+  };
+
   return (
     <>
-      <Breadcrumb title={"Contact"} pages={["contact"]} />
+      <Breadcrumb title={"Контакти"} pages={["contact"]} />
 
       <section className="overflow-hidden py-20 bg-gray-2">
         <div className="max-w-[1170px] w-full mx-auto px-4 sm:px-8 xl:px-0">
@@ -87,86 +163,138 @@ const Contact = () => {
             </div>
 
             <div className="xl:max-w-[770px] w-full bg-white rounded-xl shadow-1 p-4 sm:p-7.5 xl:p-10">
-              <form>
+              <form onSubmit={handleSubmit}>
                 <div className="flex flex-col lg:flex-row gap-5 sm:gap-8 mb-5">
                   <div className="w-full">
                     <label htmlFor="firstName" className="block mb-2.5">
-                      First Name <span className="text-red">*</span>
+                      Ім'я <span className="text-red">*</span>
                     </label>
 
                     <input
                       type="text"
                       name="firstName"
                       id="firstName"
-                      placeholder="Jhon"
-                      className="rounded-md border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
+                      placeholder="Ваше ім'я"
+                      value={formData.firstName}
+                      onChange={handleChange}
+                      className={`rounded-md border bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-gold/20 ${
+                        errors.firstName ? 'border-red' : 'border-gray-3'
+                      }`}
                     />
+                    {errors.firstName && (
+                      <p className="text-red text-sm mt-1">{errors.firstName}</p>
+                    )}
                   </div>
 
                   <div className="w-full">
                     <label htmlFor="lastName" className="block mb-2.5">
-                      Last Name <span className="text-red">*</span>
+                      Прізвище <span className="text-red">*</span>
                     </label>
 
                     <input
                       type="text"
                       name="lastName"
                       id="lastName"
-                      placeholder="Deo"
-                      className="rounded-md border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
+                      placeholder="Ваше прізвище"
+                      value={formData.lastName}
+                      onChange={handleChange}
+                      className={`rounded-md border bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-gold/20 ${
+                        errors.lastName ? 'border-red' : 'border-gray-3'
+                      }`}
                     />
+                    {errors.lastName && (
+                      <p className="text-red text-sm mt-1">{errors.lastName}</p>
+                    )}
                   </div>
                 </div>
 
                 <div className="flex flex-col lg:flex-row gap-5 sm:gap-8 mb-5">
                   <div className="w-full">
-                    <label htmlFor="subject" className="block mb-2.5">
-                      Subject
+                    <label htmlFor="email" className="block mb-2.5">
+                      Email
                     </label>
 
                     <input
-                      type="text"
-                      name="subject"
-                      id="subject"
-                      placeholder="Type your subject"
-                      className="rounded-md border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
+                      type="email"
+                      name="email"
+                      id="email"
+                      placeholder="Ваш email"
+                      value={formData.email}
+                      onChange={handleChange}
+                      className={`rounded-md border bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-gold/20 ${
+                        errors.email ? 'border-red' : 'border-gray-3'
+                      }`}
                     />
+                    {errors.email && (
+                      <p className="text-red text-sm mt-1">{errors.email}</p>
+                    )}
                   </div>
 
                   <div className="w-full">
                     <label htmlFor="phone" className="block mb-2.5">
-                      Phone
+                      Телефон
                     </label>
 
                     <input
                       type="text"
                       name="phone"
                       id="phone"
-                      placeholder="Enter your phone"
-                      className="rounded-md border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
+                      placeholder="+380..."
+                      value={formData.phone}
+                      onChange={handleChange}
+                      className={`rounded-md border bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-gold/20 ${
+                        errors.phone ? 'border-red' : 'border-gray-3'
+                      }`}
                     />
+                    {errors.phone && (
+                      <p className="text-red text-sm mt-1">{errors.phone}</p>
+                    )}
                   </div>
+                </div>
+
+                <div className="mb-5">
+                  <label htmlFor="subject" className="block mb-2.5">
+                    Тема
+                  </label>
+
+                  <input
+                    type="text"
+                    name="subject"
+                    id="subject"
+                    placeholder="Тема повідомлення"
+                    value={formData.subject}
+                    onChange={handleChange}
+                    className="rounded-md border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-gold/20"
+                  />
                 </div>
 
                 <div className="mb-7.5">
                   <label htmlFor="message" className="block mb-2.5">
-                    Message
+                    Повідомлення <span className="text-red">*</span>
                   </label>
 
                   <textarea
                     name="message"
                     id="message"
                     rows={5}
-                    placeholder="Type your message"
-                    className="rounded-md border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full p-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
+                    placeholder="Ваше повідомлення"
+                    value={formData.message}
+                    onChange={handleChange}
+                    className={`rounded-md border bg-gray-1 placeholder:text-dark-5 w-full p-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-gold/20 ${
+                      errors.message ? 'border-red' : 'border-gray-3'
+                    }`}
                   ></textarea>
+                  {errors.message && (
+                    <p className="text-red text-sm mt-1">{errors.message}</p>
+                  )}
                 </div>
 
                 <button
                   type="submit"
-                  className="inline-flex font-medium text-white bg-gradient-to-r from-gold to-gold-dark py-3 px-7 rounded-full shadow-md ease-out duration-200 hover:from-gold-dark hover:to-gold"
+                  disabled={loading}
+                  className="inline-flex font-medium text-white bg-gradient-to-r from-gold to-gold-dark py-3 px-7 rounded-full shadow-md ease-out duration-200 hover:from-gold-dark hover:to-gold disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Send Message
+                  {loading ? "Надсилання..." : "Надіслати"}
                 </button>
               </form>
             </div>

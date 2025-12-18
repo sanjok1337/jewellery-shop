@@ -7,6 +7,13 @@ import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/app/context/AuthContext";
 
+interface FormErrors {
+  name?: string;
+  email?: string;
+  password?: string;
+  confirmPassword?: string;
+}
+
 const Signup = () => {
   const router = useRouter();
   const { login } = useAuth();
@@ -16,7 +23,53 @@ const Signup = () => {
     password: "",
     confirmPassword: "",
   });
+  const [errors, setErrors] = useState<FormErrors>({});
   const [loading, setLoading] = useState(false);
+
+  // Validation regexes
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const nameRegex = /^[a-zA-Zа-яА-ЯіїєґІЇЄҐ\s'-]{2,50}$/;
+
+  const validateForm = (): boolean => {
+    const newErrors: FormErrors = {};
+
+    // Name validation
+    if (!formData.name.trim()) {
+      newErrors.name = "Введіть ім'я";
+    } else if (formData.name.trim().length < 2) {
+      newErrors.name = "Ім'я має бути мінімум 2 символи";
+    } else if (!nameRegex.test(formData.name.trim())) {
+      newErrors.name = "Ім'я може містити тільки літери";
+    }
+
+    // Email validation
+    if (!formData.email.trim()) {
+      newErrors.email = "Введіть email адресу";
+    } else if (!emailRegex.test(formData.email)) {
+      newErrors.email = "Невалідний формат email";
+    }
+
+    // Password validation
+    if (!formData.password) {
+      newErrors.password = "Введіть пароль";
+    } else if (formData.password.length < 6) {
+      newErrors.password = "Пароль має бути мінімум 6 символів";
+    } else if (!/[A-ZА-ЯІЇЄҐ]/.test(formData.password)) {
+      newErrors.password = "Пароль має містити велику літеру";
+    } else if (!/[0-9]/.test(formData.password)) {
+      newErrors.password = "Пароль має містити цифру";
+    }
+
+    // Confirm password validation
+    if (!formData.confirmPassword) {
+      newErrors.confirmPassword = "Підтвердіть пароль";
+    } else if (formData.password !== formData.confirmPassword) {
+      newErrors.confirmPassword = "Паролі не збігаються";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -24,24 +77,18 @@ const Signup = () => {
       ...prev,
       [name]: value,
     }));
+    // Clear error when user starts typing
+    if (errors[name as keyof FormErrors]) {
+      setErrors((prev) => ({ ...prev, [name]: undefined }));
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    // Р’Р°Р»С–РґР°С†С–СЏ
-    if (!formData.name.trim() || !formData.email.trim() || !formData.password) {
-      toast.error("Р’СЃС– РїРѕР»СЏ РѕР±РѕРІ'СЏР·РєРѕРІС–");
-      return;
-    }
-
-    if (formData.password !== formData.confirmPassword) {
-      toast.error("РџР°СЂРѕР»С– РЅРµ Р·Р±С–РіР°СЋС‚СЊСЃСЏ");
-      return;
-    }
-
-    if (formData.password.length < 6) {
-      toast.error("РџР°СЂРѕР»СЊ РјР°С” Р±СѓС‚Рё РјС–РЅС–РјСѓРј 6 СЃРёРјРІРѕР»С–РІ");
+    // Валідація
+    if (!validateForm()) {
+      toast.error("Будь ласка, виправте помилки у формі");
       return;
     }
 
@@ -166,68 +213,91 @@ const Signup = () => {
               <form onSubmit={handleSubmit}>
                 <div className="mb-5">
                   <label htmlFor="name" className="block mb-2.5">
-                    Full Name <span className="text-red">*</span>
+                    Повне ім'я <span className="text-red">*</span>
                   </label>
 
                   <input
                     type="text"
                     name="name"
                     id="name"
-                    placeholder="Enter your full name"
+                    placeholder="Введіть ваше ім'я"
                     value={formData.name}
                     onChange={handleChange}
-                    className="rounded-lg border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-3 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-gold/30"
+                    className={`rounded-lg border bg-gray-1 placeholder:text-dark-5 w-full py-3 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-gold/30 ${
+                      errors.name ? 'border-red' : 'border-gray-3'
+                    }`}
                   />
+                  {errors.name && (
+                    <p className="text-red text-sm mt-1">{errors.name}</p>
+                  )}
                 </div>
 
                 <div className="mb-5">
                   <label htmlFor="email" className="block mb-2.5">
-                    Email Address <span className="text-red">*</span>
+                    Email адреса <span className="text-red">*</span>
                   </label>
 
                   <input
                     type="email"
                     name="email"
                     id="email"
-                    placeholder="Enter your email address"
+                    placeholder="Введіть ваш email"
                     value={formData.email}
                     onChange={handleChange}
-                    className="rounded-lg border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-3 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-gold/30"
+                    className={`rounded-lg border bg-gray-1 placeholder:text-dark-5 w-full py-3 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-gold/30 ${
+                      errors.email ? 'border-red' : 'border-gray-3'
+                    }`}
                   />
+                  {errors.email && (
+                    <p className="text-red text-sm mt-1">{errors.email}</p>
+                  )}
                 </div>
 
                 <div className="mb-5">
                   <label htmlFor="password" className="block mb-2.5">
-                    Password <span className="text-red">*</span>
+                    Пароль <span className="text-red">*</span>
                   </label>
 
                   <input
                     type="password"
                     name="password"
                     id="password"
-                    placeholder="Enter your password"
+                    placeholder="Введіть пароль"
                     value={formData.password}
                     onChange={handleChange}
                     autoComplete="on"
-                    className="rounded-lg border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-3 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-gold/30"
+                    className={`rounded-lg border bg-gray-1 placeholder:text-dark-5 w-full py-3 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-gold/30 ${
+                      errors.password ? 'border-red' : 'border-gray-3'
+                    }`}
                   />
+                  {errors.password && (
+                    <p className="text-red text-sm mt-1">{errors.password}</p>
+                  )}
+                  <p className="text-gray-500 text-xs mt-1">
+                    Мінімум 6 символів, велика літера та цифра
+                  </p>
                 </div>
 
                 <div className="mb-5.5">
                   <label htmlFor="confirmPassword" className="block mb-2.5">
-                    Confirm Password <span className="text-red">*</span>
+                    Підтвердіть пароль <span className="text-red">*</span>
                   </label>
 
                   <input
                     type="password"
                     name="confirmPassword"
                     id="confirmPassword"
-                    placeholder="Re-type your password"
+                    placeholder="Повторіть пароль"
                     value={formData.confirmPassword}
                     onChange={handleChange}
                     autoComplete="on"
-                    className="rounded-lg border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-3 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-gold/30"
+                    className={`rounded-lg border bg-gray-1 placeholder:text-dark-5 w-full py-3 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-gold/30 ${
+                      errors.confirmPassword ? 'border-red' : 'border-gray-3'
+                    }`}
                   />
+                  {errors.confirmPassword && (
+                    <p className="text-red text-sm mt-1">{errors.confirmPassword}</p>
+                  )}
                 </div>
 
                 <button
@@ -235,16 +305,16 @@ const Signup = () => {
                   disabled={loading}
                   className="w-full flex justify-center font-medium text-white bg-dark py-3 px-6 rounded-lg ease-out duration-200 hover:bg-gold mt-7.5 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {loading ? "Creating Account..." : "Create Account"}
+                  {loading ? "Створення акаунту..." : "Створити акаунт"}
                 </button>
 
                 <p className="text-center mt-6">
-                  Already have an account?
+                  Вже маєте акаунт?
                   <Link
                     href="/signin"
                     className="text-dark ease-out duration-200 hover:text-gold pl-2"
                   >
-                    Sign in Now
+                    Увійти
                   </Link>
                 </p>
               </form>

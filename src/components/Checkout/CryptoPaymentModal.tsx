@@ -39,6 +39,8 @@ const CryptoPaymentModal = ({
   cryptoType,
   onPaymentSuccess,
 }: CryptoPaymentModalProps) => {
+  console.log('💳 CryptoPaymentModal props:', { isOpen, orderId, totalAmount, cryptoType });
+  
   const { token } = useAuth();
   const [paymentDetails, setPaymentDetails] = useState<PaymentDetails | null>(null);
   const [loading, setLoading] = useState(true);
@@ -53,6 +55,9 @@ const CryptoPaymentModal = ({
   });
   const [txHash, setTxHash] = useState<string | null>(null);
   const [sendingTx, setSendingTx] = useState(false);
+  const [manualTxHash, setManualTxHash] = useState<string>("");
+  const [verificationStatus, setVerificationStatus] = useState<'idle' | 'sending' | 'confirming' | 'verifying' | 'success' | 'error'>('idle');
+  const [verificationMessage, setVerificationMessage] = useState<string>("");
 
   const cryptoNames: Record<string, string> = {
     bitcoin: "Bitcoin (BTC)",
@@ -91,9 +96,52 @@ const CryptoPaymentModal = ({
   };
 
   useEffect(() => {
-    if (isOpen && orderId && cryptoType) {
+    if (!isOpen) return;
+    
+    console.log('🔵 Modal opened', { orderId, cryptoType });
+    
+    if (orderId && cryptoType) {
+      // Reset states
+      setPaymentDetails(null);
+      setTxHash(null);
+      setLoading(true);
+      
+      // Generate payment and check wallet
       generatePayment();
       checkWalletConnection();
+    } else {
+      console.error('❌ Missing orderId or cryptoType', { orderId, cryptoType });
+      toast.error('Invalid payment parameters');
+      setLoading(false);
+    }
+
+    // Set up MetaMask event listeners
+    if (typeof window !== "undefined" && window.ethereum) {
+      const handleAccountsChanged = (accounts: string[]) => {
+        if (accounts.length > 0) {
+          updateWalletState(accounts[0]);
+        } else {
+          setWallet({
+            isConnected: false,
+            address: null,
+            balance: null,
+            isCorrectNetwork: false,
+          });
+        }
+      };
+
+      const handleChainChanged = () => {
+        // Reload page on chain change as recommended by MetaMask
+        window.location.reload();
+      };
+
+      window.ethereum.on?.("accountsChanged", handleAccountsChanged);
+      window.ethereum.on?.("chainChanged", handleChainChanged);
+
+      return () => {
+        window.ethereum?.removeListener?.("accountsChanged", handleAccountsChanged);
+        window.ethereum?.removeListener?.("chainChanged", handleChainChanged);
+      };
     }
   }, [isOpen, orderId, cryptoType]);
 
@@ -117,15 +165,43 @@ const CryptoPaymentModal = ({
 
   // Check if MetaMask is installed and connected
   const checkWalletConnection = async () => {
-    if (typeof window !== "undefined" && window.ethereum) {
-      try {
-        const accounts = await window.ethereum.request({ method: "eth_accounts" });
-        if (accounts.length > 0) {
-          await updateWalletState(accounts[0]);
-        }
-      } catch (error) {
-        console.error("Error checking wallet connection:", error);
+    console.log('🔍 Checking wallet connection...');
+    
+    if (typeof window === "undefined") {
+      console.log('❌ Window not defined (SSR)');
+      return;
+    }
+    
+    if (!window.ethereum) {
+      console.log('❌ MetaMask not installed');
+      return;
+    }
+    
+    try {
+      const accounts = await window.ethereum.request({ method: "eth_accounts" });
+      console.log('👛 Accounts found:', accounts.length);
+      
+      if (accounts.length > 0) {
+        console.log('✅ Wallet already connected:', accounts[0]);
+        await updateWalletState(accounts[0]);
+      } else {
+        console.log('ℹ️ No accounts connected yet');
+        // Reset wallet state if no accounts
+        setWallet({
+          isConnected: false,
+          address: null,
+          balance: null,
+          isCorrectNetwork: false,
+        });
       }
+    } catch (error) {
+      console.error("❌ Error checking wallet connection:", error);
+      setWallet({
+        isConnected: false,
+        address: null,
+        balance: null,
+        isCorrectNetwork: false,
+      });
     }
   };
 
@@ -136,14 +212,21 @@ const CryptoPaymentModal = ({
       const balance = await provider.getBalance(address);
       const network = await provider.getNetwork();
       
+      const isSepoliaNetwork = network.chainId === BigInt(11155111); // Sepolia chainId
+      
       setWallet({
         isConnected: true,
         address,
         balance: formatEther(balance),
-        isCorrectNetwork: network.chainId === BigInt(11155111), // Sepolia
+        isCorrectNetwork: isSepoliaNetwork,
       });
+
+      if (!isSepoliaNetwork) {
+        toast.error("Please switch to Sepolia testnet");
+      }
     } catch (error) {
       console.error("Error updating wallet state:", error);
+      toast.error("Failed to get wallet information");
     }
   };
 
@@ -156,33 +239,50 @@ const CryptoPaymentModal = ({
     }
 
     try {
+      // Request account access
       const accounts = await window.ethereum.request({
         method: "eth_requestAccounts",
       });
       
       if (accounts.length > 0) {
         await updateWalletState(accounts[0]);
-        toast.success("Wallet connected!");
+        toast.success("Wallet connected successfully!");
+      } else {
+        toast.error("No accounts found. Please unlock MetaMask.");
       }
     } catch (error: any) {
+      console.error("Connect wallet error:", error);
       if (error.code === 4001) {
         toast.error("Connection rejected by user");
+      } else if (error.code === -32002) {
+        toast.error("Please check MetaMask - connection request pending");
       } else {
-        toast.error("Failed to connect wallet");
+        toast.error(error.message || "Failed to connect wallet");
       }
     }
   };
 
   // Switch to Sepolia network
   const switchToSepolia = async () => {
+    if (!window.ethereum) {
+      toast.error("MetaMask not found");
+      return;
+    }
+
     try {
       await window.ethereum.request({
         method: "wallet_switchEthereumChain",
         params: [{ chainId: SEPOLIA_CHAIN_ID }],
       });
-      await checkWalletConnection();
-      toast.success("Switched to Sepolia testnet!");
+      
+      // Wait a bit for the network to switch
+      setTimeout(async () => {
+        await checkWalletConnection();
+        toast.success("Switched to Sepolia testnet!");
+      }, 500);
     } catch (error: any) {
+      console.error("Switch network error:", error);
+      
       // If Sepolia is not added, add it
       if (error.code === 4902) {
         try {
@@ -191,63 +291,113 @@ const CryptoPaymentModal = ({
             params: [
               {
                 chainId: SEPOLIA_CHAIN_ID,
-                chainName: "Sepolia Testnet",
+                chainName: "Sepolia Test Network",
                 nativeCurrency: {
-                  name: "SepoliaETH",
+                  name: "Sepolia ETH",
                   symbol: "ETH",
                   decimals: 18,
                 },
-                rpcUrls: ["https://sepolia.infura.io/v3/"],
+                rpcUrls: ["https://rpc.sepolia.org"],
                 blockExplorerUrls: ["https://sepolia.etherscan.io"],
               },
             ],
           });
-          toast.success("Sepolia network added!");
-        } catch (addError) {
+          toast.success("Sepolia network added and switched!");
+          setTimeout(() => checkWalletConnection(), 500);
+        } catch (addError: any) {
+          console.error("Add network error:", addError);
           toast.error("Failed to add Sepolia network");
         }
+      } else if (error.code === 4001) {
+        toast.error("Network switch rejected by user");
       } else {
-        toast.error("Failed to switch network");
+        toast.error(error.message || "Failed to switch network");
       }
     }
   };
 
   // Send ETH transaction via MetaMask
   const sendTransaction = async () => {
-    if (!paymentDetails || !wallet.isConnected) return;
+    if (!paymentDetails || !wallet.isConnected || !wallet.isCorrectNetwork) {
+      toast.error("Please connect wallet and switch to Sepolia network");
+      return;
+    }
 
     setSendingTx(true);
+    setVerificationStatus('sending');
+    setVerificationMessage('Preparing transaction...');
+    
     try {
       const provider = new BrowserProvider(window.ethereum);
       const signer = await provider.getSigner();
       
+      // Parse amount and check balance
+      const amountWei = parseEther(paymentDetails.crypto_amount);
+      const balance = await provider.getBalance(wallet.address!);
+      
+      console.log('💰 Balance check:', {
+        balance: formatEther(balance),
+        required: paymentDetails.crypto_amount,
+        balanceWei: balance.toString(),
+        amountWei: amountWei.toString()
+      });
+      
+      // Check if balance is sufficient (including estimated gas)
+      const estimatedGas = parseEther('0.001'); // Reserve for gas fees
+      const totalRequired = amountWei + estimatedGas;
+      
+      if (balance < totalRequired) {
+        const shortfall = formatEther(totalRequired - balance);
+        toast.error(`Insufficient balance. You need ${paymentDetails.crypto_amount} ETH + ~0.001 ETH for gas. Missing: ${shortfall} ETH`);
+        setSendingTx(false);
+        return;
+      }
+
+      // Send transaction
+      setVerificationMessage('Please confirm transaction in MetaMask...');
       const tx = await signer.sendTransaction({
         to: paymentDetails.wallet_address,
-        value: parseEther(paymentDetails.crypto_amount),
+        value: amountWei,
       });
 
       setTxHash(tx.hash);
+      setVerificationStatus('confirming');
+      setVerificationMessage('Transaction sent! Waiting for blockchain confirmation...');
       toast.success("Transaction sent! Waiting for confirmation...");
 
       // Wait for transaction confirmation
       const receipt = await tx.wait();
       
       if (receipt && receipt.status === 1) {
+        setVerificationStatus('verifying');
+        setVerificationMessage('Transaction confirmed! Verifying payment...');
         toast.success("Transaction confirmed!");
         
         // Verify payment on backend with tx hash
         await verifyWithTxHash(tx.hash);
       } else {
+        setVerificationStatus('error');
+        setVerificationMessage('Transaction failed on blockchain');
         toast.error("Transaction failed!");
+        setTxHash(null);
       }
     } catch (error: any) {
       console.error("Transaction error:", error);
-      if (error.code === 4001) {
+      setTxHash(null);
+      setVerificationStatus('error');
+      
+      if (error.code === 4001 || error.code === "ACTION_REJECTED") {
+        setVerificationMessage('Transaction rejected by user');
         toast.error("Transaction rejected by user");
-      } else if (error.code === "INSUFFICIENT_FUNDS") {
-        toast.error("Insufficient funds for transaction");
+      } else if (error.code === "INSUFFICIENT_FUNDS" || error.code === -32000) {
+        setVerificationMessage('Insufficient funds for transaction + gas fees');
+        toast.error("Insufficient funds for transaction + gas fees");
+      } else if (error.code === "NETWORK_ERROR") {
+        setVerificationMessage('Network error. Please check your connection.');
+        toast.error("Network error. Please check your connection.");
       } else {
-        toast.error(error.message || "Transaction failed");
+        setVerificationMessage(error.shortMessage || error.message || 'Transaction failed');
+        toast.error(error.shortMessage || error.message || "Transaction failed");
       }
     } finally {
       setSendingTx(false);
@@ -256,6 +406,7 @@ const CryptoPaymentModal = ({
 
   // Verify payment with transaction hash
   const verifyWithTxHash = async (hash: string) => {
+    console.log('🔍 Starting transaction verification...', { hash, orderId });
     setVerifying(true);
     try {
       const response = await fetch("http://localhost:5000/api/crypto-payments/verify-tx", {
@@ -270,24 +421,58 @@ const CryptoPaymentModal = ({
         }),
       });
 
+      console.log('📥 Verification response status:', response.status);
+
       if (response.ok) {
-        toast.success("Payment verified successfully!");
-        onPaymentSuccess();
+        const data = await response.json();
+        console.log('✅ Verification successful:', data);
+        setVerificationStatus('success');
+        setVerificationMessage('Payment verified successfully!');
+        toast.success("Payment verified successfully! Order updated.");
+        
+        // Call success callback and close modal after delay
+        console.log('📞 Calling onPaymentSuccess callback...');
+        setTimeout(async () => {
+          await onPaymentSuccess();
+          console.log('🚪 Closing modal...');
+          onClose();
+        }, 1500);
       } else {
-        const error = await response.json();
-        toast.error(error.message || "Payment verification failed");
+        const errorText = await response.text();
+        console.error('❌ Verification failed:', errorText);
+        let error;
+        try {
+          error = JSON.parse(errorText);
+        } catch (e) {
+          error = { message: errorText };
+        }
+        
+        // Show more helpful error message
+        const errorMessage = error.message || "Payment verification failed";
+        if (errorMessage.includes('not found')) {
+          toast.error("Transaction not yet confirmed on blockchain. Please wait a moment and try again.");
+        } else {
+          toast.error(errorMessage);
+        }
       }
     } catch (error) {
-      console.error("Verify payment error:", error);
-      toast.error("Failed to verify payment");
+      console.error("💥 Verify payment error:", error);
+      toast.error(`Connection error: ${error instanceof Error ? error.message : 'Failed to verify'}`);
     } finally {
       setVerifying(false);
+      console.log('🏁 Verification completed');
     }
   };
 
   const generatePayment = async () => {
+    console.log('🚀 Starting payment generation...', { orderId, cryptoType, token: token ? 'exists' : 'missing' });
     setLoading(true);
+    
+    // Small delay to ensure order is fully created
+    await new Promise(resolve => setTimeout(resolve, 500));
+    
     try {
+      console.log('📡 Sending request to generate payment...');
       const response = await fetch("http://localhost:5000/api/crypto-payments/generate", {
         method: "POST",
         headers: {
@@ -300,52 +485,60 @@ const CryptoPaymentModal = ({
         }),
       });
 
+      console.log('📥 Response status:', response.status);
+
       if (response.ok) {
         const data = await response.json();
-        setPaymentDetails(data.payment);
-        setTimeLeft(data.payment.expires_in);
+        console.log('✅ Payment details received:', data);
+        
+        if (data.payment) {
+          setPaymentDetails(data.payment);
+          setTimeLeft(data.payment.expires_in || 1800);
+          toast.success("Payment details generated!");
+        } else {
+          console.error('❌ No payment data in response');
+          toast.error("Invalid payment data received");
+          onClose();
+        }
       } else {
-        const error = await response.json();
-        toast.error(error.message || "Failed to generate payment");
+        const errorText = await response.text();
+        console.error('❌ API error response:', errorText);
+        
+        let errorMessage = "Failed to generate payment";
+        try {
+          const errorData = JSON.parse(errorText);
+          errorMessage = errorData.message || errorMessage;
+        } catch (e) {
+          errorMessage = errorText || errorMessage;
+        }
+        
+        toast.error(errorMessage);
         onClose();
       }
     } catch (error) {
-      console.error("Generate payment error:", error);
-      toast.error("Failed to generate payment details");
+      console.error('💥 Generate payment error:', error);
+      toast.error(`Connection error: ${error instanceof Error ? error.message : 'Failed to connect to server'}`);
       onClose();
     } finally {
       setLoading(false);
+      console.log('🏁 Payment generation completed');
     }
   };
 
   const handleVerifyPayment = async () => {
-    setVerifying(true);
-    try {
-      const response = await fetch("http://localhost:5000/api/crypto-payments/verify", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          order_id: orderId,
-        }),
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        toast.success("Payment verified successfully!");
-        onPaymentSuccess();
-      } else {
-        const error = await response.json();
-        toast.error(error.message || "Payment verification failed");
-      }
-    } catch (error) {
-      console.error("Verify payment error:", error);
-      toast.error("Failed to verify payment");
-    } finally {
-      setVerifying(false);
+    if (!manualTxHash.trim()) {
+      toast.error("Please enter transaction hash");
+      return;
     }
+
+    // Validate tx hash format (0x followed by 64 hex characters)
+    const txHashRegex = /^0x[a-fA-F0-9]{64}$/;
+    if (!txHashRegex.test(manualTxHash.trim())) {
+      toast.error("Invalid transaction hash format");
+      return;
+    }
+
+    await verifyWithTxHash(manualTxHash.trim());
   };
 
   const handleSimulatePayment = async () => {
@@ -425,13 +618,23 @@ const CryptoPaymentModal = ({
           {loading ? (
             <div className="flex flex-col items-center justify-center py-12">
               <div className="w-12 h-12 border-4 border-gold-light-3 border-t-gold rounded-full animate-spin" />
-              <p className="mt-4 text-gray-600">Generating payment details...</p>
+              <p className="mt-4 text-gray-900 font-semibold">Generating payment details...</p>
+              <button
+                onClick={() => {
+                  console.log('⏹️ Cancelling payment generation');
+                  setLoading(false);
+                  onClose();
+                }}
+                className="mt-4 px-4 py-2 text-sm text-gray-500 hover:text-gray-700 underline"
+              >
+                Cancel
+              </button>
             </div>
           ) : paymentDetails ? (
             <>
               {/* Timer */}
               <div className="text-center mb-6">
-                <p className="text-sm text-gray-500">Payment expires in</p>
+                <p className="text-sm text-gray-700 font-medium">Payment expires in</p>
                 <p className={`text-2xl font-bold ${timeLeft < 300 ? "text-red-500" : "text-gold-dark"}`}>
                   {formatTime(timeLeft)}
                 </p>
@@ -440,20 +643,20 @@ const CryptoPaymentModal = ({
               {/* Amount */}
               <div className="bg-champagne-light/50 rounded-xl p-4 mb-4 border border-gold-light-4">
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-gray-600">Amount to pay:</span>
+                  <span className="text-gray-800 font-medium">Amount to pay:</span>
                   <span className="text-xl font-bold text-gold-dark">
                     {paymentDetails.crypto_amount} {cryptoType.toUpperCase()}
                   </span>
                 </div>
                 <div className="flex items-center justify-between text-sm">
-                  <span className="text-gray-500">USD equivalent:</span>
-                  <span className="text-gray-700">${totalAmount.toFixed(2)}</span>
+                  <span className="text-gray-700 font-medium">USD equivalent:</span>
+                  <span className="text-gray-900 font-semibold">${totalAmount.toFixed(2)}</span>
                 </div>
               </div>
 
               {/* Wallet Address */}
               <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-600 mb-2">Send to wallet address:</label>
+                <label className="block text-sm font-semibold text-gray-800 mb-2">Send to wallet address:</label>
                 <div className="flex items-center gap-2">
                   <div className="flex-1 bg-white border border-gold-light-3 rounded-lg p-3 font-mono text-sm break-all">
                     {paymentDetails.wallet_address}
@@ -486,7 +689,7 @@ const CryptoPaymentModal = ({
 
               {/* Payment Reference */}
               <div className="mb-6">
-                <label className="block text-sm font-medium text-gray-600 mb-2">Payment Reference:</label>
+                <label className="block text-sm font-semibold text-gray-800 mb-2">Payment Reference:</label>
                 <div className="flex items-center gap-2">
                   <div className="flex-1 bg-white border border-gold-light-3 rounded-lg p-3 font-mono text-sm">
                     {paymentDetails.payment_reference}
@@ -556,50 +759,126 @@ const CryptoPaymentModal = ({
                     ) : (
                       <div className="space-y-3">
                         <div className="flex items-center justify-between text-sm">
-                          <span className="text-gray-600">Connected:</span>
-                          <span className="font-mono text-xs text-gray-800">
+                          <span className="text-gray-800 font-medium">Connected:</span>
+                          <span className="font-mono text-xs text-gray-900 font-semibold">
                             {wallet.address?.slice(0, 6)}...{wallet.address?.slice(-4)}
                           </span>
                         </div>
                         <div className="flex items-center justify-between text-sm">
-                          <span className="text-gray-600">Balance:</span>
-                          <span className="font-semibold text-gray-800">
+                          <span className="text-gray-800 font-medium">Balance:</span>
+                          <span className="font-semibold text-gray-900">
                             {parseFloat(wallet.balance || "0").toFixed(4)} ETH
                           </span>
                         </div>
                         
                         {txHash ? (
-                          <div className="bg-green-100 rounded-lg p-3 text-center">
-                            <p className="text-sm text-green-800 mb-1">Transaction sent!</p>
-                            <a
-                              href={`https://sepolia.etherscan.io/tx/${txHash}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-xs text-green-600 hover:underline font-mono"
-                            >
-                              View on Etherscan
-                            </a>
+                          <div className="space-y-3">
+                            {/* Transaction Status Display */}
+                            <div className={`rounded-lg p-4 text-center ${
+                              verificationStatus === 'success' ? 'bg-green-100 border border-green-300' :
+                              verificationStatus === 'error' ? 'bg-red-100 border border-red-300' :
+                              'bg-blue-100 border border-blue-300'
+                            }`}>
+                              {/* Status Icon */}
+                              <div className="flex justify-center mb-2">
+                                {verificationStatus === 'success' ? (
+                                  <svg className="w-10 h-10 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                  </svg>
+                                ) : verificationStatus === 'error' ? (
+                                  <svg className="w-10 h-10 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                  </svg>
+                                ) : (
+                                  <div className="w-10 h-10 border-4 border-blue-300 border-t-blue-600 rounded-full animate-spin" />
+                                )}
+                              </div>
+                              
+                              {/* Status Message */}
+                              <p className={`text-sm font-semibold mb-1 ${
+                                verificationStatus === 'success' ? 'text-green-800' :
+                                verificationStatus === 'error' ? 'text-red-800' :
+                                'text-blue-800'
+                              }`}>
+                                {verificationStatus === 'confirming' && 'Очікування підтвердження...'}
+                                {verificationStatus === 'verifying' && 'Верифікація платежу...'}
+                                {verificationStatus === 'success' && 'Оплата успішна!'}
+                                {verificationStatus === 'error' && 'Помилка транзакції'}
+                              </p>
+                              <p className={`text-xs ${
+                                verificationStatus === 'success' ? 'text-green-700' :
+                                verificationStatus === 'error' ? 'text-red-700' :
+                                'text-blue-700'
+                              }`}>
+                                {verificationMessage}
+                              </p>
+                              
+                              {/* Etherscan Link */}
+                              <a
+                                href={`https://sepolia.etherscan.io/tx/${txHash}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center gap-1 mt-2 text-xs text-blue-600 hover:underline font-mono"
+                              >
+                                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                                </svg>
+                                Переглянути на Etherscan
+                              </a>
+                            </div>
+                            
+                            {verificationStatus === 'error' && (
+                              <button
+                                onClick={() => {
+                                  setTxHash(null);
+                                  setVerificationStatus('idle');
+                                  setVerificationMessage('');
+                                }}
+                                className="w-full py-2 px-4 bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium rounded-lg transition-all"
+                              >
+                                Спробувати ще раз
+                              </button>
+                            )}
                           </div>
                         ) : (
-                          <button
-                            onClick={sendTransaction}
-                            disabled={sendingTx || parseFloat(wallet.balance || "0") < parseFloat(paymentDetails.crypto_amount)}
-                            className="w-full py-2.5 px-4 bg-orange-500 hover:bg-orange-600 text-white font-medium rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                          >
-                            {sendingTx ? (
-                              <>
-                                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                                Sending...
-                              </>
+                          <>
+                            {parseFloat(wallet.balance || "0") < parseFloat(paymentDetails.crypto_amount) ? (
+                              <div className="space-y-2">
+                                <button
+                                  disabled
+                                  className="w-full py-2.5 px-4 bg-red-400 text-white font-medium rounded-lg cursor-not-allowed flex items-center justify-center gap-2"
+                                >
+                                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                                  </svg>
+                                  Insufficient Balance
+                                </button>
+                                <p className="text-xs text-red-600 text-center font-medium">
+                                  Need {paymentDetails.crypto_amount} ETH, have {parseFloat(wallet.balance || "0").toFixed(4)} ETH
+                                </p>
+                              </div>
                             ) : (
-                              <>
-                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/>
-                                </svg>
-                                Pay {paymentDetails.crypto_amount} ETH
-                              </>
+                              <button
+                                onClick={sendTransaction}
+                                disabled={sendingTx}
+                                className="w-full py-2.5 px-4 bg-orange-400 hover:bg-orange-500 text-gray-900 font-bold rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-md border border-orange-500"
+                              >
+                                {sendingTx ? (
+                                  <>
+                                    <div className="w-5 h-5 border-2 border-gray-900 border-t-transparent rounded-full animate-spin" />
+                                    <span className="text-gray-900">Sending...</span>
+                                  </>
+                                ) : (
+                                  <>
+                                    <svg className="w-5 h-5 text-gray-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/>
+                                    </svg>
+                                    <span className="text-gray-900">Pay {paymentDetails.crypto_amount} ETH</span>
+                                  </>
+                                )}
+                              </button>
                             )}
-                          </button>
+                          </>
                         )}
                       </div>
                     )}
@@ -614,20 +893,37 @@ const CryptoPaymentModal = ({
                 )}
 
                 <div className="relative flex items-center my-4">
-                  <div className="flex-grow border-t border-gray-200"></div>
-                  <span className="flex-shrink mx-4 text-gray-400 text-sm">or pay manually</span>
-                  <div className="flex-grow border-t border-gray-200"></div>
+                  <div className="flex-grow border-t border-gray-300"></div>
+                  <span className="flex-shrink mx-4 text-gray-800 font-medium text-sm">or verify manual payment</span>
+                  <div className="flex-grow border-t border-gray-300"></div>
+                </div>
+
+                {/* Manual Transaction Hash Input */}
+                <div className="bg-blue-50 rounded-xl p-4 mb-3 border border-blue-200">
+                  <label className="block text-sm font-semibold text-gray-900 mb-2">
+                    Enter Transaction Hash:
+                  </label>
+                  <p className="text-xs text-gray-800 mb-3">
+                    If you paid manually, paste your transaction hash here to verify payment
+                  </p>
+                  <input
+                    type="text"
+                    value={manualTxHash}
+                    onChange={(e) => setManualTxHash(e.target.value)}
+                    placeholder="0x..."
+                    className="w-full px-4 py-2.5 border border-blue-300 rounded-lg font-mono text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
                 </div>
 
                 <button
                   onClick={handleVerifyPayment}
-                  disabled={verifying}
-                  className="w-full py-3 px-6 bg-gradient-to-r from-gold to-gold-dark text-white font-medium rounded-full hover:from-gold-dark hover:to-gold transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  disabled={verifying || !manualTxHash.trim()}
+                  className="w-full py-3 px-6 bg-gradient-to-r from-blue-500 to-blue-600 text-white font-medium rounded-full hover:from-blue-600 hover:to-blue-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
                   {verifying ? (
                     <>
                       <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                      Verifying...
+                      Verifying on Blockchain...
                     </>
                   ) : (
                     <>
@@ -639,21 +935,9 @@ const CryptoPaymentModal = ({
                           d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
                         />
                       </svg>
-                      I&apos;ve Made the Payment
+                      Verify Transaction on Blockchain
                     </>
                   )}
-                </button>
-
-                {/* Simulate Payment Button (for testing) */}
-                <button
-                  onClick={handleSimulatePayment}
-                  disabled={verifying}
-                  className="w-full py-3 px-6 bg-green-500 hover:bg-green-600 text-white font-medium rounded-full transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                  </svg>
-                  Simulate Payment (Testing)
                 </button>
 
                 <button
@@ -665,7 +949,7 @@ const CryptoPaymentModal = ({
               </div>
 
               {/* Info Note */}
-              <p className="mt-4 text-xs text-center text-gray-500">
+              <p className="mt-4 text-xs text-center text-gray-700 font-medium">
                 Send exactly the amount shown above to the wallet address. The payment will be verified automatically.
               </p>
             </>

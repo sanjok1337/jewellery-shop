@@ -52,6 +52,7 @@ const Checkout = () => {
 
   // Check if selected payment method is crypto
   const isCryptoPayment = ['bitcoin', 'ethereum', 'usdt'].includes(paymentMethod);
+  const isCashOnDelivery = paymentMethod === 'cash';
 
   useEffect(() => {
     console.log('Checkout - isAuthenticated:', isAuthenticated);
@@ -158,10 +159,38 @@ const Checkout = () => {
           
           // If crypto payment, show the crypto modal
           if (isCryptoPayment) {
-            setCryptoOrderId(data.orderId);
+            const orderId = data.orderId || data.order?.id || data.id;
+            console.log('🔑 Order ID for crypto payment:', orderId);
+            
+            if (!orderId) {
+              console.error('❌ No order ID in response:', data);
+              toast.error('Failed to get order ID');
+              return;
+            }
+            
+            setCryptoOrderId(orderId);
             setCryptoOrderTotal(calculateTotal());
-            setShowCryptoModal(true);
+            
+            // Wait a bit before opening modal to ensure order is saved
+            setTimeout(() => {
+              console.log('🚀 Opening crypto payment modal', { orderId, paymentMethod, total: calculateTotal() });
+              setShowCryptoModal(true);
+            }, 300);
+            
             toast.success('Order created! Please complete payment.');
+          } else if (isCashOnDelivery) {
+            // Оплата при отриманні - просто створюємо замовлення і редіректимо
+            toast.success('Замовлення створено! Оплата при отриманні.');
+            
+            // Clear cart after successful order
+            await fetch('http://localhost:5000/api/cart', {
+              method: 'DELETE',
+              headers: {
+                'Authorization': `Bearer ${token}`
+              }
+            });
+            
+            router.push(`/my-account`);
           } else {
             toast.success('Order created successfully!');
             
@@ -199,18 +228,26 @@ const Checkout = () => {
   };
 
   const handleCryptoPaymentSuccess = async () => {
+    console.log('✅ handleCryptoPaymentSuccess called - payment verified!');
     setShowCryptoModal(false);
     
     // Clear cart after successful payment
-    await fetch('http://localhost:5000/api/cart', {
-      method: 'DELETE',
-      headers: {
-        'Authorization': `Bearer ${token}`
-      }
-    });
+    try {
+      await fetch('http://localhost:5000/api/cart', {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      console.log('🛒 Cart cleared successfully');
+    } catch (error) {
+      console.error('❌ Error clearing cart:', error);
+    }
     
-    toast.success('Payment successful!');
-    router.push(`/my-account`);
+    toast.success('Payment successful! Redirecting...');
+    setTimeout(() => {
+      router.push(`/my-account`);
+    }, 500);
   };
 
   if (loading) {
@@ -360,10 +397,13 @@ const Checkout = () => {
       </section>
 
       {/* Crypto Payment Modal */}
-      {showCryptoModal && (
+      {showCryptoModal && cryptoOrderId && (
         <CryptoPaymentModal
           isOpen={showCryptoModal}
-          onClose={() => setShowCryptoModal(false)}
+          onClose={() => {
+            console.log('🔴 Closing crypto modal');
+            setShowCryptoModal(false);
+          }}
           orderId={cryptoOrderId}
           totalAmount={cryptoOrderTotal}
           cryptoType={paymentMethod}

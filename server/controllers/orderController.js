@@ -145,6 +145,15 @@ const createOrder = async (req, res) => {
 
       console.log('Order totals:', { subtotal, shippingCost, totalAmount });
 
+      // Визначаємо статус замовлення в залежності від способу оплати
+      // cash = оплата при отриманні - статус "awaiting_delivery" (очікує доставки)
+      // crypto = криптовалюта - статус "pending" (очікує оплати)
+      // інші - статус "pending"
+      let orderStatus = 'pending';
+      if (payment_method === 'cash') {
+        orderStatus = 'awaiting_delivery'; // Оплата при отриманні
+      }
+
       // Створюємо замовлення
       const [orderResult] = await connection.execute(`
         INSERT INTO orders (
@@ -155,8 +164,8 @@ const createOrder = async (req, res) => {
           payment_method,
           shipping_method,
           notes
-        ) VALUES (?, ?, ?, 'pending', ?, ?, ?)
-      `, [userId, address_id, totalAmount, payment_method, shipping_method, notes || null]);
+        ) VALUES (?, ?, ?, ?, ?, ?, ?)
+      `, [userId, address_id, totalAmount, orderStatus, payment_method, shipping_method, notes || null]);
 
       const orderId = orderResult.insertId;
       console.log('Order created with ID:', orderId);
