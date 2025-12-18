@@ -800,10 +800,10 @@ const CryptoPaymentModal = ({
                                 verificationStatus === 'error' ? 'text-red-800' :
                                 'text-blue-800'
                               }`}>
-                                {verificationStatus === 'confirming' && 'Очікування підтвердження...'}
-                                {verificationStatus === 'verifying' && 'Верифікація платежу...'}
-                                {verificationStatus === 'success' && 'Оплата успішна!'}
-                                {verificationStatus === 'error' && 'Помилка транзакції'}
+                                {verificationStatus === 'confirming' && 'Waiting for confirmation...'}
+                                {verificationStatus === 'verifying' && 'Verifying payment...'}
+                                {verificationStatus === 'success' && 'Payment successful!'}
+                                {verificationStatus === 'error' && 'Transaction error'}
                               </p>
                               <p className={`text-xs ${
                                 verificationStatus === 'success' ? 'text-green-700' :
@@ -823,7 +823,7 @@ const CryptoPaymentModal = ({
                                 <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                                 </svg>
-                                Переглянути на Etherscan
+                                View on Etherscan
                               </a>
                             </div>
                             
@@ -836,7 +836,7 @@ const CryptoPaymentModal = ({
                                 }}
                                 className="w-full py-2 px-4 bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium rounded-lg transition-all"
                               >
-                                Спробувати ще раз
+                                Try again
                               </button>
                             )}
                           </div>

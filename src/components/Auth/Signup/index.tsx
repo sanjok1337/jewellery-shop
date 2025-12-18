@@ -2,7 +2,7 @@
 
 import Breadcrumb from "@/components/Common/Breadcrumb";
 import Link from "next/link";
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/app/context/AuthContext";
@@ -12,11 +12,15 @@ interface FormErrors {
   email?: string;
   password?: string;
   confirmPassword?: string;
+  code?: string;
 }
+
+type Step = 'form' | 'verification';
 
 const Signup = () => {
   const router = useRouter();
   const { login } = useAuth();
+  const [step, setStep] = useState<Step>('form');
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -25,46 +29,56 @@ const Signup = () => {
   });
   const [errors, setErrors] = useState<FormErrors>({});
   const [loading, setLoading] = useState(false);
+  
+  // Verification state
+  const [verificationToken, setVerificationToken] = useState<string>("");
+  const [code, setCode] = useState<string[]>(["", "", "", "", "", ""]);
+  const [resendTimer, setResendTimer] = useState(0);
+  const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   // Validation regexes
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   const nameRegex = /^[a-zA-Zа-яА-ЯіїєґІЇЄҐ\s'-]{2,50}$/;
 
+  // Resend timer
+  useEffect(() => {
+    if (resendTimer > 0) {
+      const timer = setTimeout(() => setResendTimer(resendTimer - 1), 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [resendTimer]);
+
   const validateForm = (): boolean => {
     const newErrors: FormErrors = {};
 
-    // Name validation
     if (!formData.name.trim()) {
-      newErrors.name = "Введіть ім'я";
+      newErrors.name = "Please enter your name";
     } else if (formData.name.trim().length < 2) {
-      newErrors.name = "Ім'я має бути мінімум 2 символи";
+      newErrors.name = "Name must be at least 2 characters";
     } else if (!nameRegex.test(formData.name.trim())) {
-      newErrors.name = "Ім'я може містити тільки літери";
+      newErrors.name = "Name can only contain letters";
     }
 
-    // Email validation
     if (!formData.email.trim()) {
-      newErrors.email = "Введіть email адресу";
+      newErrors.email = "Please enter your email";
     } else if (!emailRegex.test(formData.email)) {
-      newErrors.email = "Невалідний формат email";
+      newErrors.email = "Invalid email format";
     }
 
-    // Password validation
     if (!formData.password) {
-      newErrors.password = "Введіть пароль";
+      newErrors.password = "Please enter a password";
     } else if (formData.password.length < 6) {
-      newErrors.password = "Пароль має бути мінімум 6 символів";
+      newErrors.password = "Password must be at least 6 characters";
     } else if (!/[A-ZА-ЯІЇЄҐ]/.test(formData.password)) {
-      newErrors.password = "Пароль має містити велику літеру";
+      newErrors.password = "Password must contain an uppercase letter";
     } else if (!/[0-9]/.test(formData.password)) {
-      newErrors.password = "Пароль має містити цифру";
+      newErrors.password = "Password must contain a number";
     }
 
-    // Confirm password validation
     if (!formData.confirmPassword) {
-      newErrors.confirmPassword = "Підтвердіть пароль";
+      newErrors.confirmPassword = "Please confirm your password";
     } else if (formData.password !== formData.confirmPassword) {
-      newErrors.confirmPassword = "Паролі не збігаються";
+      newErrors.confirmPassword = "Passwords don't match";
     }
 
     setErrors(newErrors);
@@ -77,25 +91,59 @@ const Signup = () => {
       ...prev,
       [name]: value,
     }));
-    // Clear error when user starts typing
     if (errors[name as keyof FormErrors]) {
       setErrors((prev) => ({ ...prev, [name]: undefined }));
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  // Handle code input
+  const handleCodeChange = (index: number, value: string) => {
+    if (!/^\d*$/.test(value)) return;
+    
+    const newCode = [...code];
+    newCode[index] = value.slice(-1);
+    setCode(newCode);
+    
+    if (value && index < 5) {
+      inputRefs.current[index + 1]?.focus();
+    }
+    
+    if (errors.code) {
+      setErrors((prev) => ({ ...prev, code: undefined }));
+    }
+  };
+
+  const handleCodeKeyDown = (index: number, e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Backspace" && !code[index] && index > 0) {
+      inputRefs.current[index - 1]?.focus();
+    }
+  };
+
+  const handleCodePaste = (e: React.ClipboardEvent) => {
+    e.preventDefault();
+    const pastedData = e.clipboardData.getData("text").replace(/\D/g, "").slice(0, 6);
+    const newCode = [...code];
+    for (let i = 0; i < pastedData.length; i++) {
+      newCode[i] = pastedData[i];
+    }
+    setCode(newCode);
+    const lastIndex = Math.min(pastedData.length - 1, 5);
+    inputRefs.current[lastIndex]?.focus();
+  };
+
+  // Step 1: Send verification code
+  const handleSendCode = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    // Валідація
     if (!validateForm()) {
-      toast.error("Будь ласка, виправте помилки у формі");
+      toast.error("Please fix the errors in the form");
       return;
     }
 
     setLoading(true);
 
     try {
-      const response = await fetch("http://localhost:5000/api/auth/register", {
+      const response = await fetch("http://localhost:5000/api/auth/send-verification", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -110,17 +158,95 @@ const Signup = () => {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message || "РџРѕРјРёР»РєР° СЂРµС”СЃС‚СЂР°С†С–С—");
+        throw new Error(data.message || "Failed to send verification code");
       }
 
-      // Р—Р±РµСЂС–РіР°С”РјРѕ С‚РѕРєРµРЅ С‡РµСЂРµР· AuthContext
-      login(data.token, data.user);
-      toast.success("Р РµС”СЃС‚СЂР°С†С–СЏ СѓСЃРїС–С€РЅР°!");
+      setVerificationToken(data.verificationToken);
+      setStep('verification');
+      setResendTimer(60);
+      toast.success("Verification code sent to your email!");
       
-      // РџРµСЂРµРЅР°РїСЂР°РІР»СЏС”РјРѕ РЅР° РіРѕР»РѕРІРЅСѓ СЃС‚РѕСЂС–РЅРєСѓ
+      setTimeout(() => inputRefs.current[0]?.focus(), 100);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Failed to send code");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Step 2: Verify code and complete registration
+  const handleVerifyCode = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    const fullCode = code.join("");
+    
+    if (fullCode.length !== 6) {
+      setErrors({ code: "Please enter the 6-digit code" });
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const response = await fetch("http://localhost:5000/api/auth/verify-code", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          verificationToken,
+          code: fullCode,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Invalid code");
+      }
+
+      login(data.token, data.user);
+      toast.success("Registration successful! Welcome!");
       router.push("/");
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "РџРѕРјРёР»РєР° СЂРµС”СЃС‚СЂР°С†С–С—");
+      toast.error(error instanceof Error ? error.message : "Verification failed");
+      setErrors({ code: error instanceof Error ? error.message : "Invalid code" });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Resend code
+  const handleResendCode = async () => {
+    if (resendTimer > 0) return;
+    
+    setLoading(true);
+    try {
+      const response = await fetch("http://localhost:5000/api/auth/send-verification", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: formData.name,
+          email: formData.email,
+          password: formData.password,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Failed to send code");
+      }
+
+      setVerificationToken(data.verificationToken);
+      setCode(["", "", "", "", "", ""]);
+      setResendTimer(60);
+      toast.success("New code sent!");
+      inputRefs.current[0]?.focus();
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Failed to send code");
     } finally {
       setLoading(false);
     }
@@ -128,197 +254,236 @@ const Signup = () => {
 
   return (
     <>
-      <Breadcrumb title={"Signup"} pages={["Signup"]} />
+      <Breadcrumb title={"Sign Up"} pages={["Sign Up"]} />
       <section className="overflow-hidden py-20 bg-gray-2">
         <div className="max-w-[1170px] w-full mx-auto px-4 sm:px-8 xl:px-0">
           <div className="max-w-[570px] w-full mx-auto rounded-xl bg-white shadow-1 p-4 sm:p-7.5 xl:p-11">
-            <div className="text-center mb-11">
-              <h2 className="font-semibold text-xl sm:text-2xl xl:text-heading-5 text-dark mb-1.5">
-                Create an Account
-              </h2>
-              <p>Enter your detail below</p>
-            </div>
+            
+            {step === 'form' ? (
+              <>
+                <div className="text-center mb-11">
+                  <h2 className="font-semibold text-xl sm:text-2xl xl:text-heading-5 text-dark mb-1.5">
+                    Create an Account
+                  </h2>
+                  <p>Enter your details below</p>
+                </div>
 
-            <div className="flex flex-col gap-4.5">
-              <button className="flex justify-center items-center gap-3.5 rounded-lg border border-gray-3 bg-gray-1 p-3 ease-out duration-200 hover:bg-gray-2">
-                <svg
-                  width="20"
-                  height="20"
-                  viewBox="0 0 20 20"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <g clipPath="url(#clip0_98_7461)">
-                    <mask
-                      id="mask0_98_7461"
-                      maskUnits="userSpaceOnUse"
-                      x="0"
-                      y="0"
-                      width="20"
-                      height="20"
+                <div className="mt-5.5">
+                  <form onSubmit={handleSendCode}>
+                    <div className="mb-5">
+                      <label htmlFor="name" className="block mb-2.5">
+                        Full Name <span className="text-red">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        name="name"
+                        id="name"
+                        placeholder="Enter your name"
+                        value={formData.name}
+                        onChange={handleChange}
+                        className={`rounded-lg border bg-gray-1 placeholder:text-dark-5 w-full py-3 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-gold/30 ${
+                          errors.name ? 'border-red' : 'border-gray-3'
+                        }`}
+                      />
+                      {errors.name && (
+                        <p className="text-red text-sm mt-1">{errors.name}</p>
+                      )}
+                    </div>
+
+                    <div className="mb-5">
+                      <label htmlFor="email" className="block mb-2.5">
+                        Email Address <span className="text-red">*</span>
+                      </label>
+                      <input
+                        type="email"
+                        name="email"
+                        id="email"
+                        placeholder="Enter your email"
+                        value={formData.email}
+                        onChange={handleChange}
+                        className={`rounded-lg border bg-gray-1 placeholder:text-dark-5 w-full py-3 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-gold/30 ${
+                          errors.email ? 'border-red' : 'border-gray-3'
+                        }`}
+                      />
+                      {errors.email && (
+                        <p className="text-red text-sm mt-1">{errors.email}</p>
+                      )}
+                    </div>
+
+                    <div className="mb-5">
+                      <label htmlFor="password" className="block mb-2.5">
+                        Password <span className="text-red">*</span>
+                      </label>
+                      <input
+                        type="password"
+                        name="password"
+                        id="password"
+                        placeholder="Enter password"
+                        value={formData.password}
+                        onChange={handleChange}
+                        autoComplete="new-password"
+                        className={`rounded-lg border bg-gray-1 placeholder:text-dark-5 w-full py-3 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-gold/30 ${
+                          errors.password ? 'border-red' : 'border-gray-3'
+                        }`}
+                      />
+                      {errors.password && (
+                        <p className="text-red text-sm mt-1">{errors.password}</p>
+                      )}
+                      <p className="text-gray-500 text-xs mt-1">
+                        Minimum 6 characters, uppercase letter and number
+                      </p>
+                    </div>
+
+                    <div className="mb-5.5">
+                      <label htmlFor="confirmPassword" className="block mb-2.5">
+                        Confirm Password <span className="text-red">*</span>
+                      </label>
+                      <input
+                        type="password"
+                        name="confirmPassword"
+                        id="confirmPassword"
+                        placeholder="Repeat password"
+                        value={formData.confirmPassword}
+                        onChange={handleChange}
+                        autoComplete="new-password"
+                        className={`rounded-lg border bg-gray-1 placeholder:text-dark-5 w-full py-3 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-gold/30 ${
+                          errors.confirmPassword ? 'border-red' : 'border-gray-3'
+                        }`}
+                      />
+                      {errors.confirmPassword && (
+                        <p className="text-red text-sm mt-1">{errors.confirmPassword}</p>
+                      )}
+                    </div>
+
+                    <button
+                      type="submit"
+                      disabled={loading}
+                      className="w-full flex justify-center font-medium text-white bg-gradient-to-r from-gold to-gold-dark py-3 px-6 rounded-lg ease-out duration-200 hover:from-gold-dark hover:to-gold mt-7.5 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      <path d="M20 0H0V20H20V0Z" fill="white" />
-                    </mask>
-                    <g mask="url(#mask0_98_7461)">
-                      <path
-                        d="M19.999 10.2218C20.0111 9.53429 19.9387 8.84791 19.7834 8.17737H10.2031V11.8884H15.8267C15.7201 12.5391 15.4804 13.162 15.1219 13.7195C14.7634 14.2771 14.2935 14.7578 13.7405 15.1328L13.7209 15.2571L16.7502 17.5568L16.96 17.5774C18.8873 15.8329 19.999 13.2661 19.999 10.2218Z"
-                        fill="#4285F4"
-                      />
-                      <path
-                        d="M10.2036 20C12.9586 20 15.2715 19.1111 16.9609 17.5777L13.7409 15.1332C12.8793 15.7223 11.7229 16.1333 10.2036 16.1333C8.91317 16.126 7.65795 15.7206 6.61596 14.9746C5.57397 14.2287 4.79811 13.1802 4.39848 11.9777L4.2789 11.9877L1.12906 14.3766L1.08789 14.4888C1.93622 16.1457 3.23812 17.5386 4.84801 18.512C6.45791 19.4852 8.31194 20.0005 10.2036 20Z"
-                        fill="#34A853"
-                      />
-                      <path
-                        d="M4.39899 11.9776C4.1758 11.3411 4.06063 10.673 4.05807 9.9999C4.06218 9.3279 4.1731 8.66067 4.38684 8.02221L4.38115 7.88959L1.1927 5.46234L1.0884 5.51095C0.372762 6.90337 0 8.44075 0 9.99983C0 11.5589 0.372762 13.0962 1.0884 14.4887L4.39899 11.9776Z"
-                        fill="#FBBC05"
-                      />
-                      <path
-                        d="M10.2039 3.86663C11.6661 3.84438 13.0802 4.37803 14.1495 5.35558L17.0294 2.59997C15.1823 0.90185 12.7364 -0.0298855 10.2039 -3.67839e-05C8.31239 -0.000477835 6.45795 0.514733 4.84805 1.48799C3.23816 2.46123 1.93624 3.85417 1.08789 5.51101L4.38751 8.02225C4.79107 6.82005 5.5695 5.77231 6.61303 5.02675C7.65655 4.28119 8.91254 3.87541 10.2039 3.86663Z"
-                        fill="#EB4335"
-                      />
-                    </g>
-                  </g>
-                  <defs>
-                    <clipPath id="clip0_98_7461">
-                      <rect width="20" height="20" fill="white" />
-                    </clipPath>
-                  </defs>
-                </svg>
-                Sign Up with Google
-              </button>
+                      {loading ? (
+                        <span className="flex items-center gap-2">
+                          <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"/>
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
+                          </svg>
+                          Sending code...
+                        </span>
+                      ) : (
+                        "Continue"
+                      )}
+                    </button>
 
-              <button className="flex justify-center items-center gap-3.5 rounded-lg border border-gray-3 bg-gray-1 p-3 ease-out duration-200 hover:bg-gray-2">
-                <svg
-                  width="22"
-                  height="22"
-                  viewBox="0 0 22 22"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M10.9997 1.83331C5.93773 1.83331 1.83301 6.04119 1.83301 11.232C1.83301 15.3847 4.45954 18.9077 8.10178 20.1505C8.55988 20.2375 8.72811 19.9466 8.72811 19.6983C8.72811 19.4743 8.71956 18.7338 8.71567 17.9485C6.16541 18.517 5.6273 16.8395 5.6273 16.8395C5.21032 15.7532 4.60951 15.4644 4.60951 15.4644C3.77785 14.8811 4.6722 14.893 4.6722 14.893C5.59272 14.9593 6.07742 15.8615 6.07742 15.8615C6.89499 17.2984 8.22184 16.883 8.74493 16.6429C8.82718 16.0353 9.06478 15.6208 9.32694 15.3861C7.2909 15.1484 5.15051 14.3425 5.15051 10.7412C5.15051 9.71509 5.5086 8.87661 6.09503 8.21844C5.99984 7.98167 5.68611 7.02577 6.18382 5.73115C6.18382 5.73115 6.95358 5.47855 8.70532 6.69458C9.43648 6.48627 10.2207 6.3819 10.9997 6.37836C11.7787 6.3819 12.5635 6.48627 13.2961 6.69458C15.0457 5.47855 15.8145 5.73115 15.8145 5.73115C16.3134 7.02577 15.9995 7.98167 15.9043 8.21844C16.4921 8.87661 16.8477 9.715 16.8477 10.7412C16.8477 14.351 14.7033 15.146 12.662 15.3786C12.9909 15.6702 13.2838 16.2423 13.2838 17.1191C13.2838 18.3766 13.2732 19.3888 13.2732 19.6983C13.2732 19.9485 13.4382 20.2415 13.9028 20.1492C17.5431 18.905 20.1663 15.3833 20.1663 11.232C20.1663 6.04119 16.0621 1.83331 10.9997 1.83331Z"
-                    fill="#15171A"
-                  />
-                </svg>
-                Sign Up with Github
-              </button>
-            </div>
-
-            <span className="relative z-1 block font-medium text-center mt-4.5">
-              <span className="block absolute -z-1 left-0 top-1/2 h-px w-full bg-gray-3"></span>
-              <span className="inline-block px-3 bg-white">Or</span>
-            </span>
-
-            <div className="mt-5.5">
-              <form onSubmit={handleSubmit}>
-                <div className="mb-5">
-                  <label htmlFor="name" className="block mb-2.5">
-                    Повне ім'я <span className="text-red">*</span>
-                  </label>
-
-                  <input
-                    type="text"
-                    name="name"
-                    id="name"
-                    placeholder="Введіть ваше ім'я"
-                    value={formData.name}
-                    onChange={handleChange}
-                    className={`rounded-lg border bg-gray-1 placeholder:text-dark-5 w-full py-3 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-gold/30 ${
-                      errors.name ? 'border-red' : 'border-gray-3'
-                    }`}
-                  />
-                  {errors.name && (
-                    <p className="text-red text-sm mt-1">{errors.name}</p>
-                  )}
+                    <p className="text-center mt-6">
+                      Already have an account?
+                      <Link
+                        href="/signin"
+                        className="text-dark ease-out duration-200 hover:text-gold pl-2"
+                      >
+                        Sign In
+                      </Link>
+                    </p>
+                  </form>
                 </div>
-
-                <div className="mb-5">
-                  <label htmlFor="email" className="block mb-2.5">
-                    Email адреса <span className="text-red">*</span>
-                  </label>
-
-                  <input
-                    type="email"
-                    name="email"
-                    id="email"
-                    placeholder="Введіть ваш email"
-                    value={formData.email}
-                    onChange={handleChange}
-                    className={`rounded-lg border bg-gray-1 placeholder:text-dark-5 w-full py-3 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-gold/30 ${
-                      errors.email ? 'border-red' : 'border-gray-3'
-                    }`}
-                  />
-                  {errors.email && (
-                    <p className="text-red text-sm mt-1">{errors.email}</p>
-                  )}
-                </div>
-
-                <div className="mb-5">
-                  <label htmlFor="password" className="block mb-2.5">
-                    Пароль <span className="text-red">*</span>
-                  </label>
-
-                  <input
-                    type="password"
-                    name="password"
-                    id="password"
-                    placeholder="Введіть пароль"
-                    value={formData.password}
-                    onChange={handleChange}
-                    autoComplete="on"
-                    className={`rounded-lg border bg-gray-1 placeholder:text-dark-5 w-full py-3 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-gold/30 ${
-                      errors.password ? 'border-red' : 'border-gray-3'
-                    }`}
-                  />
-                  {errors.password && (
-                    <p className="text-red text-sm mt-1">{errors.password}</p>
-                  )}
-                  <p className="text-gray-500 text-xs mt-1">
-                    Мінімум 6 символів, велика літера та цифра
+              </>
+            ) : (
+              <>
+                {/* Verification Step */}
+                <div className="text-center mb-8">
+                  <div className="w-20 h-20 bg-gradient-to-r from-gold to-gold-dark rounded-full flex items-center justify-center mx-auto mb-6">
+                    <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                    </svg>
+                  </div>
+                  <h2 className="font-semibold text-xl sm:text-2xl text-dark mb-2">
+                    Check your email
+                  </h2>
+                  <p className="text-gray-600">
+                    We sent a 6-digit code to
                   </p>
+                  <p className="font-semibold text-dark">{formData.email}</p>
                 </div>
 
-                <div className="mb-5.5">
-                  <label htmlFor="confirmPassword" className="block mb-2.5">
-                    Підтвердіть пароль <span className="text-red">*</span>
-                  </label>
+                <form onSubmit={handleVerifyCode}>
+                  <div className="mb-6">
+                    <label className="block text-center mb-4 text-gray-700">
+                      Enter verification code
+                    </label>
+                    <div className="flex justify-center gap-2 sm:gap-3" onPaste={handleCodePaste}>
+                      {code.map((digit, index) => (
+                        <input
+                          key={index}
+                          ref={(el) => { inputRefs.current[index] = el; }}
+                          type="text"
+                          inputMode="numeric"
+                          maxLength={1}
+                          value={digit}
+                          onChange={(e) => handleCodeChange(index, e.target.value)}
+                          onKeyDown={(e) => handleCodeKeyDown(index, e)}
+                          className={`w-12 h-14 sm:w-14 sm:h-16 text-center text-2xl font-bold rounded-lg border-2 outline-none transition-all duration-200 ${
+                            errors.code 
+                              ? 'border-red bg-red-50' 
+                              : digit 
+                                ? 'border-gold bg-gold/5' 
+                                : 'border-gray-3 bg-gray-1'
+                          } focus:border-gold focus:ring-2 focus:ring-gold/20`}
+                        />
+                      ))}
+                    </div>
+                    {errors.code && (
+                      <p className="text-red text-sm mt-3 text-center">{errors.code}</p>
+                    )}
+                  </div>
 
-                  <input
-                    type="password"
-                    name="confirmPassword"
-                    id="confirmPassword"
-                    placeholder="Повторіть пароль"
-                    value={formData.confirmPassword}
-                    onChange={handleChange}
-                    autoComplete="on"
-                    className={`rounded-lg border bg-gray-1 placeholder:text-dark-5 w-full py-3 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-gold/30 ${
-                      errors.confirmPassword ? 'border-red' : 'border-gray-3'
-                    }`}
-                  />
-                  {errors.confirmPassword && (
-                    <p className="text-red text-sm mt-1">{errors.confirmPassword}</p>
-                  )}
-                </div>
-
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="w-full flex justify-center font-medium text-white bg-dark py-3 px-6 rounded-lg ease-out duration-200 hover:bg-gold mt-7.5 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {loading ? "Створення акаунту..." : "Створити акаунт"}
-                </button>
-
-                <p className="text-center mt-6">
-                  Вже маєте акаунт?
-                  <Link
-                    href="/signin"
-                    className="text-dark ease-out duration-200 hover:text-gold pl-2"
+                  <button
+                    type="submit"
+                    disabled={loading || code.join("").length !== 6}
+                    className="w-full flex justify-center font-medium text-white bg-gradient-to-r from-gold to-gold-dark py-3 px-6 rounded-lg ease-out duration-200 hover:from-gold-dark hover:to-gold disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    Увійти
-                  </Link>
-                </p>
-              </form>
-            </div>
+                    {loading ? (
+                      <span className="flex items-center gap-2">
+                        <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"/>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
+                        </svg>
+                        Verifying...
+                      </span>
+                    ) : (
+                      "Verify & Create Account"
+                    )}
+                  </button>
+
+                  <div className="text-center mt-6">
+                    <p className="text-gray-600 mb-2">Didn't receive the code?</p>
+                    {resendTimer > 0 ? (
+                      <p className="text-gray-500">
+                        Resend in <span className="font-semibold text-gold">{resendTimer}s</span>
+                      </p>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={handleResendCode}
+                        disabled={loading}
+                        className="text-gold hover:text-gold-dark font-medium transition-colors disabled:opacity-50"
+                      >
+                        Resend code
+                      </button>
+                    )}
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setStep('form');
+                      setCode(["", "", "", "", "", ""]);
+                      setErrors({});
+                    }}
+                    className="w-full mt-4 text-gray-600 hover:text-dark transition-colors"
+                  >
+                    ← Change email
+                  </button>
+                </form>
+              </>
+            )}
           </div>
         </div>
       </section>

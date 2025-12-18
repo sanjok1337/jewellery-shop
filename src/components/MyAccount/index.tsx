@@ -98,23 +98,23 @@ const MyAccount = () => {
     const newErrors: typeof passwordErrors = {};
 
     if (!passwordData.oldPassword) {
-      newErrors.oldPassword = 'Введіть поточний пароль';
+      newErrors.oldPassword = 'Please enter current password';
     }
 
     if (!passwordData.newPassword) {
-      newErrors.newPassword = 'Введіть новий пароль';
+      newErrors.newPassword = 'Please enter new password';
     } else if (passwordData.newPassword.length < 6) {
-      newErrors.newPassword = 'Пароль має бути мінімум 6 символів';
+      newErrors.newPassword = 'Password must be at least 6 characters';
     } else if (!/[A-Z]/.test(passwordData.newPassword)) {
-      newErrors.newPassword = 'Пароль має містити велику літеру';
+      newErrors.newPassword = 'Password must contain an uppercase letter';
     } else if (!/[0-9]/.test(passwordData.newPassword)) {
-      newErrors.newPassword = 'Пароль має містити цифру';
+      newErrors.newPassword = 'Password must contain a number';
     }
 
     if (!passwordData.confirmNewPassword) {
-      newErrors.confirmNewPassword = 'Підтвердіть новий пароль';
+      newErrors.confirmNewPassword = 'Please confirm new password';
     } else if (passwordData.newPassword !== passwordData.confirmNewPassword) {
-      newErrors.confirmNewPassword = 'Паролі не співпадають';
+      newErrors.confirmNewPassword = 'Passwords do not match';
     }
 
     if (Object.keys(newErrors).length > 0) {
@@ -141,18 +141,18 @@ const MyAccount = () => {
       const data = await response.json();
 
       if (response.ok) {
-        toast.success(data.message || 'Пароль успішно змінено');
+        toast.success(data.message || 'Password changed successfully');
         setPasswordData({
           oldPassword: '',
           newPassword: '',
           confirmNewPassword: ''
         });
       } else {
-        toast.error(data.error || 'Помилка зміни пароля');
+        toast.error(data.error || 'Failed to change password');
       }
     } catch (error) {
       console.error('Error changing password:', error);
-      toast.error('Помилка зміни пароля');
+      toast.error('Failed to change password');
     } finally {
       setPasswordLoading(false);
     }
@@ -163,12 +163,12 @@ const MyAccount = () => {
     e.preventDefault();
     
     if (!emailData.newEmail) {
-      setEmailError('Введіть новий email');
+      setEmailError('Please enter new email');
       return;
     }
 
     if (!emailRegex.test(emailData.newEmail)) {
-      setEmailError('Невірний формат email');
+      setEmailError('Invalid email format');
       return;
     }
 
@@ -190,13 +190,13 @@ const MyAccount = () => {
       const data = await response.json();
 
       if (response.ok) {
-        toast.success(data.message || 'Email успішно змінено');
+        toast.success(data.message || 'Email changed successfully');
         // Update user data in context
         const updatedUser = { ...user, email: data.newEmail };
         login(token!, updatedUser);
         setEmailData({ newEmail: '' });
       } else {
-        toast.error(data.error || 'Помилка зміни email');
+        toast.error(data.error || 'Failed to change email');
       }
     } catch (error) {
       console.error('Error changing email:', error);
@@ -648,7 +648,7 @@ const MyAccount = () => {
 
                   <div className="mb-5">
                     <label htmlFor="newEmail" className="block mb-2.5">
-                      Новий Email <span className="text-red">*</span>
+                      New Email <span className="text-red">*</span>
                     </label>
                     <input
                       type="email"
@@ -658,7 +658,7 @@ const MyAccount = () => {
                         setEmailData({ newEmail: e.target.value });
                         if (emailError) setEmailError('');
                       }}
-                      placeholder="Введіть новий email"
+                      placeholder="Enter new email"
                       className={`rounded-md border bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-gold/20 ${
                         emailError ? 'border-red' : 'border-gray-3'
                       }`}
@@ -673,7 +673,7 @@ const MyAccount = () => {
                     disabled={emailLoading}
                     className="inline-flex font-medium text-white bg-gradient-to-r from-gold to-gold-dark py-3 px-7 rounded-md ease-out duration-200 hover:from-gold-dark hover:to-gold disabled:opacity-50"
                   >
-                    {emailLoading ? 'Збереження...' : 'Змінити Email'}
+                    {emailLoading ? 'Saving...' : 'Change Email'}
                   </button>
                 </form>
               </div>
@@ -681,12 +681,12 @@ const MyAccount = () => {
               {/* Password Change Form */}
               <div className="bg-white shadow-1 rounded-xl p-4 sm:p-8.5">
                 <p className="font-medium text-xl sm:text-2xl text-dark mb-7">
-                  Змінити Пароль
+                  Change Password
                 </p>
                 <form onSubmit={handleChangePassword}>
                   <div className="mb-5">
                     <label htmlFor="oldPassword" className="block mb-2.5">
-                      Поточний пароль <span className="text-red">*</span>
+                      Current Password <span className="text-red">*</span>
                     </label>
                     <input
                       type="password"
@@ -696,7 +696,7 @@ const MyAccount = () => {
                         setPasswordData({...passwordData, oldPassword: e.target.value});
                         if (passwordErrors.oldPassword) setPasswordErrors({...passwordErrors, oldPassword: undefined});
                       }}
-                      placeholder="Введіть поточний пароль"
+                      placeholder="Enter current password"
                       className={`rounded-md border bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-gold/20 ${
                         passwordErrors.oldPassword ? 'border-red' : 'border-gray-3'
                       }`}
@@ -708,7 +708,7 @@ const MyAccount = () => {
 
                   <div className="mb-5">
                     <label htmlFor="newPassword" className="block mb-2.5">
-                      Новий пароль <span className="text-red">*</span>
+                      New Password <span className="text-red">*</span>
                     </label>
                     <input
                       type="password"
@@ -718,7 +718,7 @@ const MyAccount = () => {
                         setPasswordData({...passwordData, newPassword: e.target.value});
                         if (passwordErrors.newPassword) setPasswordErrors({...passwordErrors, newPassword: undefined});
                       }}
-                      placeholder="Введіть новий пароль"
+                      placeholder="Enter new password"
                       className={`rounded-md border bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-gold/20 ${
                         passwordErrors.newPassword ? 'border-red' : 'border-gray-3'
                       }`}
@@ -726,12 +726,12 @@ const MyAccount = () => {
                     {passwordErrors.newPassword && (
                       <p className="text-red text-sm mt-1">{passwordErrors.newPassword}</p>
                     )}
-                    <p className="text-dark-5 text-xs mt-1">Мінімум 6 символів, велика літера та цифра</p>
+                    <p className="text-dark-5 text-xs mt-1">Minimum 6 characters, uppercase letter and number</p>
                   </div>
 
                   <div className="mb-5">
                     <label htmlFor="confirmNewPassword" className="block mb-2.5">
-                      Підтвердіть новий пароль <span className="text-red">*</span>
+                      Confirm New Password <span className="text-red">*</span>
                     </label>
                     <input
                       type="password"
@@ -741,7 +741,7 @@ const MyAccount = () => {
                         setPasswordData({...passwordData, confirmNewPassword: e.target.value});
                         if (passwordErrors.confirmNewPassword) setPasswordErrors({...passwordErrors, confirmNewPassword: undefined});
                       }}
-                      placeholder="Підтвердіть новий пароль"
+                      placeholder="Confirm new password"
                       className={`rounded-md border bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-gold/20 ${
                         passwordErrors.confirmNewPassword ? 'border-red' : 'border-gray-3'
                       }`}
@@ -756,7 +756,7 @@ const MyAccount = () => {
                     disabled={passwordLoading}
                     className="inline-flex font-medium text-white bg-gradient-to-r from-gold to-gold-dark py-3 px-7 rounded-md ease-out duration-200 hover:from-gold-dark hover:to-gold disabled:opacity-50"
                   >
-                    {passwordLoading ? 'Збереження...' : 'Змінити Пароль'}
+                    {passwordLoading ? 'Saving...' : 'Change Password'}
                   </button>
                 </form>
               </div>
